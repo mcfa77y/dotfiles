@@ -1,0 +1,27 @@
+[user]
+	email = joe@empohealth.com
+	name = Joe Lau
+[fetch]
+	prune = true
+[push]
+	default = current
+[alias]
+  delete-stashes = "!f() { git stash list | grep \"dm\" | awk '{print $1}' | xargs -I {} git stash drop {};};"
+	reset-file = "!f() { git checkout main -- \"$1\"; }; f"
+	rsoft = reset --soft @{u}
+
+[init]
+	defaultBranch = main
+[core]
+	hooksPath = /Users/joe/Projects/empo_health/git-hooks
+	autocrlf = input
+[pull]
+	rebase = true
+	ff = false
+[credential]
+	helper = --help
+[gitbutler]
+	aiModelProvider = ollama
+	aiOllamaModelName = qwen3:14b
+[diff]
+	tool = nvimdiff

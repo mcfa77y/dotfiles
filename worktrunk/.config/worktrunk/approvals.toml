@@ -1,0 +1,28 @@
+[projects."github.com/EmpoHealth/core"]
+approved-commands = [
+    "mkdir -p {{ worktree_path }}/.vscode",
+    "wt step copy-ignored",
+    """
+ln -sf {{ repo_path }}/../env/.env.server {{ worktree_path }}/workspaces/backend-api/.env
+ln -sf {{ repo_path }}/../env/.env.app {{ worktree_path }}/workspaces/frontend-app/.env
+ln -sf {{ repo_path }}/../env/.env.qa {{ worktree_path }}/workspaces/qa/.env
+ln -sf {{ repo_path }}/../env/.env.rhl-api-tools {{ worktree_path }}/workspaces/helper-scripts/rhl-api-tools/.env
+ln -sf {{ repo_path }}/../env/vscode/launch.json {{ worktree_path }}/.vscode/
+ln -sf {{ repo_path }}/../env/vscode/tasks.json {{ worktree_path }}/.vscode/
+""",
+    """
+yarn set version 4.7.0
+echo "node: $(node --version)"
+echo "yarn: $(yarn --version)"
+time yarn install
+""",
+    """
+git push -u origin {{ branch }} --no-verify
+git branch --set-upstream-to=origin/{{ branch }}
+""",
+    """
+windsurf .
+~/.bun/bin/bun run /Users/joe/Projects/js_for_fun/apply_vs_code_theme/index.ts || true
+""",
+    "zoxide add {{ worktree_path }}",
+]

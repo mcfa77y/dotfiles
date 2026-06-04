@@ -1,0 +1,15 @@
+# Atuin Theme Configuration - Inspired by Catppuccin
+[theme]
+name = "joe-theme"
+parent = ""
+
+[colors]
+AlertInfo = "#89b4fa"         # Info alerts (light blue)
+AlertWarn = "#fab387"         # Warning alerts (peach)
+AlertError = "#f38ba8"        # Error alerts (red)
+Annotation = "#6e6c7e"        # Supporting text (muted gray)
+Base = "#d9e0ee"              # Default foreground (soft white)
+Guidance = "#a6e3a1"          # Guidance text (green)
+Important = "#f5c2e7"         # Important information (pink)
+Title = "#cba6f7"             # Titles (purple)
+

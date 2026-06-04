@@ -1,0 +1,74 @@
+{
+  "Print to console": {
+    "prefix": "logp",
+    "body": ["console.log(`[$1] $2: ${$2}`);"],
+    "description": "Log output to console"
+  },
+  "Print JSON to console v2": {
+    "prefix": "logjj",
+    "body": ["console.log(`[$2] $1: ${JSON.stringify($1, null, 2)}`);"],
+    "description": "Log output to console"
+  },
+  "Print JSON to console": {
+    "prefix": "logj",
+    "body": ["console.log(`[$1] $3: ${JSON.stringify({$2}, null, 2)}`);"],
+    "description": "Log output to console"
+  },
+  "catch": {
+    "prefix": "catch",
+    "body": ["catch(error => console.log(`error - $1: ${error}`));", "$2"],
+    "description": "Log caught error to console"
+  },
+  "const arrow function": {
+    "prefix": "cfn",
+    "body": [
+      "const ${1:fn_name} = (${2:fn_params}) => {",
+      "\t${3:fn_body}",
+      "};"
+    ],
+    "description": "Log caught error to console"
+  },
+  "const async arrow function": {
+    "prefix": "cafn",
+    "body": [
+      "const ${1:fn_name} = async (${2:fn_params}) => {",
+      "\t${3:fn_body}",
+      "};"
+    ],
+    "description": "Log caught error to console"
+  },
+  "arrow function": {
+    "prefix": "fn",
+    "body": ["(${1:fn_params}) => {", "\t${2:fn_body}", "}"],
+    "description": "Log caught error to console"
+  },
+  "async arrow function": {
+    "prefix": "afn",
+    "body": ["async (${1:fn_params}) => {", "\t${2:fn_body}", "}"],
+    "description": "Log caught error to console"
+  },
+  "await page": {
+    "prefix": "ap",
+    "body": ["await page."],
+    "description": "await page"
+  },
+  "await expect page": {
+    "prefix": "aep",
+    "body": ["await expect(page.$1)$2"],
+    "description": "await expect page"
+  },
+  "named async function": {
+    "prefix": "nafn",
+    "body": [
+      "async function ${1:fn_name} (${2:fn_params}) {",
+      "\t${3:fn_body}",
+      "}"
+    ],
+    "description": "Named async function"
+  },
+  "named function": {
+    "prefix": "nfn",
+    "body": ["function ${1:fn_name} (${2:fn_params}) {", "\t${3:fn_body}", "}"],
+    "description": "Named function"
+  }
+}

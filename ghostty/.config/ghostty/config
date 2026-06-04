@@ -1,0 +1,20 @@
+theme = catppuccin-mocha
+font-family = ""
+font-family = "CaskaydiaCove Nerd Font Mono"
+font-size = 20
+gtk-titlebar = true
+
+window-save-state = always
+
+
+# 2025-12-15 custom shader
+custom-shader = ~/.config/ghostty/shaders/shader.glsl
+
+# Keybindings
+#  split navigation
+keybind = super+shift+u=goto_split:previous
+keybind = super+shift+i=goto_split:next
+keybind = super+shift+l=goto_split:right
+keybind = super+shift+h=goto_split:left
+keybind = super+shift+j=goto_split:down
+keybind = super+shift+k=goto_split:up
