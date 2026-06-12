@@ -6,8 +6,6 @@ export NEATLEAF_DIR=~/Projects/neatleaf
 
 export GIT_TOOL_DIR='/Users/joe/Projects/python_for_fun/git_tools/git_tools'
 export GIT_TOOL_JS_DIR='/Users/joe/Projects/js_for_fun/git-tools-js'
-export POETRY_VIRTUAL_ENV_DIR='/Users/joe/Library/Caches/pypoetry/virtualenvs'
-
 alias gfetch='git fetch --prune'
 alias gFzfBranches='git branch -a | fzf | xargs -I {} echo {} | sed "s/remotes\/origin\///" | sed "s/^[\+\*] //"'
 alias gpnv='git push --no-verify'
@@ -22,17 +20,17 @@ alias gmain='gstash "switching to main: $(gtimestamp)"; gcm; gl'
 alias gpull='gstashd; git pull; gstashp'
 
 # Prune stale branches
-alias gprune='HERE=$(pwd); echo $HERE; uv run $GIT_TOOL_DIR/git_stale_branches.py --directory $HERE; cd $HERE'
+alias gprune='uv run $GIT_TOOL_DIR/git_stale_branches.py --directory $PWD'
 
 # Worktrees
 # - prune
-alias wprune='HERE=$(pwd); echo $HERE; uv run $GIT_TOOL_DIR/git_worktree_prune.py --directory $HERE; cd $HERE'
+alias wprune='uv run $GIT_TOOL_DIR/git_worktree_prune.py --directory $PWD'
 
 # - list
-alias wls='HERE=$(pwd); uv run $GIT_TOOL_DIR/git_worktree_list.py --directory $HERE'
+alias wls='uv run $GIT_TOOL_DIR/git_worktree_list.py --directory $PWD'
 
 # - add worktreee interactively
-alias wta='HERE=$(pwd); uv run $GIT_TOOL_DIR/git_worktree_and_branches.py --here_directory $HERE'
+alias wta='uv run $GIT_TOOL_DIR/git_worktree_and_branches.py --here_directory $PWD'
 
 # - add worktree from clipboard
 # alias wtaa='HERE=$(pwd); cd $GIT_TOOL_JS_DIR; bun run cli create $(pbpaste)'

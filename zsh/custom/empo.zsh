@@ -90,7 +90,7 @@ countReferencesX() {
   echo "target: $target"
   echo "--------------------------------"
   cd $target
-  grep -r "$grep_pattern" --include="*.ts" ./**/* >grep_pattern.log
+  rg --no-line-number -g '*.ts' "$grep_pattern" >grep_pattern.log
 
   # Extract import path and filename, then print summary and file list
   cat grep_pattern.log |
