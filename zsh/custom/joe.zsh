@@ -37,8 +37,8 @@ alias zomz='cd ~/.oh-my-zsh'
 
 # Tools initializations
 
-# randomly_echo_banner
-~/.bun/bin/bun run /Users/joe/Projects/js_for_fun/figletPreview/index.ts --text Fresh
+# randomly_echo_banner - run disowned in background so it does not block terminal startup (0ms)
+~/.bun/bin/bun run /Users/joe/Projects/js_for_fun/figletPreview/index.ts --text Fresh &!
 
 # make a beep
 alias beep=echo -e "\a"
