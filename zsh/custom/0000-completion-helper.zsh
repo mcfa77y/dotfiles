@@ -1,3 +1,7 @@
+# NOTE: This file is prefixed with '0000-' so it is loaded first alphabetically 
+# by Oh My Zsh. This guarantees helper functions (like cache_completion) and 
+# variables are defined and available before other custom scripts run.
+
 # Cache shell completions to ~/.zsh/completions (keeps shell startup fast)
 cache_completion() {
   local cmd="$1"
