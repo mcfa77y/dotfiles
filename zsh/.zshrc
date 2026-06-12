@@ -57,9 +57,9 @@ log_time_lap "Zinit Bootstrapped"
 
 # --- LOAD PLUGINS & SNIPPETS ---
 # Load essential community plugins
-zinit light zsh-users/zsh-autosuggestions
-zinit light zdharma-continuum/fast-syntax-highlighting
-zinit light zsh-users/zsh-completions
+# zinit light zsh-users/zsh-autosuggestions
+# zinit light zdharma-continuum/fast-syntax-highlighting
+# zinit light zsh-users/zsh-completions
 zinit light marlonrichert/zsh-autocomplete
 
 # Load Oh-My-Zsh library and plugin snippets
@@ -126,13 +126,6 @@ export PATH="/Users/joe/.codeium/windsurf/bin:$PATH"
 # 2025-05-12 openjdk
 export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
 
-# 2025-06-30 carapace https://carapace-sh.github.io/carapace-bin/setup.htm
-export CARAPACE_BRIDGES='zsh,bash,inshellisense' # optional
-zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
-source <(carapace _carapace zsh)
-export PATH="/opt/homebrew/bin:$PATH"
-
-log_time_lap "Carapace Sourced"
 
 # High-performance, microsecond-accurate NVM Lazy-Loader
 export NVM_DIR="$HOME/.nvm"
@@ -150,16 +143,6 @@ npx() { nvm >/dev/null; npx "$@" }
 log_time_lap "NVM Lazy-Loaded"
 
 # bun completions
-[ -s "/Users/joe/.bun/_bun" ] && source "/Users/joe/.bun/_bun"
-
-# 2025-12-02 zoxide completions
-# https://github.com/ajeetdsouza/zoxide
-eval "$(zoxide init zsh)"
-
-# Worktrunk shell integration
-if command -v wt >/dev/null 2>&1; then
-  eval "$(wt config shell init zsh)"
-fi
 
 # Added by Antigravity
 export PATH="/Users/joe/.antigravity/antigravity/bin:$PATH"
