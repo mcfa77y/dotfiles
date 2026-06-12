@@ -1,1 +1,1 @@
-alias ask="ollama run phi4:latest"
+alias ask="ollama run gemma4:latest"

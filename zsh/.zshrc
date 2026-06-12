@@ -3,6 +3,7 @@ zmodload zsh/datetime
 
 # Set to "true" to print high-resolution shell startup timing and bottleneck profiling (can also be set as an env var)
 ZSH_DEBUG_PROFILE="${ZSH_DEBUG_PROFILE:-false}"
+# ZSH_DEBUG_PROFILE="${ZSH_DEBUG_PROFILE:-true}"
 
 # Initialize timing variables
 _shell_start_time=$EPOCHREALTIME
@@ -55,12 +56,17 @@ autoload -Uz _zinit
 
 log_time_lap "Zinit Bootstrapped"
 
-# --- LOAD PLUGINS & SNIPPETS ---
 # Load essential community plugins
-# zinit light zsh-users/zsh-autosuggestions
-# zinit light zdharma-continuum/fast-syntax-highlighting
-# zinit light zsh-users/zsh-completions
-zinit light marlonrichert/zsh-autocomplete
+zinit light zsh-users/zsh-autosuggestions
+zinit light zdharma-continuum/fast-syntax-highlighting
+zinit light zsh-users/zsh-completions
+# zinit light marlonrichert/zsh-autocomplete
+
+# Configure zsh-autosuggestions to use async rendering to prevent cursor/prompt lag
+export ZSH_AUTOSUGGEST_USE_ASYNC=1
+
+# Configure standard Zsh completion menu select
+zstyle ':completion:*' menu select
 
 # Load Oh-My-Zsh library and plugin snippets
 zinit snippet OMZ::lib/git.zsh
@@ -142,7 +148,6 @@ npx() { nvm >/dev/null; npx "$@" }
 
 log_time_lap "NVM Lazy-Loaded"
 
-# bun completions
 
 # Added by Antigravity
 export PATH="/Users/joe/.antigravity/antigravity/bin:$PATH"
