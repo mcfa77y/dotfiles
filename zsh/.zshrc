@@ -1,98 +1,3 @@
-# If you come fsom bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
-
-# Path to your oh-my-zsh installation.
-export ZSH="$HOME/.oh-my-zsh"
-
-# Set name of the theme to load --- if set to "random", it will
-# load a random theme each time oh-my-zsh is loaded, in which case,
-# to know which specific one was loaded, run: echo $RANDOM_THEME
-# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-# ZSH_THEME="jonathan"
-# ZSH_THEME="agnoster"
-# 2025-01-21 using powerline see bottom of this file
-
-# Set list of themes to pick from when loading at random
-# Setting this variable when ZSH_THEME=random will cause zsh to load
-# a theme from this variable instead of looking in $ZSH/themes/
-# If set to an empty array, this variable will have no effect.
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
-
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
-
-# Uncomment the following line to use hyphen-insensitive completion.
-# Case-sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
-
-# Uncomment one of the following lines to change the auto-update behavior
-# zstyle ':omz:update' mode disabled  # disable automatic updates
-zstyle ':omz:update' mode auto # update automatically without asking
-# zstyle ':omz:update' mode reminder  # just remind me to update when it's time
-
-# Uncomment the following line to change how often to auto-update (in days).
-# zstyle ':omz:update' frequency 13
-
-# Uncomment the following line if pasting URLs and other text is messed up.
-# DISABLE_MAGIC_FUNCTIONS="true"
-
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Uncomment the following line to enable command auto-correction.
-ENABLE_CORRECTION="true"
-
-# Uncomment the following line to display red dots whilst waiting for completion.
-# You can also set it to another string to have that shown instead of the default red dots.
-# e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
-# Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
-COMPLETION_WAITING_DOTS="true"
-
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# You can set one of the optional three formats:
-# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# or set a custom format using the strftime function format specifications,
-# see 'man strftime' for details.
-# HIST_STAMPS="mm/dd/yyyy"
-
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
-# 2025-06-12 store completions in the cache
-# https://stackoverflow.com/questions/62931101/i-have-multiple-files-of-zcompdump-why-do-i-have-multiple-files-of-these
-export ZSH_COMPDUMP=$ZSH/cache/.zcompdump-$HOST
-
-# Which plugins would you like to load?
-# Standard plugins can be found in $ZSH/plugins/
-# Custom plugins may be added to $ZSH_CUSTOM/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
-# plugins=(git direnv pip yarn z bgnotify zsh-autocomplete vi-mode terraform)
-# plugins=(git direnv pip z bgnotify vi-mode)
-# plugins=(git pip yarn z bgnotify vi-mode terraform direnv)
-# plugins=(git pip yarn z bgnotify vi-mode zsh-autocomplete)
-# plugins=(git z bgnotify vi-mode zsh-autocomplete terraform direnv)
-plugins=(git bgnotify vi-mode zsh-autocomplete terraform direnv aws)
-# plugins=(git pip yarn z bgnotify vi-mode)
-
-source $ZSH/oh-my-zsh.sh
-
-# User configuration
-
-# export MANPATH="/usr/local/man:$MANPATH"
-
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
-
 # Preferred editor for local and remote sessions
 if [[ -n $SSH_CONNECTION ]]; then
   export EDITOR='vim'
@@ -100,66 +5,64 @@ else
   export EDITOR='nvim'
 fi
 
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
+# --- ZINIT PACKAGE MANAGER BOOTSTRAP & SETUP ---
+# Set the directory where Zinit will be installed
+ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
+# Download Zinit if it's not already installed
+if [[ ! -f $ZINIT_HOME/zinit.zsh ]]; then
+    print -P "%F{33}▓▒░ %F{220}Installing %F{33}ZDHARMA-CONTINUUM%F{220} Zinit Plugin Manager...%f"
+    mkdir -p "$(dirname $ZINIT_HOME)"
+    git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
+fi
 
-# z autocomplete - 2023-08-21
-# Make Tab go straight to the menu and cycle there
-bindkey '\t' menu-select "$terminfo[kcbt]" menu-select
-bindkey -M menuselect '\t' menu-complete "$terminfo[kcbt]" reverse-menu-complete
-# First insert the common substring
-# all Tab widgets
-zstyle ':autocomplete:*complete*:*' insert-unambiguous yes
+# Source Zinit
+source "${ZINIT_HOME}/zinit.zsh"
 
-# all history widgets
-zstyle ':autocomplete:*history*:*' insert-unambiguous yes
+# Enable Zinit completions
+autoload -Uz _zinit
+(( ${+_comps} )) && _comps[zinit]=_zinit
 
-# ^S
-zstyle ':autocomplete:menu-search:*' insert-unambiguous yes
+# --- LOAD PLUGINS & SNIPPETS ---
+# Load essential community plugins
+zinit light zsh-users/zsh-autosuggestions
+zinit light zdharma-continuum/fast-syntax-highlighting
+zinit light zsh-users/zsh-completions
+zinit light marlonrichert/zsh-autocomplete
 
-# tabtab source for packages
-# uninstall by removing these lines
-# [[ -f ~/.config/tabtab/zsh/__tabtab.zsh ]] && . ~/.config/tabtab/zsh/__tabtab.zsh || true
+# Load Oh-My-Zsh library and plugin snippets
+zinit snippet OMZ::lib/git.zsh
+zinit snippet OMZ::plugins/git/git.plugin.zsh
+zinit snippet OMZ::plugins/bgnotify/bgnotify.plugin.zsh
+zinit snippet OMZ::plugins/vi-mode/vi-mode.plugin.zsh
+zinit snippet OMZ::plugins/terraform/terraform.plugin.zsh
+zinit snippet OMZ::plugins/direnv/direnv.plugin.zsh
+zinit snippet OMZ::plugins/aws/aws.plugin.zsh
+
+# Load local custom plugins
+zinit light ~/dotfiles/zsh/custom/plugins/nx-completion
+
+# --- COMPLETION SYSTEM INITIALIZATION ---
+# Initialize zsh completion system (required for carapace, bun, wt, etc.)
+autoload -Uz compinit
+compinit
+
+# Replay intercepted compdefs
+zinit cdreplay -q
+
+# --- LOAD CUSTOM SCRIPTS (Hybrid Setup) ---
+# Source all flat custom scripts under custom/*.zsh
+for file in ~/dotfiles/zsh/custom/*.zsh; do
+  [[ -f "$file" ]] && source "$file"
+done
+
+# --- OTHER UTILITIES & CONFIGS ---
 
 # fzf - useful keybindings and fuzzy completion 2023-12-18
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # 2024-06-12 `jk` vim keybinding for zsh terminal https://unix.stackexchange.com/questions/697018/jj-vim-keybinding-for-zsh-terminal
 bindkey -M viins jk vi-cmd-mode
-
-# 2024-08-13 no auto correct for nx: https://superuser.com/questions/439209/how-to-partially-disable-the-zshs-autocorrect
-alias nx='nocorrect nx'
-alias yarn='nocorrect yarn'
-alias npx='nocorrect npx'
-
-# 2025-07-31 pyenv# Activate Homebrew in the current shell session
-# https://lucagrippa.io/blog/Setting-up-Pyenv-in-.zshrc
-eval "$(/opt/homebrew/bin/brew shellenv)"
- 
-# Set the PYENV_ROOT variable to point to the location of Pyenv
-export PYENV_ROOT="$HOME/.pyenv"
- 
-# Check if pyenv command is available, if not, add Pyenv binary directory to PATH
-command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
- 
-# Initialize pyenv into the shell session
-eval "$(pyenv init -)"
- 
-# Initialize pyenv-virtualenv plugin into the shell session
-eval "$(pyenv virtualenv-init -)"
-
-# 2025-01-21 powerline init  - https://powerline.readthedocs.io/en/latest/installation.html#pip-installation
-# . /Users/joe/.pyenv/versions/3.13.5/lib/python3.13/site-packages/powerline/bindings/zsh/powerline.zsh
-# POWERLINE_CONFIG_PATHS="/Users/joe/.config/powerline"
 
 # 2026-01-14 starship init - https://starship.rs
 export STARSHIP_CONFIG=~/.config/starship/starship.toml
@@ -168,16 +71,12 @@ eval "$(starship init zsh)"
 # Added by Windsurf
 export PATH="/Users/joe/.codeium/windsurf/bin:$PATH"
 
-# 2025-05-12 yarn berry for oh-my-zsh
-# zstyle ':omz:plugins:yarn' berry yes
-
 # 2025-05-12 openjdk
 export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
 
 # 2025-06-30 carapace https://carapace-sh.github.io/carapace-bin/setup.htm
-export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
+export CARAPACE_BRIDGES='zsh,bash,inshellisense' # optional
 zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
-echo "sourcing carapace"
 source <(carapace _carapace zsh)
 export PATH="/opt/homebrew/bin:$PATH"
 
@@ -192,21 +91,13 @@ export NVM_DIR="$HOME/.nvm"
 # https://github.com/ajeetdsouza/zoxide
 eval "$(zoxide init zsh)"
 
-# 2026-02-10 zsh line editor
-autoload edit-command-line
-zle -N edit-command-line
-
-
-# Added by GitButler installer
-# export PATH="/Users/joe/.local/bin:$PATH"
-# eval "$(but completions zsh)"
-
-if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi
+# Worktrunk shell integration
+if command -v wt >/dev/null 2>&1; then
+  eval "$(wt config shell init zsh)"
+fi
 
 # Added by Antigravity
 export PATH="/Users/joe/.antigravity/antigravity/bin:$PATH"
 
-
 # Added by Antigravity IDE
 export PATH="/Users/joe/.antigravity-ide/antigravity-ide/bin:$PATH"
-
