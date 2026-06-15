@@ -67,6 +67,7 @@ export ZSH_AUTOSUGGEST_USE_ASYNC=1
 
 # Configure standard Zsh completion menu select
 zstyle ':completion:*' menu select
+LISTMAX=0
 
 # Load Oh-My-Zsh library and plugin snippets
 zinit snippet OMZ::lib/git.zsh
@@ -84,8 +85,7 @@ log_time_lap "Plugins Loaded"
 
 # --- COMPLETION SYSTEM INITIALIZATION ---
 # Initialize zsh completion system (required for carapace, bun, wt, etc.)
-autoload -Uz compinit
-compinit
+autoload -Uz compinit && compinit
 
 # Replay intercepted compdefs
 zinit cdreplay -q

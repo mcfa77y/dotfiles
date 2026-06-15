@@ -14,7 +14,6 @@ cache_completion() {
     if [[ ! -f "$target_file" ]]; then
       mkdir -p "$target_dir"
       eval "$completion_generator" >"$target_file" 2>/dev/null
-    else
     fi
   fi
 }
