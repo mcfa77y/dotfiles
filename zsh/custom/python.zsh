@@ -5,7 +5,7 @@ command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
 # Lazy-load pyenv and pyenv-virtualenv
 pyenv() {
   unset -f pyenv python pip
-  eval "$(pyenv init - zsh)"
+  eval "$(pyenv init - zsh --no-rehash)"
   eval "$(pyenv virtualenv-init - zsh)"
   pyenv "$@"
 }
