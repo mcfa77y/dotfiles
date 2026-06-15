@@ -1,5 +1,6 @@
 # upgrade ls 2024-03-01
 alias ls='eza --all --icons --group-directories-first'
+alias l='eza --all --icons --group-directories-first'
 alias lst='eza --group-directories-first --git-ignore --tree --icons --level 2'
 
 # Editing oh my zsh
@@ -11,15 +12,17 @@ alias ee='apply_theme; code_ide '
 alias sz='source ~/.zshrc'
 alias eomzplugins='code_ide ~/.zshrc'
 alias eomzcustom='code_ide ~/.oh-my-zsh/custom/joe.zsh'
-alias nomz='nvim ~/.oh-my-zsh/oh-my-zsh.sh'
-alias nomzcustom='cd ~/.oh-my-zsh; nvim ~/.oh-my-zsh/custom/joe.zsh'
+# alias nomz='nvim ~/.oh-my-zsh/oh-my-zsh.sh'
+alias nomz='nvim ~/dotfiles/zsh/custom/joe.zsh'
+# alias nomzcustom='cd ~/.oh-my-zsh; nvim ~/.oh-my-zsh/custom/joe.zsh'
 alias nzsh='cd ~/; nvim ~/.zshrc'
+# alias nzsh='cd ~/; nvim ~/.zshrc'
 
 alias pkn='pkill -9 node'
 alias pkv='pkill -9 vite'
 
 # fuzzy find directories 2023-12-30
-alias fcd='cd "$(find . -type d \( -path "*/.git" -o -path "*/node_modules" \) -prune -o -print | fzf | xargs -r dirname)"'
+alias fcd='cd "$(fd --type d --hidden --exclude .git --exclude node_modules | fzf | xargs -r dirname)"'
 
 # fast jumps
 alias z-='cd -'
@@ -38,7 +41,7 @@ alias zomz='cd ~/.oh-my-zsh'
 # Tools initializations
 
 # randomly_echo_banner - run disowned in background so it does not block terminal startup (0ms)
-~/.bun/bin/bun run /Users/joe/Projects/js_for_fun/figletPreview/index.ts --text Fresh &!
+~/.bun/bin/bun run /Users/joe/Projects/js_for_fun/figletPreview/index.ts --text Fresh &|
 
 # make a beep
 alias beep=echo -e "\a"
