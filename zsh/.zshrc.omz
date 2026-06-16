@@ -138,7 +138,8 @@ zstyle ':autocomplete:menu-search:*' insert-unambiguous yes
 # [[ -f ~/.config/tabtab/zsh/__tabtab.zsh ]] && . ~/.config/tabtab/zsh/__tabtab.zsh || true
 
 # fzf - useful keybindings and fuzzy completion 2023-12-18
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+cache_completion fzf fzf_init.zsh "cat /opt/homebrew/opt/fzf/shell/completion.zsh /opt/homebrew/opt/fzf/shell/key-bindings.zsh"
+[[ -f ~/.zsh/completions/fzf_init.zsh ]] && source ~/.zsh/completions/fzf_init.zsh
 
 # 2024-06-12 `jk` vim keybinding for zsh terminal https://unix.stackexchange.com/questions/697018/jj-vim-keybinding-for-zsh-terminal
 bindkey -M viins jk vi-cmd-mode
