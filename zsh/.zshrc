@@ -62,7 +62,7 @@ export ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 # Load essential community plugins
 zinit light zsh-users/zsh-autosuggestions
 zinit light zdharma-continuum/fast-syntax-highlighting
-zinit light zsh-users/zsh-completions
+# zinit light zsh-users/zsh-completions
 # zinit light marlonrichert/zsh-autocomplete
 
 # Configure zsh-autosuggestions to use async rendering to prevent cursor/prompt lag
@@ -72,6 +72,7 @@ export ZSH_AUTOSUGGEST_USE_ASYNC=1
 zstyle ':completion:*' menu select
 zstyle ':completion:*' group-name ''
 LISTMAX=1000
+# CARAPACE_DEBUG=0
 
 # Load Oh-My-Zsh library and plugin snippets
 zinit snippet OMZ::lib/git.zsh
