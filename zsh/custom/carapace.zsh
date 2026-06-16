@@ -2,8 +2,8 @@
 # Ensure Homebrew and carapace are in the PATH before calling cache_completion
 export PATH="/opt/homebrew/bin:$PATH"
 
-export CARAPACE_BRIDGES='zsh,bash,inshellisense' # optional
-zstyle ':completion:*' format $'\e[2;37mCompleting XX%d\e[m'
+export CARAPACE_BRIDGES='zsh,bash' # optional
+zstyle ':completion:*' format $'\e[2;37m[Carapace] %d\e[m'
 
 cache_completion carapace carapace_init.zsh "carapace _carapace zsh"
 [[ -f ~/.zsh/completions/carapace_init.zsh ]] && source ~/.zsh/completions/carapace_init.zsh

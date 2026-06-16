@@ -69,9 +69,9 @@ log_time_lap "Zinit Bootstrapped"
 export ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
 # Load essential community plugins
-# zinit light zsh-users/zsh-autosuggestions
+zinit light zsh-users/zsh-autosuggestions
 zinit light zdharma-continuum/fast-syntax-highlighting
-# zinit light zsh-users/zsh-completions
+zinit light zsh-users/zsh-completions
 zinit light marlonrichert/zsh-autocomplete
 
 # Configure zsh-autosuggestions to use async rendering to prevent cursor/prompt lag
@@ -128,6 +128,28 @@ log_time_lap "Custom Flat Scripts Sourced"
 
 # 2024-06-12 `jk` vim keybinding for zsh terminal https://unix.stackexchange.com/questions/697018/jj-vim-keybinding-for-zsh-terminal
 bindkey -M viins jk vi-cmd-mode
+
+# zsh-autocomplete key bindings and styles
+zmodload zsh/terminfo
+local tab_key='\t'
+local backtab_key="${terminfo[kcbt]:-}"
+
+# Make Tab / Shift+Tab go straight to the completion menu and cycle there
+bindkey "$tab_key" menu-select
+if [[ -n "$backtab_key" ]]; then
+  bindkey "$backtab_key" menu-select
+fi
+
+# Make Tab / Shift+Tab cycle selection in the completion menu
+bindkey -M menuselect "$tab_key" menu-complete
+if [[ -n "$backtab_key" ]]; then
+  bindkey -M menuselect "$backtab_key" reverse-menu-complete
+fi
+
+# Configure zsh-autocomplete to insert the unambiguous prefix first
+zstyle ':autocomplete:*complete*:*' insert-unambiguous yes
+zstyle ':autocomplete:*history*:*' insert-unambiguous yes
+zstyle ':autocomplete:menu-search:*' insert-unambiguous yes
 
 # 2026-01-14 starship init - https://starship.rs
 export STARSHIP_CONFIG=~/.config/starship/starship.toml
