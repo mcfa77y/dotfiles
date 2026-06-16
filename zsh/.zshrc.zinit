@@ -69,10 +69,10 @@ log_time_lap "Zinit Bootstrapped"
 export ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
 # Load essential community plugins
-zinit light zsh-users/zsh-autosuggestions
+# zinit light zsh-users/zsh-autosuggestions
 zinit light zdharma-continuum/fast-syntax-highlighting
-zinit light zsh-users/zsh-completions
-zinit light marlonrichert/zsh-autocomplete
+# zinit light zsh-users/zsh-completions
+# zinit light marlonrichert/zsh-autocomplete
 
 # Configure zsh-autosuggestions to use async rendering to prevent cursor/prompt lag
 export ZSH_AUTOSUGGEST_USE_ASYNC=1
@@ -128,6 +128,7 @@ bindkey -M viins jk vi-cmd-mode
 
 # zsh-autocomplete key bindings and styles
 zmodload zsh/terminfo
+zmodload zsh/complist
 local tab_key='\t'
 local backtab_key="${terminfo[kcbt]:-}"
 

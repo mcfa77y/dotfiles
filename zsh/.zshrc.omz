@@ -115,6 +115,7 @@ fi
 # z autocomplete - 2023-08-21
 # Make Tab go straight to the menu and cycle there
 zmodload zsh/terminfo
+zmodload zsh/complist
 bindkey '\t' menu-select
 if [[ -n "$terminfo[kcbt]" ]]; then
   bindkey "$terminfo[kcbt]" menu-select
@@ -180,7 +181,7 @@ export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
 
 # 2025-06-30 carapace https://carapace-sh.github.io/carapace-bin/setup.htm
 export CARAPACE_BRIDGES='zsh,bash,inshellisense' # optional
-zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
+zstyle ':completion:*' format '%F{242}Completing %d%f'
 source <(carapace _carapace zsh)
 export PATH="/opt/homebrew/bin:$PATH"
 
