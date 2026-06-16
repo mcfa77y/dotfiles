@@ -67,6 +67,7 @@ export ZSH_AUTOSUGGEST_USE_ASYNC=1
 
 # Configure standard Zsh completion menu select
 zstyle ':completion:*' menu select
+zstyle ':completion:*' group-name ''
 LISTMAX=0
 
 # Load Oh-My-Zsh library and plugin snippets
