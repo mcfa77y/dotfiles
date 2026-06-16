@@ -56,6 +56,9 @@ autoload -Uz _zinit
 
 log_time_lap "Zinit Bootstrapped"
 
+# Configure zsh-autosuggestions strategies (try history first, then completions like Carapace)
+export ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+
 # Load essential community plugins
 zinit light zsh-users/zsh-autosuggestions
 zinit light zdharma-continuum/fast-syntax-highlighting
