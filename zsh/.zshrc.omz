@@ -84,7 +84,7 @@ export ZSH_COMPDUMP=$ZSH/cache/.zcompdump-$HOST
 plugins=(git bgnotify vi-mode zsh-autocomplete terraform direnv aws colored-man-pages)
 # plugins=(git pip yarn z bgnotify vi-mode)
 
-# source $ZSH/oh-my-zsh.sh
+source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
@@ -114,8 +114,15 @@ fi
 
 # z autocomplete - 2023-08-21
 # Make Tab go straight to the menu and cycle there
-bindkey '\t' menu-select "$terminfo[kcbt]" menu-select
-bindkey -M menuselect '\t' menu-complete "$terminfo[kcbt]" reverse-menu-complete
+zmodload zsh/terminfo
+bindkey '\t' menu-select
+if [[ -n "$terminfo[kcbt]" ]]; then
+  bindkey "$terminfo[kcbt]" menu-select
+fi
+bindkey -M menuselect '\t' menu-complete
+if [[ -n "$terminfo[kcbt]" ]]; then
+  bindkey -M menuselect "$terminfo[kcbt]" reverse-menu-complete
+fi
 # First insert the common substring
 # all Tab widgets
 zstyle ':autocomplete:*complete*:*' insert-unambiguous yes

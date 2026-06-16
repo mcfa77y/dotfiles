@@ -4,3 +4,7 @@
 .vscode/
 /gk/
 /oh-my-zsh/
+
+nvim/.config/nvim
+
+zsh/.zcompdump
