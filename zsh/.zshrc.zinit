@@ -69,10 +69,10 @@ log_time_lap "Zinit Bootstrapped"
 export ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
 # Load essential community plugins
-# zinit light zsh-users/zsh-autosuggestions
+zinit light zsh-users/zsh-autosuggestions
 zinit light zdharma-continuum/fast-syntax-highlighting
-# zinit light zsh-users/zsh-completions
-# zinit light marlonrichert/zsh-autocomplete
+zinit light zsh-users/zsh-completions
+zinit light marlonrichert/zsh-autocomplete
 
 # Configure zsh-autosuggestions to use async rendering to prevent cursor/prompt lag
 export ZSH_AUTOSUGGEST_USE_ASYNC=1
@@ -162,20 +162,16 @@ export PATH="/Users/joe/.codeium/windsurf/bin:$PATH"
 export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
 
 
-# High-performance, microsecond-accurate NVM Lazy-Loader
+# Asynchronously load NVM in the background using Zinit Turbo Mode
 export NVM_DIR="$HOME/.nvm"
-nvm() {
-  unset -f nvm node npm yarn npx bun
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-  nvm "$@"
-}
-node() { nvm >/dev/null; node "$@" }
-npm() { nvm >/dev/null; npm "$@" }
-yarn() { nvm >/dev/null; yarn "$@" }
-npx() { nvm >/dev/null; npx "$@" }
 
-log_time_lap "NVM Lazy-Loaded"
+zinit ice wait'0' lucid is-snippet if'[[ -s "$NVM_DIR/nvm.sh" ]]'
+zinit snippet "$NVM_DIR/nvm.sh"
+
+zinit ice wait'0' lucid is-snippet if'[[ -s "$NVM_DIR/bash_completion" ]]'
+zinit snippet "$NVM_DIR/bash_completion"
+
+log_time_lap "NVM Async Scheduled"
 
 
 # Added by Antigravity

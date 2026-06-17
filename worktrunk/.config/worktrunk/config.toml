@@ -53,7 +53,7 @@
 #
 # `~` expands to the home directory. Relative paths resolve from `repo_path`.
 #
-worktree-path = "/Users/joe/Projects/empo_health/empo-worktrees/{{ branch | sanitize }}"
+worktree-path = "{{ repo_path }}/../empo-worktrees/{{ branch | sanitize }}"
 
 ## LLM commit messages
 #
