@@ -1,5 +1,5 @@
 # Custom cmux function for Oh My Zsh
-# Usage: cmux-tab --name <tab_name> --command <command_to_run> [--focus]
+# Usage: cmux-tab --name <tab_name> --command <command_to_run> [--focus] [--cwd <path>]
 # Example: cmux-tab --name "BE Server" --command "echo 'new foo'"
 # By default, this function creates the new surface in the background, keeping focus on your active tab.
 # Use --focus (or -f) to explicitly switch focus to the new tab.
@@ -7,6 +7,7 @@ function cmux-tab() {
   local tab_name=""
   local cmd_to_run=""
   local focus_new=false
+  local cwd="$PWD"
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -30,16 +31,24 @@ function cmux-tab() {
         focus_new=true
         shift 1
         ;;
+      --cwd)
+        if [[ -z "$2" ]]; then
+          echo "Error: --cwd requires a value."
+          return 1
+        fi
+        cwd="$2"
+        shift 2
+        ;;
       *)
         echo "Unknown option: $1"
-        echo "Usage: cmux-tab --name <tab_name> --command <command_to_run> [--focus]"
+        echo "Usage: cmux-tab --name <tab_name> --command <command_to_run> [--focus] [--cwd <path>]"
         return 1
         ;;
     esac
   done
 
   if [[ -z "$tab_name" || -z "$cmd_to_run" ]]; then
-    echo "Usage: cmux-tab --name <tab_name> --command <command_to_run> [--focus]"
+    echo "Usage: cmux-tab --name <tab_name> --command <command_to_run> [--focus] [--cwd <path>]"
     return 1
   fi
 
@@ -51,7 +60,7 @@ function cmux-tab() {
 
   # Create the new terminal surface/tab and capture its reference ID from JSON output
   local res
-  res=$(cmux new-surface --focus "$focus_val" --json 2>/dev/null)
+  res=$(cmux new-surface --working-directory "$cwd" --focus "$focus_val" --json 2>/dev/null)
   if [[ $? -ne 0 || -z "$res" ]]; then
     echo "Error: Failed to create new cmux surface. Is cmux running?"
     return 1
@@ -70,3 +79,13 @@ function cmux-tab() {
   # Send and execute the command in that surface
   cmux send --surface "$surface_ref" "${cmd_to_run}\n"
 }
+
+
+# Get title of the current cmux surface
+cmux-current-title() {
+  cmux tree 2>/dev/null | grep -F "◀ here" | sed -n 's/.*"\(.*\)".*/\1/p'
+}
+
+# Alias for quicker typing
+alias ct='cmux-tab'
+
