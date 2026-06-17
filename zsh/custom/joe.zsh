@@ -6,7 +6,6 @@ alias lst='eza --group-directories-first --git-ignore --tree --icons --level 2'
 # Editing oh my zsh
 # alias code_ide='windsurf'
 alias code_ide='agy-ide'
-alias nv='nvim'
 alias apply_theme="~/.bun/bin/bun run /Users/joe/Projects/js_for_fun/apply_vs_code_theme/index.ts"
 alias ee='apply_theme; code_ide '
 alias sz='source ~/.zshrc'
