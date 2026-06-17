@@ -5,9 +5,30 @@ export RHL_DIR="$EMPO_DIR/remote-health-link"
 
 alias empo_start_ticket='cd $RHL_DIR; gl; gcb $(pbpaste); gp --no-verify; gback; wtaa'
 
-alias yss="$PACKAGE_MANAGER run start:server"
-alias ysa="$PACKAGE_MANAGER run start:app"
-alias ytsw="$PACKAGE_MANAGER run test:server:watch"
+yss() {
+  if [[ -n "$CMUX_SURFACE_ID" && "$(cmux-current-title)" != "BE Server" ]]; then
+    cmux-tab --name "BE Server" --command "$PACKAGE_MANAGER run start:server"
+  else
+    $PACKAGE_MANAGER run start:server
+  fi
+}
+
+ysa() {
+  if [[ -n "$CMUX_SURFACE_ID" && "$(cmux-current-title)" != "FE Server" ]]; then
+    cmux-tab --name "FE Server" --command "$PACKAGE_MANAGER run start:app"
+  else
+    $PACKAGE_MANAGER run start:app
+  fi
+}
+
+ytsw() {
+  if [[ -n "$CMUX_SURFACE_ID" && "$(cmux-current-title)" != "Server Watch" ]]; then
+    cmux-tab --name "Server Watch" --command "$PACKAGE_MANAGER run test:server:watch"
+  else
+    $PACKAGE_MANAGER run test:server:watch
+  fi
+}
+
 
 alias zroot="zparent workspaces; cd .."
 alias zbe="cd workspaces/backend-api"

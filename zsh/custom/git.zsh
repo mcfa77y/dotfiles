@@ -34,7 +34,7 @@ alias wta='uv run $GIT_TOOL_DIR/git_worktree_and_branches.py --here_directory $P
 
 # - add worktree from clipboard
 # alias wtaa='HERE=$(pwd); cd $GIT_TOOL_JS_DIR; bun run cli create $(pbpaste)'
-alias wtaa='HERE=$(pwd); cd $RHL_DIR; wt switch --config $GIT_TOOL_JS_DIR/.config/wt.json $(pbpaste)'
+alias wtaa='HERE=$(pwd); cd $RHL_DIR; wt switch --create --config $GIT_TOOL_JS_DIR/.config/wt.toml $(pbpaste)'
 
 # - git push no verify
 alias gpnv='git push --no-verify'
@@ -57,7 +57,15 @@ function gCommitAndPush() {
 # 2025-02-26
 alias lg='lazygit'
 
-alias wtjs='cd $GIT_TOOL_JS_DIR; bun start; cd -'
+wtjs() {
+  if [[ -n "$CMUX_SURFACE_ID" && "$(cmux-current-title)" != "git-tools-js" ]]; then
+    cmux-tab --name "git-tools-js" --command "bun start" --cwd "$GIT_TOOL_JS_DIR"
+  else
+    (cd "$GIT_TOOL_JS_DIR" && bun start)
+  fi
+}
+
+
 
 # 2026-02-13
 # change directory to a worktree
