@@ -66,16 +66,16 @@ autoload -Uz _zinit
 log_time_lap "Zinit Bootstrapped"
 
 # Configure zsh-autosuggestions strategies (try history first, then completions like Carapace)
-export ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+# export ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
 # Load essential community plugins
-zinit light zsh-users/zsh-autosuggestions
+# zinit light zsh-users/zsh-autosuggestions
 zinit light zdharma-continuum/fast-syntax-highlighting
 zinit light zsh-users/zsh-completions
 zinit light marlonrichert/zsh-autocomplete
 
 # Configure zsh-autosuggestions to use async rendering to prevent cursor/prompt lag
-export ZSH_AUTOSUGGEST_USE_ASYNC=1
+# export ZSH_AUTOSUGGEST_USE_ASYNC=1
 
 
 # Load Oh-My-Zsh library and plugin snippets
@@ -86,6 +86,7 @@ zinit snippet OMZ::plugins/vi-mode/vi-mode.plugin.zsh
 zinit snippet OMZ::plugins/terraform/terraform.plugin.zsh
 zinit snippet OMZ::plugins/direnv/direnv.plugin.zsh
 zinit snippet OMZ::plugins/aws/aws.plugin.zsh
+zinit snippet OMZP::colored-man-pages
 
 # Load local custom plugins
 zinit light ~/dotfiles/zsh/custom/plugins/nx-completion
@@ -180,4 +181,18 @@ export PATH="/Users/joe/.antigravity/antigravity/bin:$PATH"
 # Added by Antigravity IDE
 export PATH="/Users/joe/.antigravity-ide/antigravity-ide/bin:$PATH"
 
+
+# 2026-06-22
+# Clean up any child zsh processes (such as zsh-autocomplete background workers) when the shell exits
+_cleanup_zsh_child_processes() {
+  (( ZSH_SUBSHELL == 0 )) || return 0
+  if command -v pgrep &>/dev/null; then
+    local pids
+    pids=($(pgrep -P $$ -x zsh 2>/dev/null))
+    if (( ${#pids} > 0 )); then
+      kill -TERM "${pids[@]}" 2>/dev/null
+    fi
+  fi
+}
+trap _cleanup_zsh_child_processes EXIT HUP TERM
 log_time_lap "Shell Startup Completed"

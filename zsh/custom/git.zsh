@@ -58,20 +58,18 @@ function gCommitAndPush() {
 alias lg='lazygit'
 
 wtjs() {
-  if [[ -n "$CMUX_SURFACE_ID" && "$(cmux-current-title)" != "git-tools-js" ]]; then
-    cmux-tab --name "git-tools-js" --command "bun start" --cwd "$GIT_TOOL_JS_DIR"
-  else
-    (cd "$GIT_TOOL_JS_DIR" && bun start)
-  fi
+  (cd "$GIT_TOOL_JS_DIR" && bun start)
 }
 
-
+wtjs-cli() {
+  (cd "$GIT_TOOL_JS_DIR" && bun run cli)
+}
 
 # 2026-02-13
 # change directory to a worktree
 function zwt() {
   zrhl
-  local target=$(git worktree list | fzf | awk '{print $1}')
+  local target=$(wt list | fzf --ansi | cut -d " " -f 2)
   if [ -n "$target" ]; then
     cd "$target"
     .

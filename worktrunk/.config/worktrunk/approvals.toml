@@ -36,4 +36,8 @@ ln -sf {{ repo_path }}/../env/vscode/tasks.json {{ worktree_path }}/.vscode/
     "mkdir -p {{ worktree_path }}/.config",
     "ln -sf /Users/joe/Projects/js_for_fun/git-tools-js/.config/wt.toml {{ worktree_path }}/.config/wt.toml",
     "~/.bun/bin/bun run --cwd /Users/joe/Projects/empo_health/scripts/infisical-update-env-vars start --env all",
+    """
+agy-ide .
+~/.bun/bin/bun run /Users/joe/Projects/js_for_fun/apply_vs_code_theme/index.ts || true
+""",
 ]

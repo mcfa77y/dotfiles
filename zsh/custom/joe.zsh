@@ -8,12 +8,6 @@ alias lst='eza --group-directories-first --git-ignore --tree --icons --level 2'
 alias code_ide='agy-ide'
 alias apply_theme="~/.bun/bin/bun run /Users/joe/Projects/js_for_fun/apply_vs_code_theme/index.ts"
 alias ee='apply_theme; code_ide '
-alias sz='source ~/.zshrc'
-alias eomzplugins='code_ide ~/.zshrc'
-alias eomzcustom='code_ide ~/.oh-my-zsh/custom/joe.zsh'
-alias nomz='nvim ~/dotfiles/zsh/custom/joe.zsh'
-alias nzsh='cd ~/; nvim ~/.zshrc'
-
 alias pkn='pkill -9 node'
 alias pkv='pkill -9 vite'
 
@@ -33,7 +27,7 @@ export PY_DIR='/Users/joe/Projects/python_for_fun'
 alias zpy='cd $PY_DIR'
 alias zdl='cd /Users/joe/Downloads'
 alias zconfig='cd ~/.config'
-alias zomz='cd ~/.oh-my-zsh'
+alias fconfig='zconfig; nvim $(fzf_select); cd -'
 
 # Tools initializations
 
@@ -50,18 +44,18 @@ export LG_CONFIG_FILE="$LAZY_GIT_CONFIG_DIR/config.yml"
 
 # 2025-11-06
 goto_parent_directory() {
-  local target="${1:-my_target_folder}"
-  local cur="$PWD"
-  while [[ "$cur" != "/" && "$cur" != "" ]]; do
+  local target_dir="${1:-my_target_folder}"
+  local current_dir="$PWD"
+  while [[ "$current_dir" != "/" && "$current_dir" != "" ]]; do
     local base
-    base="$(basename "$cur")"
-    if [[ "$base" == "$target" ]]; then
-      cd "$cur" || return 1
+    base="$(basename "$current_dir")"
+    if [[ "$base" == "$target_dir" ]]; then
+      cd "$current_dir" || return 1
       return 0
     fi
-    cur="$(dirname "$cur")"
+    current_dir="$(dirname "$current_dir")"
   done
-  echo "Target folder '$target' not found" >&2
+  echo "Target folder '$target_dir' not found" >&2
   return 1
 }
 alias zparent='goto_parent_directory'
