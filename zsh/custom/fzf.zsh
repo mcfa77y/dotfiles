@@ -1,6 +1,15 @@
 # https://github.com/junegunn/fzf#customizing-fuzzy-completion-for-bash-and-zsh
 
-# export FZF_DEFAULT_COMMAND='fd --type f --strip-cwd-prefix'
+_fd_excludes() {
+  local item
+  for item in "$@"; do
+    echo -n "--exclude=$item "
+  done
+}
+
+export FZF_DEFAULT_COMMAND="fd --type f --hidden --follow $(_fd_excludes .git node_modules target .cache)"
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND="fd --type d --hidden --follow $(_fd_excludes .git node_modules target .cache)"
 
 # Tokyo Night Theme
 # https://junegunn.github.io/fzf/color-themes/?s=q1YqUbJSCsnPrsxX8MtMzyhR0lEqSUpXslJSNjQwNDRMVqoFAA
@@ -27,13 +36,6 @@ export FZF_COMPLETION_PATH_OPTS='--walker file,dir,follow,hidden'
 ## Options for directory completion (e.g. cd **<TAB>)
 export FZF_COMPLETION_DIR_OPTS='--walker dir,follow'
 
-_lst() {
-  eza --group-directories-first --git-ignore --tree --icons --level 2 --color=always "$1"
-}
-_bat_color() {
-  bat --color=always --style=numbers,changes --decorations=always "$1"
-}
-
 ## Advanced customization of fzf options via _fzf_comprun function
 ## - The first argument to the function is the name of the command.
 ## - You should make sure to pass the rest of the arguments ($@) to fzf.
@@ -53,12 +55,6 @@ _fzf_comprun() {
 # Use fd (https://github.com/sharkdp/fd) for listing path candidates.
 # - The first argument to the function ($1) is the base path to start traversal
 # - See the source code (completion.{bash,zsh}) for the details.
-_fd_excludes() {
-  local item
-  for item in "$@"; do
-    echo -n "--exclude=$item "
-  done
-}
 
 _fzf_compgen_path() {
   fd --hidden --follow $(_fd_excludes .git node_modules target .cache) . "$1"
