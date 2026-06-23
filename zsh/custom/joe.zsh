@@ -3,9 +3,6 @@ alias ls='eza --all --icons --group-directories-first'
 alias l='eza --all --icons --group-directories-first'
 alias lst='eza --group-directories-first --git-ignore --tree --icons --level 2'
 
-# fuzzy find directories 2023-12-30
-alias fcd='cd "$(fd --type d --hidden --exclude .git --exclude node_modules | fzf | xargs -r dirname)"'
-
 # fast jumps
 alias cd='z'
 alias ..='cd ..'
