@@ -6,4 +6,3 @@ export CARAPACE_BRIDGES='zsh,bash' # optional
 zstyle ':completion:*' format '%F{242}[Carapace] %d%f'
 
 cache_completion carapace carapace_init.zsh "carapace _carapace zsh"
-[[ -f ~/.zsh/completions/carapace_init.zsh ]] && source ~/.zsh/completions/carapace_init.zsh

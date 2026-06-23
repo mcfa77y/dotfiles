@@ -3,18 +3,11 @@ alias ls='eza --all --icons --group-directories-first'
 alias l='eza --all --icons --group-directories-first'
 alias lst='eza --group-directories-first --git-ignore --tree --icons --level 2'
 
-# Editing oh my zsh
-# alias code_ide='windsurf'
-alias code_ide='agy-ide'
-alias apply_theme="~/.bun/bin/bun run /Users/joe/Projects/js_for_fun/apply_vs_code_theme/index.ts"
-alias ee='apply_theme; code_ide '
-alias pkn='pkill -9 node'
-alias pkv='pkill -9 vite'
-
 # fuzzy find directories 2023-12-30
 alias fcd='cd "$(fd --type d --hidden --exclude .git --exclude node_modules | fzf | xargs -r dirname)"'
 
 # fast jumps
+alias cd='z'
 alias ..='cd ..'
 alias z-='cd -'
 alias z2='cd ../../'
@@ -28,6 +21,13 @@ alias zpy='cd $PY_DIR'
 alias zdl='cd /Users/joe/Downloads'
 alias zconfig='cd ~/.config'
 alias fconfig='zconfig; nvim $(fzf_select); cd -'
+
+# Editing oh my zsh
+# alias code_ide='windsurf'
+# alias code_ide='agy-ide'
+alias EDITOR='agy-ide'
+alias apply_theme'bun run --cwd $JS_DIR/apply_vs_code_theme/ index.ts'
+alias ee='apply_theme; $EDITOR'
 
 # Tools initializations
 

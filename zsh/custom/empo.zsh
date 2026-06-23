@@ -1,7 +1,7 @@
 # PACKAGE_MANAGER='pnpm'
 PACKAGE_MANAGER='yarn'
 export EMPO_DIR="/Users/joe/Projects/empo_health"
-export RHL_DIR="$EMPO_DIR/remote-health-link"
+export RHL_DIR="$EMPO_DIR/main"
 
 alias empo_start_ticket='cd $RHL_DIR; gl; gcb $(pbpaste); gp --no-verify; gback; wtaa'
 
@@ -29,16 +29,11 @@ ytsw() {
   fi
 }
 
-
-alias zroot="zparent workspaces; cd .."
-alias zbe="cd workspaces/backend-api"
-alias zber="zroot; cd workspaces/backend-api"
-alias zfe="cd workspaces/frontend-app"
-alias zfer="zroot; cd workspaces/frontend-app"
-alias zqa="cd workspaces/qa"
-alias zqar="zroot; cd workspaces/qa"
-alias zrat="cd workspaces/helper-scripts/rhl-api-tools"
-alias zratr="zroot; cd workspaces/helper-scripts/rhl-api-tools"
+alias zroot="z $(git_current_branch)"
+alias zbe="zroot; z workspaces/backend-api/"
+alias zfe="zroot; z workspaces/frontend-app/"
+alias zqa="zroot; z workspaces/qa/"
+alias zrat="zroot; z workspaces/helper-scripts/rhl-api-tools/"
 
 alias zempo='cd $EMPO_DIR'
 alias zrhl='cd $RHL_DIR'

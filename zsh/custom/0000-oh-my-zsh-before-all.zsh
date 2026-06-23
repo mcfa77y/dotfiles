@@ -15,6 +15,9 @@ cache_completion() {
       mkdir -p "$target_dir"
       eval "$completion_generator" >"$target_file" 2>/dev/null
     fi
+    if [[ -f "$target_file" && "$completion_file" != _* ]]; then
+      source "$target_file"
+    fi
   fi
 }
 

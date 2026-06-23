@@ -67,14 +67,7 @@ wtjs-cli() {
 
 # 2026-02-13
 # change directory to a worktree
-function zwt() {
-  zrhl
-  local target=$(wt list | fzf --ansi | cut -d " " -f 2)
-  if [ -n "$target" ]; then
-    cd "$target"
-    .
-  fi
-}
+alias wts='wt switch'
 
 # 2026-04-08
 # function to create a backup git branch
