@@ -32,7 +32,8 @@ alias ee='apply_theme; $EDITOR'
 # Tools initializations
 
 # randomly_echo_banner - run disowned in background so it does not block terminal startup (0ms)
-~/.bun/bin/bun run /Users/joe/Projects/js_for_fun/figletPreview/index.ts --text Fresh &|
+# ~/.bun/bin/bun run /Users/joe/Projects/js_for_fun/figletPreview/index.ts --text Fresh &|
+~/.bun/bin/bun run --cwd $JS_DIR/figletPreview start --text Fresh
 
 # make a beep
 alias beep=echo -e "\a"
