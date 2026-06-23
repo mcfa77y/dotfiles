@@ -150,6 +150,12 @@ zstyle ':autocomplete:*complete*:*' insert-unambiguous yes
 zstyle ':autocomplete:*history*:*' insert-unambiguous yes
 zstyle ':autocomplete:menu-search:*' insert-unambiguous yes
 
+# Re-enable fzf-completion after zsh-autocomplete key bindings override Tab
+if whence -f fzf-completion &>/dev/null; then
+  fzf_default_completion=menu-select
+  bindkey "$tab_key" fzf-completion
+fi
+
 # 2026-01-14 starship init - https://starship.rs
 export STARSHIP_CONFIG=~/.config/starship/starship.toml
 eval "$(starship init zsh)"
