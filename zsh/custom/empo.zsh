@@ -1,6 +1,7 @@
 # PACKAGE_MANAGER='pnpm'
 PACKAGE_MANAGER='yarn'
 export EMPO_DIR="/Users/joe/Projects/empo_health"
+export EMPO_WORKTREE_DIR="/Users/joe/Projects/empo_health/empo-worktrees"
 export RHL_DIR="$EMPO_DIR/main"
 
 alias empo_start_ticket='cd $RHL_DIR; gl; gcb $(pbpaste); gp --no-verify; gback; wtaa'

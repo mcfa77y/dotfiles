@@ -202,3 +202,7 @@ _cleanup_zsh_child_processes() {
 }
 trap _cleanup_zsh_child_processes EXIT HUP TERM
 log_time_lap "Shell Startup Completed"
+
+
+# Added by Antigravity CLI installer
+export PATH="/Users/joe/.local/bin:$PATH"

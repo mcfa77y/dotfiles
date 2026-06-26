@@ -73,17 +73,16 @@ yarn_test_e2e_find_run() {
 
 # 2026-04-02 bun run demo
 brd() {
-  local testName=$(ls src/demo)
-  local tests=$(fd '\.demo\.ts$' | fzf -m --preview "bat --color=always {}" --header "Select demo (Tab to multi-select)")
+  local demo_file=$(fd '\.demo\.ts$' | fzf -m --preview "bat --color=always {}" --header "Select demo (Tab to multi-select)")
   bun run ${(f)tests}
-  echo "bun run ${(f)tests}"
-  echo "bun run ${(f)tests}" | pbcopy
+  echo "bun run ${(f)demo_file}"
+  echo "bun run ${(f)demo_file}" | pbcopy
 }
 
 # 2026-06-09 start app and server local_playwright
 local_start_app_and_server() {
-  cmux-tab --name "BE Server" --command "zbe; yarn start"
-  cmux-tab --name "FE Server" --command "zfe; yarn start"
+  cmux-tab --name "BE Server" --command "zbe; /Users/joe/.nvm/versions/node/v22.13.1/bin/yarn start"
+  cmux-tab --name "FE Server" --command "zfe; /Users/joe/.nvm/versions/node/v22.13.1/bin/yarn start"
 }
 
 # 2026-06-10

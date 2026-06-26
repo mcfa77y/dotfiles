@@ -60,9 +60,10 @@ worktree-path = "{{ repo_path }}/../empo-worktrees/{{ branch | sanitize }}"
 # Generate commit messages automatically during merge. Requires an external CLI tool.
 #
 [commit.generation]
-command = "gemini --skip-trust --model flash --output-format json | jq -r '.response'"
+command = "agy -p \"$(cat)\" --model \"Gemini 3.5 Flash (Low)\""
 template-append = """
 - Use Conventional Commits format (e.g., feat:, fix:, docs:, chore:, refactor:) in the subject line.
+- Extract the ticket number (e.g., RHL-3697) from the branch name and append it in parentheses to the end of the subject line (e.g., "feat: add user login (RHL-3697)").
 - Keep the subject line summary in lowercase (unless it refers to specific proper nouns or acronyms).
 - In the body of the message, explain the "why" and "rationale" behind the changes, not just "what" changed.
 - If there are multiple distinct changes, use clean bullet points in the body to list them.

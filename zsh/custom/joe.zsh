@@ -22,7 +22,7 @@ alias fconfig='zconfig; nvim $(fzf_select); cd -'
 # Editing oh my zsh
 # alias code_ide='windsurf'
 # alias code_ide='agy-ide'
-alias EDITOR='agy-ide'
+export EDITOR='agy-ide'
 alias apply_theme'bun run --cwd $JS_DIR/apply_vs_code_theme/ index.ts'
 alias ee='apply_theme; $EDITOR'
 
