@@ -1,3 +1,4 @@
+# --- Databases & Hasura ---
 # Neatleaf database connections
 export STAGE=dev
 export ENV=$STAGE
@@ -29,3 +30,19 @@ export VITE_HASURA_GRAPHQL_URL=$DEVSTABLE_HASURA_ADMIN_URL
 export DB_CONNECTION_STRING=$SANDBOX_DB_CONNECTION_STRING
 export DATABASE_CONNECTION_URL=$DEV_DB_CONNECTION_STRING
 # export DATABASE_CONNECTION_URL=$SANDBOX_DB_CONNECTION_STRING
+
+# --- Testing & Playwright ---
+# E2E testing neatleaf 2023-11-07
+export E2E_TEST_EMAIL=e2e-test-user+kiosk@neatleaf.com
+export E2E_TEST_PASSWORD=#defaultPassword123
+export PLAYWRIGHT_FULLY_PARALLEL=true
+export PLAYWRIGHT_TIMEOUT="30_000"
+# export PLAYWRIGHT_RETRIES=3
+export PLAYWRIGHT_RETRIES=1
+# export BASE_URL="https://dashboard.sqa.neatleaf.com"
+export BASE_URL="http://localhost:3000"
+
+# Playwright Trace Downloader (Beautiful TUI/CLI)
+playwright-trace() {
+  bun run --cwd /Users/joe/Projects/empo_health/scripts/playwright-trace-from-url src/index.ts "$@"
+}

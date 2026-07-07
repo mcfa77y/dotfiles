@@ -1,6 +1,3 @@
-# from brew upgrade 2034-10-31 happy halloween!
-cache_completion ngrok _ngrok "SHELL=/bin/zsh ngrok completion"
-
 ngrok_start() {
   if [[ -n "$CMUX_SURFACE_ID" && "$(cmux-current-title)" != "Ngrok 3000" ]]; then
     cmux-tab --name "Ngrok 3000" --command "ngrok http --domain=saved-heron-driving.ngrok-free.app 3000"

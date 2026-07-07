@@ -1,5 +1,3 @@
-# https://github.com/junegunn/fzf#customizing-fuzzy-completion-for-bash-and-zsh
-
 _fd_excludes() {
   local item
   for item in "$@"; do
@@ -72,6 +70,6 @@ fzf_select() {
   fzf --preview 'if [ -d {} ]; then eza --group-directories-first --git-ignore --tree --icons --level 2 --color=always {} | head -200; else bat --color=always --style=numbers,changes --decorations=always {}; fi' --header "Select file"
 }
 
-# fzf - useful keybindings and fuzzy completion
-# cache_completion fzf fzf_init.zsh "cat /opt/homebrew/opt/fzf/shell/completion.zsh /opt/homebrew/opt/fzf/shell/key-bindings.zsh"
-cache_completion fzf fzf_init.zsh "fzf --zsh"
+# 2026-06-29
+# nvim with fuzzy finder
+alias nfzf='nvim $(fzf_select)'

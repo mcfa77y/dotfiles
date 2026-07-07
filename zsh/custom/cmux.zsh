@@ -1,7 +1,6 @@
 # 2026-06-23
 # folder dirname
-alias folder_name="basename $PWD"
-alias cmux-set-workspace-name='cmux workspace rename --title "$(folder_name)" $(cmux current-workspace)'
+alias cmux-set-workspace-name='cmux workspace rename --title "$(basename $PWD)" $(cmux current-workspace)'
 # Custom cmux function for Oh My Zsh
 # Usage: cmux-tab --name <tab_name> --command <command_to_run> [--focus] [--cwd <path>]
 # Example: cmux-tab --name "BE Server" --command "echo 'new foo'"

@@ -1,3 +1,62 @@
+# --- Bun ---
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+# --- Go ---
+# Golang environment variables (optimized to avoid slow brew CLI call)
+if [[ -d "/opt/homebrew/opt/go/libexec" ]]; then
+  export GOROOT="/opt/homebrew/opt/go/libexec"
+elif [[ -d "/usr/local/opt/go/libexec" ]]; then
+  export GOROOT="/usr/local/opt/go/libexec"
+else
+  if [[ "$(uname -m)" = "arm64" ]]; then
+    export GOROOT="/opt/homebrew/opt/go/libexec"
+  else
+    export GOROOT="/usr/local/opt/go/libexec"
+  fi
+fi
+
+export GOPATH=$HOME/go
+export PATH=$GOPATH/bin:$GOROOT/bin:$HOME/.local/bin:$PATH
+
+# --- Sonar ---
+export SONAR_HOME=/opt/homebrew/Cellar/sonar-scanner/7.3.0.5189/libexec
+export SONAR=$SONAR_HOME/bin
+export PATH=$SONAR:$PATH
+
+# --- PNPM ---
+export PNPM_HOME="/Users/joe/Library/pnpm"
+case ":$PATH:" in
+*":$PNPM_HOME:"*) ;;
+*) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+
+alias p='pnpm'
+alias px='pnpm exec'
+alias prec='pnpm --recrusive '
+alias pa='pnpm add '
+alias pad='pnpm add --save-dev '
+alias pr='pnpm remove'
+
+alias pd='p dev | pino-pretty'
+
+# --- Python ---
+export PYENV_ROOT="$HOME/.pyenv"
+command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+
+# Lazy-load pyenv and pyenv-virtualenv
+pyenv() {
+  unset -f pyenv python pip
+  eval "$(pyenv init - zsh --no-rehash)"
+  eval "$(pyenv virtualenv-init - zsh)"
+  pyenv "$@"
+}
+python() { pyenv >/dev/null; python "$@" }
+pip() { pyenv >/dev/null; pip "$@" }
+
+export PATH="$HOME/.local/bin:$PATH"
+
+# --- Node/NVM/Yarn ---
 # Synchronous NVM loader wrappers to prevent race conditions on shell startup/immediate command executions
 _is_nvm_loaded() {
   (( $+functions[nvm] )) && [[ "$(whence -f nvm 2>/dev/null)" != *"unfunction nvm"* ]]
