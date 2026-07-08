@@ -31,11 +31,11 @@ alias wls='uv run $GIT_TOOL_DIR/git_worktree_list.py --directory $PWD'
 
 # - add working tree from existing remote branch
 # alias wta='uv run $GIT_TOOL_DIR/git_worktree_and_branches.py --here_directory $PWD'
-alias wte='HERE=$(pwd); cd $RHL_DIR; wt switch --remotes --config $GIT_TOOL_JS_DIR/.config/wt.toml $(pbpaste); cd $HERE'
+alias wtexisting='HERE=$(pwd); cd $RHL_DIR; wt switch --remotes $(pbpaste); cd $HERE'
 
 # - add worktree from clipboard
 # alias wtaa='HERE=$(pwd); cd $GIT_TOOL_JS_DIR; bun run cli create $(pbpaste)'
-alias wtn='HERE=$(pwd); cd $RHL_DIR; wt switch --create --config $GIT_TOOL_JS_DIR/.config/wt.toml $(pbpaste); cd $HERE'
+alias wtnew='HERE=$(pwd); cd $RHL_DIR; wt switch --create $(pbpaste); cd $HERE'
 
 # - git push no verify
 alias gpnv='git push --no-verify'
