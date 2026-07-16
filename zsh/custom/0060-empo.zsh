@@ -237,16 +237,16 @@ export SCRIPTS_DIR='/Users/joe/Projects/empo_health/scripts'
 local_e2e() {
   # Go to backend directory
   local HERE=$(pwd)
-  zber
+  zbe
   local BE_DIR=$(pwd)
 
   local SRC_URI="$SCRIPTS_DIR/testing-configs/docker-compose.yml"
   local DEST_URI="$BE_DIR/sources/e2e/test-data/docker-compose.yml"
 
   # Copy over docker-compose
-  # cp "$SRC_URI" "$DEST_URI"
-  ln -s "$SRC_URI" "$DEST_URI"
-  echo "linked docker-compose"
+  cp "$SRC_URI" "$DEST_URI"
+  # ln -s "$SRC_URI" "$DEST_URI"
+  echo "updated docker-compose"
   cd "$HERE" || exit
 }
 
@@ -287,12 +287,13 @@ yarn_test_qa_find_run() {
     yarn test ${(f)tests}
     echo "clipboard updated with: yarn test ${(@f)tests}"
     echo -n "yarn test ${(@f)tests}" | pbcopy
-    say 'finish with qa tests'
+    say 'finished with queue ah tests'
   fi
 }
 
 # 2026-03-04 yarn test finds test files in a directory,
 yarn_test_e2e_find_run() {
+  local_e2e
   # fd ignores node_modules by default
   local tests=$(fd '\.e2e.spec\.ts$' | fzf -m --preview "bat --color=always {}" --header "Select tests (Tab to multi-select)")
   if [ -n "$tests" ]; then

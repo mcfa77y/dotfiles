@@ -70,6 +70,14 @@ fzf_select() {
   fzf --preview 'if [ -d {} ]; then eza --group-directories-first --git-ignore --tree --icons --level 2 --color=always {} | head -200; else bat --color=always --style=numbers,changes --decorations=always {}; fi' --header "Select file"
 }
 
+cutN() {
+  local field=$1
+  cut -d ' ' -f $field
+}
+
+cut1() {
+  cutN 1
+}
 # 2026-06-29
 # nvim with fuzzy finder
 alias nfzf='nvim $(fzf_select)'
