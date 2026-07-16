@@ -9,9 +9,10 @@ Use this skill to create a ticket for changes you have already staged in git.
 
 ## Steps
 
-1. **Verify Staged Changes**: Run `git diff --cached --stat`. Abort if nothing is staged.
-2. **Generate Content**: Read `git diff --cached` and write a title and detailed description to a temporary markdown file (e.g. `docs/staged-changes-desc.md`).
-3. **Create Linear Ticket**:
+1. **Verify repository**: Confirm that the git remote matches `https://github.com/EmpoHealth/core` (or its SSH equivalent `git@github.com:EmpoHealth/core.git`). Abort if not inside this repository.
+2. **Verify Staged Changes**: Run `git diff --cached --stat`. Abort if nothing is staged.
+3. **Generate Content**: Read `git diff --cached` and write a title and detailed description to a temporary markdown file (e.g. `docs/staged-changes-desc.md`).
+4. **Create Linear Ticket**:
    Read the temporary description file, then call `mcp__linear_save_issue` using the IDs from the `## Linear IDs` section. The `description` field accepts literal Markdown newlines.
 
    ```json
@@ -33,12 +34,12 @@ Use this skill to create a ticket for changes you have already staged in git.
      --assignee "Joe Lau" --state "In Progress" \
      --description-file "<Path to file>" --no-interactive
    ```
-4. **Stash Changes**: `git stash push --staged -m "stashed-for-<linear-issue>"`
-5. **Create Worktree**: Lower-case the issue ID and run:
+5. **Stash Changes**: `git stash push --staged -m "stashed-for-<linear-issue>"`
+6. **Create Worktree**: Lower-case the issue ID and run:
    ```bash
    wt switch --create --config $GIT_TOOL_JS_DIR/.config/wt.toml <lowercase-ticket-id>
    ```
-6. **Apply Stash**: Switch `Cwd` to the new worktree and run `git stash pop`.
+7. **Apply Stash**: Switch `Cwd` to the new worktree and run `git stash pop`.
 
 ## Linear IDs
 

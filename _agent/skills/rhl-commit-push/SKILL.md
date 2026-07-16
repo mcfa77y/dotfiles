@@ -5,14 +5,15 @@ description: Commits and pushes changed files while excluding local dev/test fil
 
 # Git Commit and Push
 
-1. **Identify changes**: Check modified files. **Do not** stage or commit changes to:
+1. **Verify repository**: Confirm that the git remote matches `https://github.com/EmpoHealth/core` (or its SSH equivalent `git@github.com:EmpoHealth/core.git`). Abort if not inside this repository.
+2. **Identify changes**: Check modified files. **Do not** stage or commit changes to:
    - `docs/*`
    - `playwright.config.ts`
    - `docker.compose.yml`
    - `test-setup.helper.ts`
-2. **Linting**: Check `.commitlintrc.json` and ensure the commit message adheres to the rules.
-3. **Commit**: Commit the allowed changes.
-4. **Push**:
+3. **Linting**: Check `.commitlintrc.json` and ensure the commit message adheres to the rules.
+4. **Commit**: Commit the allowed changes.
+5. **Push**:
    - If changes are infrastructure-only (`*.tf`, `*.yml`), run `git push --no-verify`
    - Otherwise run `git push`
 

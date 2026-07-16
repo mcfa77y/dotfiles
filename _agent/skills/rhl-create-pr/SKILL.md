@@ -5,15 +5,16 @@ description: Creates a GitHub Pull Request describing changes on the current bra
 
 # Git Create Pull Request
 
-1. **Identify Base**: Base branch is `origin/main`.
-2. **Analyze Changes**: `git diff --name-only origin/main...HEAD`
-3. **Reviewers**:
+1. **Verify repository**: Confirm that the git remote matches `https://github.com/EmpoHealth/core` (or its SSH equivalent `git@github.com:EmpoHealth/core.git`). Abort if not inside this repository.
+2. **Identify Base**: Base branch is `origin/main`.
+3. **Analyze Changes**: `git diff --name-only origin/main...HEAD`
+4. **Reviewers**:
    - Baseline: `pm-pp`, `simon57b`, `singhmadhurima123`
    - If `*.tf`, `*.yml`, or `*.yaml` files changed, add `edahlseng`
-4. **Generate Content**:
+5. **Generate Content**:
    - Read `git log origin/main..HEAD --oneline`
    - Extract Linear ticket from branch name (`git branch --show-current`). If it matches `rhl-\d+`, suffix the PR title with `(RHL-1234)`.
-5. **Create PR**:
+6. **Create PR**:
    ```bash
    gh pr create --title "<Title>" --body "<Description>" --reviewer "<Reviewers>"
    ```
