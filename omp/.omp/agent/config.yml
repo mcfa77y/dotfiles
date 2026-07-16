@@ -1,0 +1,49 @@
+prewalk: 
+  enabled: true
+providers:
+  webSearch: devin/swe-1-7
+symbolPreset: nerd
+theme: 
+  dark: titanium
+setupVersion: 1
+modelRoles: 
+  default: devin/swe-1-7
+  smol: google-antigravity/gemini-3.5-flash
+  fast: google-antigravity/gemini-3.5-flash
+  slow: google-antigravity/claude-opus-4-6
+  plan: google-antigravity/claude-sonnet-4-6
+  "#smol": google-antigravity/gemini-3.5-flash
+  "#slow": google-antigravity/claude-opus-4-6
+  "#plan": google-antigravity/claude-sonnet-4-6
+  "#fast": google-antigravity/gemini-3.5-flash
+  "#default": google-antigravity/gemini-3.1-pro
+defaultThinkingLevel: auto
+disabledExtensions: 
+  []
+hideThinkingBlock: false
+skills: 
+  enabled: true
+  enablePiUser: true
+  enablePiProject: true
+  enableAgentsUser: true
+  enableAgentsProject: true
+  customDirectories: 
+    - /Users/joe/.omp/agent/skills/cloudflare/skills
+modelProviderOrder: 
+  - google-antigravity
+  - ollama
+task: 
+  prewalk: true
+  agentModelOverrides: 
+    explore: google-antigravity/gemini-3.5-flash
+    sonic: google-antigravity/gemini-3.5-flash
+    plan: google-antigravity/claude-sonnet-4-6
+    reviewer: google-antigravity/gemini-3.1-pro
+    task: google-antigravity/gemini-3.1-pro
+retry: 
+  fallbackChains: 
+    default: 
+      - google-antigravity/claude-sonnet-4-6
+    smol: 
+      - google-antigravity/claude-sonnet-4-5
+  modelFallback: true

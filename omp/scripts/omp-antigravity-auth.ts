@@ -31,6 +31,7 @@ const SCOPES = [
 ].join(" ");
 
 const TIER_LEGACY = "legacy-tier";
+const HARDCODED_PROJECT_ID = "empo-health-antigravity";
 const CACHE_PATH = join(homedir(), ".cache", "omp-antigravity-auth.json");
 
 type ProjectIdValue = string | { id?: string } | undefined;
@@ -46,15 +47,6 @@ interface Cache {
 	accountId: string;
 }
 
-function getUserAgent(): string {
-	const version = "2.1.4";
-	let os = process.platform;
-	if (os === "win32") os = "windows";
-	let arch = process.arch;
-	if (arch === "x64") arch = "amd64";
-	else if (arch === "ia32") arch = "386";
-	return `antigravity/hub/${version} ${os}/${arch}`;
-}
 
 async function readCache(): Promise<Cache | null> {
 	try {
@@ -94,77 +86,6 @@ async function getUserEmail(accessToken: string): Promise<string | undefined> {
 	}
 }
 
-function readProjectId(value: ProjectIdValue): string | undefined {
-	if (typeof value === "string" && value.length > 0) {
-		return value;
-	}
-	if (value && typeof value === "object" && typeof value.id === "string" && value.id.length > 0) {
-		return value.id;
-	}
-	return undefined;
-}
-
-function getDefaultTierId(allowedTiers?: Array<{ id?: string; isDefault?: boolean }>): string {
-	if (!allowedTiers || allowedTiers.length === 0) {
-		return TIER_LEGACY;
-	}
-	const defaultTier = allowedTiers.find(
-		tier => tier.isDefault && typeof tier.id === "string" && tier.id.length > 0,
-	);
-	return defaultTier?.id || TIER_LEGACY;
-}
-
-async function discoverProject(accessToken: string): Promise<string> {
-	const headers: Record<string, string> = {
-		Authorization: `Bearer ${accessToken}`,
-		"Content-Type": "application/json",
-		"User-Agent": getUserAgent(),
-	};
-	const metadata = {
-		ideType: "ANTIGRAVITY",
-		platform: "PLATFORM_UNSPECIFIED",
-		pluginType: "GEMINI",
-	};
-
-	const loadData = (await fetchJson(`${CLOUD_CODE_ENDPOINT}/v1internal:loadCodeAssist`, {
-		method: "POST",
-		headers,
-		body: JSON.stringify({ metadata }),
-	})) as {
-		cloudaicompanionProject?: ProjectIdValue;
-		allowedTiers?: Array<{ id?: string; isDefault?: boolean }>;
-	};
-
-	const existing = readProjectId(loadData.cloudaicompanionProject);
-	if (existing) {
-		return existing;
-	}
-
-	const tierId = getDefaultTierId(loadData.allowedTiers);
-	const onboardBody = { tierId, metadata };
-	for (let attempt = 1; attempt <= 5; attempt++) {
-		const op = (await fetchJson(`${CLOUD_CODE_ENDPOINT}/v1internal:onboardUser`, {
-			method: "POST",
-			headers,
-			body: JSON.stringify(onboardBody),
-		})) as {
-			done?: boolean;
-			response?: { cloudaicompanionProject?: ProjectIdValue };
-		};
-		if (op.done) {
-			const pid = readProjectId(op.response?.cloudaicompanionProject);
-			if (pid) {
-				return pid;
-			}
-		}
-		if (attempt < 5) {
-			const { promise, resolve } = Promise.withResolvers<void>();
-			setTimeout(resolve, 2000);
-			await promise;
-		}
-	}
-	throw new Error("Could not discover or provision an Antigravity project after 5 attempts");
-}
 
 async function refreshCache(cache: Cache): Promise<Cache> {
 	const resp = await fetch(TOKEN_URL, {
@@ -189,16 +110,15 @@ async function refreshCache(cache: Cache): Promise<Cache> {
 	const accessToken = data.access_token;
 	const expiresAt = Date.now() + data.expires_in * 1000 - 5 * 60 * 1000;
 
-	const [email, projectId] = await Promise.all([
+	const [email] = await Promise.all([
 		getUserEmail(accessToken),
-		discoverProject(accessToken),
 	]);
 
 	const updated: Cache = {
 		apiEndpoint: "",
 		token: accessToken,
 		enterpriseUrl: "",
-		projectId,
+		projectId: HARDCODED_PROJECT_ID,
 		refreshToken: data.refresh_token || cache.refreshToken,
 		expiresAt,
 		email: email || cache.email || "",
@@ -349,16 +269,15 @@ async function exchangeCode(code: string, redirectUri: string): Promise<Cache> {
 	const accessToken = data.access_token;
 	const expiresAt = Date.now() + data.expires_in * 1000 - 5 * 60 * 1000;
 
-	const [email, projectId] = await Promise.all([
+	const [email] = await Promise.all([
 		getUserEmail(accessToken),
-		discoverProject(accessToken),
 	]);
 
 	const cache: Cache = {
 		apiEndpoint: "",
 		token: accessToken,
 		enterpriseUrl: "",
-		projectId,
+		projectId: HARDCODED_PROJECT_ID,
 		refreshToken: data.refresh_token,
 		expiresAt,
 		email: email || "",
@@ -439,7 +358,7 @@ async function main(): Promise<void> {
 	if (!process.stdin.isTTY) {
 		console.error(
 			"No cached Antigravity credentials and not running interactively. " +
-				"Run `bun ~/.omp/agent/scripts/omp-antigravity-auth.ts` in a terminal to authenticate.",
+			"Run `bun ~/.omp/agent/scripts/omp-antigravity-auth.ts` in a terminal to authenticate.",
 		);
 		process.exit(1);
 	}
