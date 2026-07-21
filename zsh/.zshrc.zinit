@@ -206,3 +206,12 @@ log_time_lap "Shell Startup Completed"
 
 # Added by Antigravity CLI installer
 export PATH="/Users/joe/.local/bin:$PATH"
+
+# bun completions
+[ -s "/Users/joe/.bun/_bun" ] && source "/Users/joe/.bun/_bun"
+
+# The next line updates PATH ffor the Google Cloud SDK.
+if [ -f '/Users/joe/Projects/git-apps/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/joe/Projects/git-apps/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/joe/Projects/git-apps/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/joe/Projects/git-apps/google-cloud-sdk/completion.zsh.inc'; fi

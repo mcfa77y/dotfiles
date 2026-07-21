@@ -324,8 +324,8 @@ frontend_start() {
 }
 # 2026-06-09 start app and server local_playwright
 local_start_app_and_server() {
-  cmux-tab --name "BE Server" --command "frontend_start "
-  cmux-tab --name "FE Server" --command "backend_start "
+  cmux-tab --name "FE Server" --command "frontend_start "
+  cmux-tab --name "BE Server" --command "backend_start "
 }
 
 # 2026-06-10
@@ -334,3 +334,9 @@ infisical_update_vars() {
   local infisical_vars_dir="$SCRIPTS_DIR/infisical-update-env-vars"
   bun run --cwd $infisical_vars_dir start --env all
 }
+
+# 2026-07-17 Alias for agy in RHL worktrees to share memory/context
+alias ragy='agy --project remote-health-link'
+
+# 2026-07-17 Alias for omp in RHL worktrees to share memory/context
+alias romp='omp --profile remote-health-link'

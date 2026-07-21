@@ -43,6 +43,11 @@ kill_by_port() {
   echo "Process with PID $PID successfully killed."
 }
 
+# Run a command quietly in the background without blocking the terminal
+silently() {
+  "$@" >/dev/null 2>&1 &
+}
+
 # --- Directory Utilities ---
 # Traverse up the directory tree to find a specific parent folder and cd into it
 goto_parent_directory() {

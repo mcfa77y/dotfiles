@@ -7,7 +7,11 @@ export DOCKER_REGISTRY_PORT=5575
 export PROJECTS_DIR='/Users/joe/Projects'
 export JS_DIR='/Users/joe/Projects/js_for_fun'
 export PY_DIR='/Users/joe/Projects/python_for_fun'
-export EDITOR='agy-ide'
+export EDITOR='nvim'
+export AI_HARNESS='agy'
+
+# Google Antigravity
+export GOOGLE_CLOUD_PROJECT_ID='empo-health-antigravity'
 
 # --- Lazygit ---
 LAZY_GIT_CONFIG_DIR='/Users/joe/.config/lazygit'
