@@ -1,3 +1,4 @@
 providers:
   google-antigravity:
     apiKey: "!bun /Users/joe/dotfiles/omp/scripts/omp-antigravity-auth.ts"
+
