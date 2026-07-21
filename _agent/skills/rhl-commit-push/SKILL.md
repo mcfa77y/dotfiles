@@ -11,7 +11,7 @@ description: Commits and pushes changed files while excluding local dev/test fil
    - `playwright.config.ts`
    - `docker.compose.yml`
    - `test-setup.helper.ts`
-3. **Linting**: Check `.commitlintrc.json` and ensure the commit message adheres to the rules.
+3. **Linting**: Check `.commitlintrc.json` and ensure the commit message adheres to the rules. Lets also add the linear ticket to the commit message title.
 4. **Commit**: Commit the allowed changes.
 5. **Push**:
    - If changes are infrastructure-only (`*.tf`, `*.yml`), run `git push --no-verify`
