@@ -69,4 +69,44 @@ SURFACE_REF=$(cmux list-pane-surfaces --workspace "$WORKSPACE_REF" --json 2>/dev
 # Rename the terminal tab to "devin <branch>"
 cmux rename-tab --workspace "$WORKSPACE_REF" --surface "$SURFACE_REF" "devin {{ branch }}"
 """,
+    """
+~/.bun/bin/bun run /Users/joe/Projects/js_for_fun/apply_vs_code_theme/index.ts || true
+$EDITOR .
+$AI_HARNESS .
+""",
+    """
+export CMUX_QUIET=1
+
+# Skip if a cmux workspace for this branch already exists
+WORKSPACE_REF=$(cmux list-workspaces --json 2>/dev/null | jq -r --arg t "{{ branch | sanitize }}" '.workspaces[] | select(.title == $t) | .ref' | head -1)
+[ -n "$WORKSPACE_REF" ] && exit 0
+
+# Create the workspace and start ai harnes in the new worktree
+cmux new-workspace --name "{{ branch | sanitize }}" --cwd "{{ worktree_path }}" --command "$AI_HARNESS" --focus true
+
+# Resolve the new workspace and its first surface
+WORKSPACE_REF=$(cmux list-workspaces --json 2>/dev/null | jq -r --arg t "{{ branch | sanitize }}" '.workspaces[] | select(.title == $t) | .ref' | head -1)
+[ -n "$WORKSPACE_REF" ] || exit 0
+
+SURFACE_REF=$(cmux list-pane-surfaces --workspace "$WORKSPACE_REF" --json 2>/dev/null | jq -r '.surfaces[0].ref')
+[ -n "$SURFACE_REF" ] || exit 0
+
+# Rename the terminal tab to "$AI_HARNESS <branch>"
+cmux rename-tab --workspace "$WORKSPACE_REF" --surface "$SURFACE_REF" "$AI_HARNESS {{ branch }}"
+""",
+    """
+~/.bun/bin/bun run /Users/joe/Projects/js_for_fun/apply_vs_code_theme/index.ts || true
+${EDITOR:-agy-ide} .
+${AI_HARNESS:-agy} .
+""",
+    """
+  ~/.bun/bin/bun run /Users/joe/Projects/js_for_fun/apply_vs_code_theme/index.ts || true
+  ${EDITOR:-agy-ide} . >/dev/null 2>&1 &
+  ${AI_HARNESS:-agy} . >/dev/null 2>&1 &
+  """,
+    """
+  ~/.bun/bin/bun run /Users/joe/Projects/js_for_fun/apply_vs_code_theme/index.ts || true
+  # ${EDITOR:-agy-ide} . >/dev/null 2>&1 &
+  ${AI_HARNESS:-agy} . >/dev/null 2>&1 &
+  """,
 ]
