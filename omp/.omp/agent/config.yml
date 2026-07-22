@@ -1,33 +1,13 @@
-prewalk: 
-  enabled: true
-providers: 
-  webSearch: startpage
-  memoryModel: lfm2-1.2b
-  autoThinkingModel: lfm2-1.2b
-  tinyModel: lfm2-700m
-  unexpectedStopModel: lfm2-1.2b
-symbolPreset: nerd
-theme: 
-  dark: titanium
 setupVersion: 1
+modelRoles: 
+  default: google-antigravity/gemini-3.5-flash
 defaultThinkingLevel: auto
-disabledExtensions: 
-  []
-hideThinkingBlock: false
-skills: 
-  enabled: true
-  enablePiUser: true
-  enablePiProject: true
-  enableAgentsUser: true
-  enableAgentsProject: true
-  customDirectories: 
-    - /Users/joe/.omp/agent/skills/cloudflare/skills
-modelProviderOrder: 
-  - google-antigravity
-  - ollama
-task: 
-  prewalk: false
 retry: 
   fallbackChains: 
-    {}
-  modelFallback: true
+    default: 
+      - google-antigravity/gemini-3.5-flash
+      - google-antigravity/gemini-3.5-flash:medium
+      - google-antigravity/gemini-3.5-flash:low
+      - google-antigravity/gemini-3.1-pro:high
+      - google-antigravity/gemini-3.1-pro:low
+      - google-antigravity/gemini-3-flash

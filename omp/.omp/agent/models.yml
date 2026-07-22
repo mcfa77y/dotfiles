@@ -1,4 +1,8 @@
 providers:
   google-antigravity:
-    apiKey: "!bun /Users/joe/dotfiles/omp/scripts/omp-antigravity-auth.ts"
+    projectId: empo-health-antigravity
+    baseUrl: "http://127.0.0.1:8080"
+    apiKey: "!/Users/joe/.bun/bin/bun /Users/joe/.omp/agent/scripts/antigravity-auth/src/omp-antigravity-auth.ts"
+    headers:
+      x-goog-user-project: empo-health-antigravity
 
