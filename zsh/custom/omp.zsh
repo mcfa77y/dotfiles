@@ -10,6 +10,10 @@ omp-gemini() {
   command omp --config "$OMP_CONFIG_DIR/config.yml.google-antigravity" "$@"
 }
 
+omp-empo() {
+  command omp --config "$OMP_CONFIG_DIR/config.yml.empo-ai" "$@"
+}
+
 omp-profile() {
   local profile="$1"
   shift
@@ -21,8 +25,11 @@ omp-profile() {
     gemini|antigravity)
       omp-gemini "$@"
       ;;
+    empo)
+      omp-empo "$@"
+      ;;
     *)
-      print -u2 "Usage: omp-profile {devin|gemini} [omp arguments...]"
+      print -u2 "Usage: omp-profile {devin|gemini|empo} [omp arguments...]"
       return 2
       ;;
   esac
