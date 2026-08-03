@@ -1,8 +1,7 @@
 providers:
-  google-antigravity:
-    projectId: empo-health-antigravity
-    baseUrl: "http://127.0.0.1:8080"
-    apiKey: "!/Users/joe/.bun/bin/bun /Users/joe/.omp/agent/scripts/antigravity-auth/src/omp-antigravity-auth.ts"
-    headers:
-      x-goog-user-project: empo-health-antigravity
-
+  omlx:
+    baseUrl: http://127.0.0.1:8080/v1
+    api: openai-completions
+    apiKey: sk-omlx-wh6lYDweyFp8x1PnUoWpTPt7
+    discovery:
+      type: openai-models-list

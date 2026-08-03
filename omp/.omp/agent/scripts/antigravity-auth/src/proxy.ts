@@ -8,7 +8,7 @@ serve({
     const url = new URL(req.url)
     // Forward everything to cloudcode-pa.googleapis.com
     const targetUrl = `https://cloudcode-pa.googleapis.com${url.pathname}${url.search}`
-    
+
     // Copy original headers
     const headers = new Headers(req.headers)
     // Inject the quota project header

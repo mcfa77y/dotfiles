@@ -64,10 +64,14 @@ _fzf_compgen_dir() {
 }
 
 fzf_multi_select() {
-  fzf -m --preview 'if [ -d {} ]; then eza --group-directories-first --git-ignore --tree --icons --level 2 --color=always {} | head -200; else bat --color=always --style=numbers,changes --decorations=always {}; fi' --header "Select files (Tab to multi-select)"
+  local query_opt=()
+  [[ -n "$1" ]] && query_opt=(-q "$1")
+  fzf -m "${query_opt[@]}" --preview 'if [ -d {} ]; then eza --group-directories-first --git-ignore --tree --icons --level 2 --color=always {} | head -200; else bat --color=always --style=numbers,changes --decorations=always {}; fi' --header "Select files (Tab to multi-select)"
 }
 fzf_select() {
-  fzf --preview 'if [ -d {} ]; then eza --group-directories-first --git-ignore --tree --icons --level 2 --color=always {} | head -200; else bat --color=always --style=numbers,changes --decorations=always {}; fi' --header "Select file"
+  local query_opt=()
+  [[ -n "$1" ]] && query_opt=(-q "$1")
+  fzf "${query_opt[@]}" --preview 'if [ -d {} ]; then eza --group-directories-first --git-ignore --tree --icons --level 2 --color=always {} | head -200; else bat --color=always --style=numbers,changes --decorations=always {}; fi' --header "Select file"
 }
 
 cutN() {
@@ -77,6 +81,10 @@ cutN() {
 
 cut1() {
   cutN 1
+}
+
+fzf_select_cut1() {
+  fzf_select "$1" | cut1
 }
 # 2026-06-29
 # nvim with fuzzy finder

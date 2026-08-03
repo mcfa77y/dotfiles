@@ -317,22 +317,30 @@ backend_start() {
   zbe
   yarn start --debug --watch | npx pino-pretty --colorize --levelFirst --ignore pid,hostname --translateTime 'HH:MM:ss'
 }
+
 frontend_start() {
   kill_by_port 3002
   zfe
   yarn start
 }
+
 # 2026-06-09 start app and server local_playwright
 local_start_app_and_server() {
-  cmux-tab --name "FE Server" --command "frontend_start "
-  cmux-tab --name "BE Server" --command "backend_start "
+  cmux-tab --name "FE Server" --command "frontend_start"
+  cmux-tab --name "BE Server" --command "backend_start"
+  cmux-tab --name "ngrok 3000" --command "ngrok_start"
 }
 
 # 2026-06-10
 infisical_update_vars() {
+  local environment="$1"
+  if [ -z "$environment" ]; then
+    environment="development"
+  fi
   # Call script top update .env vars with infisical
   local infisical_vars_dir="$SCRIPTS_DIR/infisical-update-env-vars"
-  bun run --cwd $infisical_vars_dir start --env all
+  # bun run --cwd $infisical_vars_dir start --env development --project all
+  bun run --cwd $infisical_vars_dir start --env "$environment" --project all
 }
 
 # 2026-07-17 Alias for agy in RHL worktrees to share memory/context

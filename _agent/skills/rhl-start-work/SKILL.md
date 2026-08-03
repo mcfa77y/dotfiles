@@ -1,28 +1,18 @@
 ---
-name: rhl-start-work
-description: Start work on an existing RHL Linear ticket — fetches ticket context, creates the git worktree branch via `wt switch --create`, runs lifecycle hooks, and surfaces title/description.
+name: rhl-start-planning
+description: Start planning on an existing RHL Linear ticket — fetches ticket context and creates a plan
 ---
 
 # Start Work on Existing RHL Ticket
 
-Use this skill to pick up an existing Linear ticket and set up the worktree.
+Use this skill to pick up an existing Linear ticket and start a plan based on linear ticket description
 
 ## Steps
 
 1. **Verify repository**: Confirm that the git remote matches `https://github.com/EmpoHealth/core` (or its SSH equivalent `git@github.com:EmpoHealth/core.git`). Abort if not inside this repository.
-2. **Confirm the ticket ID**: Ask the user for the Linear ticket ID (e.g. `RHL-3822`) if not provided.
+2. **Confirm the ticket ID**: Ask the user for the Linear ticket ID (e.g. `RHL-3822`) if not provided. Ticket ID can be found in the name of the directory with pattern RHL-<ticket_id> or in the git branch name.
 3. **Fetch ticket context**: Use `mcp__linear_get_issue` with the identifier to fetch the title, description, and state.
-4. **Create the worktree**: Lower-case the ticket ID (e.g. `rhl-3822`) and run:
-   ```bash
-   wt switch --create --config $GIT_TOOL_JS_DIR/.config/wt.toml <lowercase-ticket-id>
-   ```
-   *(Fallback if `$GIT_TOOL_JS_DIR` is unset: use `~/Projects/js_for_fun/git-tools-js/.config/wt.toml`)*
-5. **Determine worktree path**:
-   ```bash
-   git worktree list | grep <lowercase-ticket-id> | awk '{print $1}'
-   ```
-6. **Switch directory**: Change `Cwd` to the resolved worktree path.
-7. **Surface context**: Print the ticket title and description so implementation can begin.
+4. **Surface context**: Print the ticket title and description so implementation can begin.
 
 ## Linear IDs
 

@@ -1,0 +1,45 @@
+setupVersion: 1
+modelRoles:
+  default: google-antigravity/gemini-3.6-flash-high
+  smol: google-antigravity/gemini-3.6-flash-low
+  slow: google-antigravity/gemini-3.1-pro-high
+  vision: google-antigravity/gemini-3.6-flash-medium
+  plan: google-antigravity/gemini-3.1-pro-low
+  designer: google-antigravity/gemini-3.5-flash-medium
+  commit: google-antigravity/gemini-3.5-flash-low
+  tiny: google-antigravity/gemini-3.6-flash-low
+  task: google-antigravity/gemini-3.6-flash-high
+  advisor: google-antigravity/gemini-3.5-flash
+defaultThinkingLevel: auto
+retry:
+  fallbackChains:
+    default:
+      - google-antigravity/gemini-3.6-flash-medium
+      - google-antigravity/gemini-3.5-flash
+      - google-antigravity/gemini-3-flash
+    slow:
+      - google-antigravity/gemini-3.1-pro-low
+      - google-antigravity/gemini-3.6-flash-high
+    task:
+      - google-antigravity/gemini-3.6-flash-medium
+      - google-antigravity/gemini-3.5-flash
+    smol:
+      - google-antigravity/gemini-3.6-flash-low
+      - google-antigravity/gemini-3.5-flash-low
+    vision:
+      - google-antigravity/gemini-3.6-flash-low
+      - google-antigravity/gemini-3.5-flash
+    plan:
+      - google-antigravity/gemini-3.1-pro-high
+      - google-antigravity/gemini-3.6-flash-high
+    designer:
+      - google-antigravity/gemini-3.5-flash-low
+      - google-antigravity/gemini-3.6-flash-medium
+    commit:
+      - google-antigravity/gemini-3.6-flash-low
+      - google-antigravity/gemini-3-flash
+    tiny:
+      - google-antigravity/gemini-3.5-flash-low
+    advisor:
+      - google-antigravity/gemini-3.6-flash-low
+      - google-antigravity/gemini-3.5-flash

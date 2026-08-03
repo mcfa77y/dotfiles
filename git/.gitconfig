@@ -15,6 +15,7 @@
 [core]
 	hooksPath = /Users/joe/Projects/empo_health/git-hooks
 	autocrlf = input
+  pager = delta
 [pull]
 	rebase = true
 	ff = false
@@ -25,3 +26,13 @@
 	aiOllamaModelName = qwen3:14b
 [diff]
 	tool = nvimdiff
+
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    navigate = true  # use n and N to move between diff sections
+    dark = true      # or `light = true`, or omit for auto-detection
+
+[merge]
+    conflictStyle = zdiff3

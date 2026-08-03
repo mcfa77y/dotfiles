@@ -1,0 +1,44 @@
+setupVersion: 1
+modelRoles:
+  default: devin/glm-5-2
+  smol: devin/glm-5-2
+  slow: devin/claude-sonnet-5-high
+  vision: devin/gemini-3-6-flash-medium
+  plan: devin/gpt-5-6-luna:low
+  designer: devin/claude-sonnet-5-medium
+  commit: devin/glm-5-2
+  tiny: devin/swe-1-6-fast
+  task: devin/glm-5-2
+  advisor: devin/glm-5-2
+defaultThinkingLevel: auto
+retry:
+  fallbackChains:
+    default:
+      - devin/swe-1-6
+      - devin/glm-5-2
+    slow:
+      - devin/claude-sonnet-5-medium
+      - devin/gpt-5-6-luna:medium
+    task:
+      - devin/swe-1-6
+      - devin/glm-5-2
+    smol:
+      - devin/swe-1-6-fast
+      - devin/swe-1-6
+    vision:
+      - devin/gemini-3-6-flash-low
+      - devin/gemini-3-5-flash
+    plan:
+      - devin/gpt-5-6-luna:medium
+      - devin/glm-5-2
+    designer:
+      - devin/claude-sonnet-5-low
+      - devin/gpt-5-6-luna:medium
+    commit:
+      - devin/swe-1-6-fast
+      - devin/glm-5-2
+    tiny:
+      - devin/glm-5-2
+    advisor:
+      - devin/swe-1-6-fast
+      - devin/glm-5-2

@@ -21,3 +21,12 @@ nvim_with_cmux_rename() {
 }
 
 alias nv='nvim_with_cmux_rename'
+
+# Pick and load a LazyVim session using fzf
+nvims() {
+  local session
+  session=$(ls ~/.local/state/nvim/sessions/ | fzf --prompt="Select LazyVim Session: ")
+  if [ -n "$session" ]; then
+    nvim -S "$HOME/.local/state/nvim/sessions/$session"
+  fi
+}

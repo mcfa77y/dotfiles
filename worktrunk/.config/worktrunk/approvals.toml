@@ -109,4 +109,5 @@ ${AI_HARNESS:-agy} .
   # ${EDITOR:-agy-ide} . >/dev/null 2>&1 &
   ${AI_HARNESS:-agy} . >/dev/null 2>&1 &
   """,
+    "~/.bun/bin/bun run --cwd /Users/joe/Projects/empo_health/scripts/infisical-update-env-vars start",
 ]

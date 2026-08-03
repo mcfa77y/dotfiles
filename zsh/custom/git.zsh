@@ -29,13 +29,15 @@ alias wprune='uv run $GIT_TOOL_DIR/git_worktree_prune.py --directory $PWD'
 # - list
 alias wls='uv run $GIT_TOOL_DIR/git_worktree_list.py --directory $PWD'
 
+# - use worktrunk with config
+alias wtc='wt --config /Users/joe/Projects/js_for_fun/git-tools-js/.config/wt.toml'
 # - add working tree from existing remote branch
 # alias wta='uv run $GIT_TOOL_DIR/git_worktree_and_branches.py --here_directory $PWD'
-alias wtexisting='HERE=$(pwd); cd $RHL_DIR; wt switch --remotes $(pbpaste); cd $HERE'
+alias wtexisting='HERE=$(pwd); cd $RHL_DIR; wt switch --config /Users/joe/Projects/js_for_fun/git-tools-js/.config/wt.toml --remotes $(pbpaste); cd $HERE'
 
 # - add worktree from clipboard
 # alias wtaa='HERE=$(pwd); cd $GIT_TOOL_JS_DIR; bun run cli create $(pbpaste)'
-alias wtnew='HERE=$(pwd); cd $RHL_DIR; wt switch --create $(pbpaste); cd $HERE'
+alias wtnew='HERE=$(pwd); cd $RHL_DIR; wt switch --config /Users/joe/Projects/js_for_fun/git-tools-js/.config/wt.toml --create $(pbpaste); cd $HERE'
 
 # - git push no verify
 alias gpnv='git push --no-verify'
@@ -91,3 +93,6 @@ function git_bak() {
     echo "Error: Could not create backup. Does '$BACKUP_BRANCH'."
   fi
 }
+
+# 2026-07-31 sparse-checkout
+alias git-fix-unable-to-rmdir='git sparse-checkout set .github/workflows .yarn workspaces/backend-api workspaces/frontend-app workspaces/helper-scripts workspaces/qa workspaces/workspaces/helper-scripts'
