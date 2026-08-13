@@ -1,13 +1,13 @@
 setupVersion: 1
 modelRoles:
   default: empo-ai/google/gemini-3.6-flash:high
-  smol: empo-ai/google/gemma-4-26b-a4b-it:low
+  smol: empo-ai/google/gemini-3.5-flash-lite:low
   slow: empo-ai/google/gemini-3.6-flash:high
   vision: empo-ai/google/gemini-3.6-flash:medium
   plan: empo-ai/google/gemini-3.6-flash:high
   designer: empo-ai/google/gemini-3.6-flash:medium
-  commit: empo-ai/google/gemma-4-26b-a4b-it:low
-  tiny: empo-ai/google/gemma-4-26b-a4b-it:minimal
+  commit: empo-ai/google/gemini-3.5-flash-lite:low
+  tiny: empo-ai/google/gemini-3.5-flash-lite:minimal
   task: empo-ai/google/gemini-3.6-flash:medium
   advisor: empo-ai/google/gemini-3.6-flash:medium
 defaultThinkingLevel: auto
@@ -26,7 +26,6 @@ retry:
       - empo-ai/google/gemini-3.5-flash:low
       - empo-ai/google/gemini-3.5-flash-lite:low
     smol:
-      - empo-ai/google/gemma-4-26b-a4b-it:minimal
       - empo-ai/google/gemini-3.5-flash-lite:minimal
       - empo-ai/google/gemini-3.1-flash-lite:minimal
     vision:
@@ -42,14 +41,20 @@ retry:
       - empo-ai/google/gemini-3.5-flash
       - empo-ai/google/gemini-3.5-flash-lite
     commit:
-      - empo-ai/google/gemma-4-26b-a4b-it:minimal
       - empo-ai/google/gemini-3.5-flash-lite:low
       - empo-ai/google/gemini-3.1-flash-lite:low
     tiny:
-      - empo-ai/google/gemma-4-26b-a4b-it:minimal
       - empo-ai/google/gemini-3.5-flash-lite:minimal
       - empo-ai/google/gemini-3.1-flash-lite:minimal
     advisor:
       - empo-ai/google/gemini-3.6-flash:low
       - empo-ai/google/gemini-3.5-flash:medium
-      - empo-ai/google/gemini-3.5-flash-lite:medium
+dev: 
+  autoqaConsent: granted
+symbolPreset: nerd
+prewalk: 
+  enabled: true
+autolearn: 
+  enabled: true
+github: 
+  enabled: true

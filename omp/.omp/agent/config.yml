@@ -3,7 +3,7 @@ modelRoles:
   smol: devin/glm-5-2
   slow: devin/claude-sonnet-5-high
   vision: devin/gemini-3-6-flash-medium
-  plan: empo-ai/google/gemini-3.6-flash:high
+  plan: empo-ai/anthropic/claude-opus-4-7
   designer: devin/claude-sonnet-5-medium
   commit: devin/glm-5-2
   tiny: devin/swe-1-6-fast
@@ -45,3 +45,9 @@ retry:
 dev: 
   autoqaConsent: granted
 symbolPreset: nerd
+prewalk: 
+  enabled: true
+autolearn: 
+  enabled: true
+github: 
+  enabled: true

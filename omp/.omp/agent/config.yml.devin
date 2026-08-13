@@ -42,3 +42,12 @@ retry:
     advisor:
       - devin/swe-1-6-fast
       - devin/glm-5-2
+dev: 
+  autoqaConsent: granted
+symbolPreset: nerd
+prewalk: 
+  enabled: true
+autolearn: 
+  enabled: true
+github: 
+  enabled: true

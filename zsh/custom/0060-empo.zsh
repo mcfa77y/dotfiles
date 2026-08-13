@@ -286,7 +286,7 @@ yarn_test_qa_find_run() {
     # Use the ${(@f)variable} trick in ZSH to handle spaces in filenames correctly
     yarn test ${(f)tests}
     echo "clipboard updated with: yarn test ${(@f)tests}"
-    echo -n "yarn test ${(@f)tests}" | pbcopy
+    echo -n "yarn test ${(@f)tests}; say 'finished with kew eigh tests'" | pbcopy
     say 'finished with queue ah tests'
   fi
 }

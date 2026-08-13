@@ -96,3 +96,4 @@ function git_bak() {
 
 # 2026-07-31 sparse-checkout
 alias git-fix-unable-to-rmdir='git sparse-checkout set .github/workflows .yarn workspaces/backend-api workspaces/frontend-app workspaces/helper-scripts workspaces/qa workspaces/workspaces/helper-scripts'
+alias git-fix-submodule='git submodule sync; git submodule update --init --recursive'

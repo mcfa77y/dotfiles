@@ -14,23 +14,27 @@ omp-empo() {
   command omp --config "$OMP_CONFIG_DIR/config.yml.empo-ai" "$@"
 }
 
+omp-empo-mix() {
+  command omp --config "$OMP_CONFIG_DIR/config.yml.empo-ai-mix" "$@"
+}
+
 omp-profile() {
   local profile="$1"
   shift
 
   case "$profile" in
-    devin)
-      omp-devin "$@"
-      ;;
-    gemini|antigravity)
-      omp-gemini "$@"
-      ;;
-    empo)
-      omp-empo "$@"
-      ;;
-    *)
-      print -u2 "Usage: omp-profile {devin|gemini|empo} [omp arguments...]"
-      return 2
-      ;;
+  devin)
+    omp-devin "$@"
+    ;;
+  gemini | antigravity)
+    omp-gemini "$@"
+    ;;
+  empo)
+    omp-empo "$@"
+    ;;
+  *)
+    print -u2 "Usage: omp-profile {devin|gemini|empo} [omp arguments...]"
+    return 2
+    ;;
   esac
 }

@@ -20,16 +20,18 @@ Enabling these services carries **zero additional license cost** for the project
 ## Detailed API Justifications
 
 ### 1. Cloud Code Private API (`cloudcode-pa.googleapis.com`)
+
 * **Role**: Serves as the secure endpoint for Gemini Code Assist developer services.
 * **Technical Requirement**: When our local IDE/terminal coding assistant (`omp`) constructs prompt context and requests code generation, it communicates with the `v1internal` stream endpoints managed by this API.
 * **Why it is necessary**: Even though the developer possesses a valid Google OAuth token via corporate sign-in, Google's gateway blocks requests unless the underlying service is activated in the user's active billing/quota project. Activating this service establishes the legitimate gateway route.
 
 ### 2. Service Usage API (`serviceusage.googleapis.com`)
+
 * **Role**: Controls the discovery, activation, and quota/policy monitoring of APIs within a GCP project.
 * **Technical Requirement**: When Google’s official authentication libraries (e.g., `google-auth-library` used by our token client) initialize a connection, they query the project's metadata to verify project health, billing eligibility, and active quotas.
-* **Why it is necessary**: 
-  - **Programmatic Management**: Allows standard command-line tools (`gcloud`) and developer scripts to inspect and manage service states.
-  - **Policy Validation**: Allows the client auth libraries to securely confirm that our project (`empo-health-antigravity`) is authorized as the quota-attribution project (`x-goog-user-project`) for outgoing calls.
+* **Why it is necessary**:
+  * **Programmatic Management**: Allows standard command-line tools (`gcloud`) and developer scripts to inspect and manage service states.
+  * **Policy Validation**: Allows the client auth libraries to securely confirm that our project (`empo-health-antigravity`) is authorized as the quota-attribution project (`x-goog-user-project`) for outgoing calls.
 
 ---
 
