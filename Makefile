@@ -1,5 +1,5 @@
 # List of all standard Stow packages to link
-PACKAGES = act atuin bash bat gh ghostty git gtk-2.0 iterm2 karabiner lazygit neofetch nvim powerline ranger starship tabtab thefuck vim vscode worktrunk yazi zsh
+PACKAGES = act atuin bash bat btop gh ghostty git glow gtk-2.0 iterm2 karabiner lazygit neofetch nvim powerline ranger starship tabtab thefuck vim vscode worktrunk yazi zsh
 
 .PHONY: all stow unstow restow
 
