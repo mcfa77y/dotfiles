@@ -8,7 +8,8 @@ export PROJECTS_DIR='/Users/joe/Projects'
 export JS_DIR='/Users/joe/Projects/js_for_fun'
 export PY_DIR='/Users/joe/Projects/python_for_fun'
 export EDITOR='nvim'
-export AI_HARNESS='agy'
+# export AI_HARNESS='agy'
+export AI_HARNESS='omp-empo'
 
 # Google Antigravity
 export GOOGLE_CLOUD_PROJECT_ID='empo-health-antigravity'

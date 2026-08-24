@@ -72,6 +72,9 @@ wtjs-cli() {
 # change directory to a worktree
 alias wts='wt switch'
 
+# 2026-08-19 worktrees list
+alias wtl='wt list'
+
 # 2026-04-08
 # function to create a backup git branch
 function git_bak() {
