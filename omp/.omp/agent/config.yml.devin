@@ -1,47 +1,48 @@
 setupVersion: 1
 modelRoles:
-  default: devin/glm-5-2
-  smol: devin/glm-5-2
-  slow: devin/claude-sonnet-5-high
-  vision: devin/gemini-3-6-flash-medium
+  default: devin/glm-5-2-1m
+  smol: devin/glm-5-2-1m
+  slow: devin/claude-opus-5-high
+  vision: devin/gemini-3-7-flash-medium
   plan: devin/gpt-5-6-luna:low
   designer: devin/claude-sonnet-5-medium
-  commit: devin/glm-5-2
-  tiny: devin/swe-1-6-fast
-  task: devin/glm-5-2
-  advisor: devin/glm-5-2
+  commit: devin/glm-5-2-1m
+  tiny: devin/swe-1-7-lightning
+  task: devin/glm-5-2-1m
+  advisor: devin/glm-5-2-1m
 defaultThinkingLevel: auto
 retry:
   fallbackChains:
     default:
-      - devin/swe-1-6
-      - devin/glm-5-2
+      - devin/swe-1-7:medium
+      - devin/glm-5-2-1m
     slow:
       - devin/claude-sonnet-5-medium
       - devin/gpt-5-6-luna:medium
     task:
-      - devin/swe-1-6
-      - devin/glm-5-2
+      - devin/swe-1-7:medium
+      - devin/glm-5-2-1m
     smol:
+      - devin/swe-1-7-lightning
       - devin/swe-1-6-fast
-      - devin/swe-1-6
     vision:
-      - devin/gemini-3-6-flash-low
-      - devin/gemini-3-5-flash
+      - devin/gemini-3-7-flash-low
+      - devin/gemini-3-6-flash
     plan:
       - devin/gpt-5-6-luna:medium
-      - devin/glm-5-2
+      - devin/glm-5-2-1m
     designer:
       - devin/claude-sonnet-5-low
       - devin/gpt-5-6-luna:medium
     commit:
-      - devin/swe-1-6-fast
-      - devin/glm-5-2
+      - devin/swe-1-7-lightning
+      - devin/glm-5-2-1m
     tiny:
-      - devin/glm-5-2
-    advisor:
       - devin/swe-1-6-fast
-      - devin/glm-5-2
+      - devin/glm-5-2-1m
+    advisor:
+      - devin/swe-1-7-lightning
+      - devin/glm-5-2-1m
 dev: 
   autoqaConsent: granted
 symbolPreset: nerd

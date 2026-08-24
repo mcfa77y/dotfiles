@@ -1,4 +1,4 @@
-setupVersion: 1
+setupVersion: 2
 modelRoles: 
   smol: devin/glm-5-2
   slow: devin/claude-sonnet-5-high
@@ -51,3 +51,20 @@ autolearn:
   enabled: true
 github: 
   enabled: true
+composer: 
+  shape: box
+spelling: 
+  autocomplete: false
+autoResume: true
+startup: 
+  setupWizard: false
+marketplace: 
+  autoUpdate: auto
+memory: 
+  backend: mnemopi
+mnemopi: 
+  scoping: global
+astGrep: 
+  enabled: true
+theme: 
+  dark: dark-synthwave
