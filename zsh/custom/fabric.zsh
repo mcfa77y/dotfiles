@@ -1,10 +1,10 @@
 # 2024-12-17
 
 # Define the base directory for Obsidian notes
-markdown_dir="/Users/joe/Projects/fabric_md"
+markdown_dir="$PROJECTS_DIR/fabric_md"
 
 # Loop through all files in the ~/.config/fabric/patterns directory
-for pattern_file in ~/.config/fabric/patterns/*; do
+for pattern_file in ~/.config/fabric/patterns/*(N); do
   # Get the base name of the file using pure Zsh modifier (takes 0ms!)
   pattern_name=${pattern_file:t}
 

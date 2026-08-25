@@ -146,51 +146,55 @@ alias nx='nocorrect nx'
 alias yarn='nocorrect yarn'
 alias npx='nocorrect npx'
 
-# 2025-07-31 pyenv# Activate Homebrew in the current shell session
-# https://lucagrippa.io/blog/Setting-up-Pyenv-in-.zshrc
-eval "$(/opt/homebrew/bin/brew shellenv)"
- 
-# Set the PYENV_ROOT variable to point to the location of Pyenv
+# 2025-07-31 pyenv and optional Homebrew shell setup
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -x /usr/local/bin/brew ]]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi
+
 export PYENV_ROOT="$HOME/.pyenv"
- 
-# Check if pyenv command is available, if not, add Pyenv binary directory to PATH
 command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
- 
-# Initialize pyenv into the shell session
-eval "$(pyenv init -)"
- 
-# Initialize pyenv-virtualenv plugin into the shell session
-eval "$(pyenv virtualenv-init -)"
+if command -v pyenv >/dev/null 2>&1; then
+  eval "$(pyenv init -)"
+  eval "$(pyenv virtualenv-init -)"
+fi
 
 # 2025-01-21 powerline init  - https://powerline.readthedocs.io/en/latest/installation.html#pip-installation
-# . /Users/joe/.pyenv/versions/3.13.5/lib/python3.13/site-packages/powerline/bindings/zsh/powerline.zsh
-# POWERLINE_CONFIG_PATHS="/Users/joe/.config/powerline"
+# . "$HOME/.pyenv/versions/3.13.5/lib/python3.13/site-packages/powerline/bindings/zsh/powerline.zsh"
+# POWERLINE_CONFIG_PATHS="$HOME/.config/powerline"
 
 # 2026-01-14 starship init - https://starship.rs
-export STARSHIP_CONFIG=~/.config/starship/starship.toml
-eval "$(starship init zsh)"
+if command -v starship >/dev/null 2>&1; then
+  export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
+  eval "$(starship init zsh)"
+fi
 
 # Added by Windsurf
-export PATH="/Users/joe/.codeium/windsurf/bin:$PATH"
+path_prepend "$HOME/.codeium/windsurf/bin"
 
 # 2025-05-12 yarn berry for oh-my-zsh
 # zstyle ':omz:plugins:yarn' berry yes
 
 # 2025-05-12 openjdk
-export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
+path_prepend /opt/homebrew/opt/openjdk/bin
+path_prepend /usr/lib/jvm/default-java/bin
 
 # 2025-06-30 carapace https://carapace-sh.github.io/carapace-bin/setup.htm
 export CARAPACE_BRIDGES='zsh,bash,inshellisense' # optional
 zstyle ':completion:*' format '%F{242}Completing %d%f'
-source <(carapace _carapace zsh)
-export PATH="/opt/homebrew/bin:$PATH"
+if command -v carapace >/dev/null 2>&1; then
+  source <(carapace _carapace zsh)
+fi
+path_prepend /opt/homebrew/bin
+path_prepend /usr/local/bin
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # bun completions
-[ -s "/Users/joe/.bun/_bun" ] && source "/Users/joe/.bun/_bun"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # 2025-12-02 zoxide completions
 # https://github.com/ajeetdsouza/zoxide
@@ -202,15 +206,14 @@ zle -N edit-command-line
 
 
 # Added by GitButler installer
-# export PATH="/Users/joe/.local/bin:$PATH"
+# path_prepend "$HOME/.local/bin"
 # eval "$(but completions zsh)"
 
 if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi
 
 # Added by Antigravity
-export PATH="/Users/joe/.antigravity/antigravity/bin:$PATH"
-
+path_prepend "$HOME/.antigravity/antigravity/bin"
 
 # Added by Antigravity IDE
-export PATH="/Users/joe/.antigravity-ide/antigravity-ide/bin:$PATH"
+path_prepend "$HOME/.antigravity-ide/antigravity-ide/bin"
 

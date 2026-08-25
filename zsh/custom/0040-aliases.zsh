@@ -1,21 +1,28 @@
 # --- Homebrew ---
-alias bu='brew update && brew upgrade --yes && say "done brew upgrade"'
+if command -v brew >/dev/null 2>&1; then
+  alias bu='brew update && brew upgrade --yes && notify_done "done brew upgrade"'
+fi
 
 # --- Ollama ---
 alias ask="ollama run gemma4:latest"
 
 # --- Nx ---
-alias nxl='bun run /Users/joe/Projects/js_for_fun/nx-utils/src/index.ts'
-alias nxu='bun run /Users/joe/Projects/js_for_fun/nx-utils/src/utils.ts'
+alias nxl='bun run "$JS_DIR/nx-utils/src/index.ts"'
+alias nxu='bun run "$JS_DIR/nx-utils/src/utils.ts"'
 
 # --- Circuit Python ---
-alias cdc='cd /Volumes; cd CIRCUITPY'
+alias cdc='cd /media/$USER/CIRCUITPY 2>/dev/null || cd /run/media/$USER/CIRCUITPY 2>/dev/null || cd /Volumes/CIRCUITPY'
 alias ncirc='cdc; nv code.py'
 
 # --- Fast Jumps & General (from joe.zsh) ---
-alias ls='eza --all --icons --group-directories-first'
-alias l='eza --all --icons --group-directories-first'
-alias lst='eza --group-directories-first --git-ignore --tree --icons --level 2'
+if command -v eza >/dev/null 2>&1; then
+  alias ls='eza --all --icons --group-directories-first'
+  alias l='eza --all --icons --group-directories-first'
+  alias lst='eza --group-directories-first --git-ignore --tree --icons --level 2'
+else
+  alias l='ls -la'
+  alias lst='ls -la'
+fi
 
 alias cd='z'
 alias ..='cd ..'
@@ -25,7 +32,7 @@ alias z3='cd ../../../'
 alias zproj='cd $PROJECTS_DIR'
 alias zjs='cd $JS_DIR'
 alias zpy='cd $PY_DIR'
-alias zdl='cd /Users/joe/Downloads'
+alias zdl='cd "$HOME/Downloads"'
 alias zconfig='cd ~/.config'
 alias fconfig='zconfig; nvim $(fzf_select); cd -'
 

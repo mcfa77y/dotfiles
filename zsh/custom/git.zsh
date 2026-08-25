@@ -1,11 +1,11 @@
 # Git functions
 
-export EMPO_WORKTREE_DIR="/Users/joe/Projects/empo_health/empo-worktrees"
+export EMPO_WORKTREE_DIR="$PROJECTS_DIR/empo_health/empo-worktrees"
 export WORKTREE_DIR=$EMPO_WORKTREE_DIR
-export NEATLEAF_DIR=~/Projects/neatleaf
+export NEATLEAF_DIR="$PROJECTS_DIR/neatleaf"
 
-export GIT_TOOL_DIR='/Users/joe/Projects/python_for_fun/git_tools/git_tools'
-export GIT_TOOL_JS_DIR='/Users/joe/Projects/js_for_fun/git-tools-js'
+export GIT_TOOL_DIR="$PY_DIR/git_tools/git_tools"
+export GIT_TOOL_JS_DIR="$JS_DIR/git-tools-js"
 alias gfetch='git fetch --prune'
 alias gFzfBranches='git branch -a | fzf | xargs -I {} echo {} | sed "s/remotes\/origin\///" | sed "s/^[\+\*] //"'
 alias gpnv='git push --no-verify'
@@ -30,14 +30,14 @@ alias wprune='uv run $GIT_TOOL_DIR/git_worktree_prune.py --directory $PWD'
 alias wls='uv run $GIT_TOOL_DIR/git_worktree_list.py --directory $PWD'
 
 # - use worktrunk with config
-alias wtc='wt --config /Users/joe/Projects/js_for_fun/git-tools-js/.config/wt.toml'
+alias wtc='wt --config "$GIT_TOOL_JS_DIR/.config/wt.toml"'
 # - add working tree from existing remote branch
 # alias wta='uv run $GIT_TOOL_DIR/git_worktree_and_branches.py --here_directory $PWD'
-alias wtexisting='HERE=$(pwd); cd $RHL_DIR; wt switch --config /Users/joe/Projects/js_for_fun/git-tools-js/.config/wt.toml --remotes $(pbpaste); cd $HERE'
+alias wtexisting='HERE=$(pwd); cd $RHL_DIR; wt switch --config "$GIT_TOOL_JS_DIR/.config/wt.toml" --remotes $(clippaste); cd $HERE'
 
 # - add worktree from clipboard
-# alias wtaa='HERE=$(pwd); cd $GIT_TOOL_JS_DIR; bun run cli create $(pbpaste)'
-alias wtnew='HERE=$(pwd); cd $RHL_DIR; wt switch --config /Users/joe/Projects/js_for_fun/git-tools-js/.config/wt.toml --create $(pbpaste); cd $HERE'
+# alias wtaa='HERE=$(pwd); cd $GIT_TOOL_JS_DIR; bun run cli create $(clippaste)'
+alias wtnew='HERE=$(pwd); cd $RHL_DIR; wt switch --config "$GIT_TOOL_JS_DIR/.config/wt.toml" --create $(clippaste); cd $HERE'
 
 # - git push no verify
 alias gpnv='git push --no-verify'
@@ -46,7 +46,8 @@ alias gpnv='git push --no-verify'
 alias ggrbom='gstashd && grbom && gstashp'
 
 # Gitkraken launch 2024-02-29 happy leap year!
-alias gg='/opt/homebrew/bin/gk graph --gitkraken;'
+unalias gg 2>/dev/null
+gg() { command gk graph --gitkraken "$@"; }
 
 alias zgittools_py='cd $GIT_TOOL_DIR'
 alias zgittools='cd $GIT_TOOL_JS_DIR'

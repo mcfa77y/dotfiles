@@ -21,6 +21,57 @@ cache_completion() {
   fi
 }
 
+# Add a directory to PATH only when it exists and is not already present.
+path_prepend() {
+  local dir="$1"
+  [[ -d "$dir" ]] || return 0
+  case ":$PATH:" in
+    *":$dir:"*) ;;
+    *) export PATH="$dir:$PATH" ;;
+  esac
+}
+
+# Portable clipboard helpers: macOS, Wayland, then X11.
+clipcopy() {
+  if command -v pbcopy >/dev/null 2>&1; then
+    pbcopy
+  elif command -v wl-copy >/dev/null 2>&1; then
+    wl-copy
+  elif command -v xclip >/dev/null 2>&1; then
+    xclip -selection clipboard
+  elif command -v xsel >/dev/null 2>&1; then
+    xsel --clipboard --input
+  else
+    cat >/dev/null
+    return 1
+  fi
+}
+
+clippaste() {
+  if command -v pbpaste >/dev/null 2>&1; then
+    pbpaste
+  elif command -v wl-paste >/dev/null 2>&1; then
+    wl-paste
+  elif command -v xclip >/dev/null 2>&1; then
+    xclip -selection clipboard -out
+  elif command -v xsel >/dev/null 2>&1; then
+    xsel --clipboard --output
+  else
+    return 1
+  fi
+}
+
+notify_done() {
+  local message="${*:-done}"
+  if command -v say >/dev/null 2>&1; then
+    say "$message"
+  elif command -v notify-send >/dev/null 2>&1; then
+    notify-send "Done" "$message"
+  else
+    print -r -- "$message"
+  fi
+}
+
 # 2024-01-07 the fuck
 # Lazy load thefuck to keep shell startup fast (0ms)
 fuck() {

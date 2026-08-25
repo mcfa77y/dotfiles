@@ -1,13 +1,14 @@
-# NOTE: Keep these path/environment setups in .zprofile (sourced only once on login)!
-# 1. Performance: Avoids running slower commands like 'brew shellenv' (20-50ms)
-#    on every interactive shell startup (new tabs/splits) which source .zshrc instead.
-# 2. IDE/Tooling: Ensures Homebrew and Pyenv PATH variables propagate to graphical 
-#    applications (like VS Code or Cursor) which query login shells to build their environment.
+# NOTE: Keep path/environment setup in .zprofile (sourced once by login shells).
+# Guard machine-specific tools so this file works on both macOS and Ubuntu.
 
-eval "$(/opt/homebrew/bin/brew shellenv)"
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -x /usr/local/bin/brew ]]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi
 
-# Set the PYENV_ROOT variable to point to the location of Pyenv
-eval "$(pyenv init --path --no-rehash)"
+if command -v pyenv >/dev/null 2>&1; then
+  eval "$(pyenv init --path --no-rehash)"
+fi
 
-# Added by Antigravity CLI installer
-export PATH="/Users/joe/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"

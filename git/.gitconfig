@@ -13,9 +13,10 @@
 [init]
 	defaultBranch = main
 [core]
-	hooksPath = /Users/joe/Projects/empo_health/git-hooks
 	autocrlf = input
   pager = delta
+[include]
+  path = ~/.gitconfig.local
 [pull]
 	rebase = true
 	ff = false

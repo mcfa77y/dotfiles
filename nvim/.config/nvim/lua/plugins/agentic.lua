@@ -1,3 +1,8 @@
+local function exe(name)
+  local path = vim.fn.exepath(name)
+  return path ~= "" and path or name
+end
+
 return {
   "carlos-algms/agentic.nvim",
   event = "VeryLazy",
@@ -8,17 +13,17 @@ return {
     acp_providers = {
       ["devin-acp"] = {
         name = "Devin",
-        command = "/Users/joe/.local/bin/devin",
+        command = exe("devin"),
         args = { "acp" },
       },
       ["omp-acp"] = {
         name = "Oh My Pi",
-        command = "/opt/homebrew/bin/omp",
+        command = exe("omp"),
         args = { "acp" },
       },
       ["empo-ai"] = {
         name = "Empo AI",
-        command = "/opt/homebrew/bin/omp",
+        command = exe("omp"),
         args = {
           "--config",
           (os.getenv("OMP_CONFIG_DIR") or (os.getenv("HOME") .. "/.omp/agent")) .. "/config.yml.empo-ai",

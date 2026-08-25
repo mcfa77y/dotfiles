@@ -44,5 +44,5 @@ export BASE_URL="http://localhost:3000"
 
 # Playwright Trace Downloader (Beautiful TUI/CLI)
 playwright-trace() {
-  bun run --cwd /Users/joe/Projects/empo_health/scripts/playwright-trace-from-url src/index.ts "$@"
+  bun run --cwd "$EMPO_DIR/scripts/playwright-trace-from-url" src/index.ts "$@"
 }

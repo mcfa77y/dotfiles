@@ -1,8 +1,9 @@
-# Prepend homebrew bin path to run completion generators
-export PATH="/opt/homebrew/bin:$PATH"
+# Add Homebrew paths only on machines where Homebrew is installed.
+path_prepend /opt/homebrew/bin
+path_prepend /usr/local/bin
 
 # bun completions
-[ -s "/Users/joe/.bun/_bun" ] && source "/Users/joe/.bun/_bun"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # carapace variables and styles
 export CARAPACE_BRIDGES='zsh,bash' # optional

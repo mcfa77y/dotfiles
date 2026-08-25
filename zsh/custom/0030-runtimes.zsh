@@ -3,29 +3,34 @@ export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
 # --- Go ---
-# Golang environment variables (optimized to avoid slow brew CLI call)
-if [[ -d "/opt/homebrew/opt/go/libexec" ]]; then
+if command -v go >/dev/null 2>&1; then
+  export GOROOT="$(go env GOROOT 2>/dev/null)"
+elif [[ -d /opt/homebrew/opt/go/libexec ]]; then
   export GOROOT="/opt/homebrew/opt/go/libexec"
-elif [[ -d "/usr/local/opt/go/libexec" ]]; then
+elif [[ -d /usr/local/opt/go/libexec ]]; then
   export GOROOT="/usr/local/opt/go/libexec"
-else
-  if [[ "$(uname -m)" = "arm64" ]]; then
-    export GOROOT="/opt/homebrew/opt/go/libexec"
-  else
-    export GOROOT="/usr/local/opt/go/libexec"
-  fi
 fi
 
-export GOPATH=$HOME/go
-export PATH=$GOPATH/bin:$GOROOT/bin:$HOME/.local/bin:$PATH
+export GOPATH="$HOME/go"
+if [[ -n "$GOROOT" ]]; then
+  export PATH="$GOPATH/bin:$GOROOT/bin:$HOME/.local/bin:$PATH"
+else
+  export PATH="$GOPATH/bin:$HOME/.local/bin:$PATH"
+fi
 
 # --- Sonar ---
-export SONAR_HOME=/opt/homebrew/Cellar/sonar-scanner/7.3.0.5189/libexec
-export SONAR=$SONAR_HOME/bin
-export PATH=$SONAR:$PATH
+if [[ -d /opt/homebrew/Cellar/sonar-scanner/7.3.0.5189/libexec ]]; then
+  export SONAR_HOME=/opt/homebrew/Cellar/sonar-scanner/7.3.0.5189/libexec
+elif [[ -d /usr/share/sonar-scanner ]]; then
+  export SONAR_HOME=/usr/share/sonar-scanner
+fi
+if [[ -n "$SONAR_HOME" ]]; then
+  export SONAR="$SONAR_HOME/bin"
+  export PATH="$SONAR:$PATH"
+fi
 
 # --- PNPM ---
-export PNPM_HOME="/Users/joe/Library/pnpm"
+export PNPM_HOME="${PNPM_HOME:-$HOME/.local/share/pnpm}"
 case ":$PATH:" in
 *":$PNPM_HOME:"*) ;;
 *) export PATH="$PNPM_HOME:$PATH" ;;

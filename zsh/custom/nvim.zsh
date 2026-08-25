@@ -1,4 +1,4 @@
-NVIM_CONFIG_DIR='/Users/joe/.config/nvim'
+NVIM_CONFIG_DIR="$HOME/.config/nvim"
 alias addLazyPackage='nvim_with_cmux_rename $NVIM_CONFIG_DIR/lua/user/init.lua'
 alias nnvim='cd $NVIM_CONFIG_DIR; nvim_with_cmux_rename .'
 

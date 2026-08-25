@@ -1,11 +1,11 @@
 # --- Base Configs ---
 # PACKAGE_MANAGER='pnpm'
 PACKAGE_MANAGER='yarn'
-export EMPO_DIR="/Users/joe/Projects/empo_health"
-export EMPO_WORKTREE_DIR="/Users/joe/Projects/empo_health/empo-worktrees"
+export EMPO_DIR="$PROJECTS_DIR/empo_health"
+export EMPO_WORKTREE_DIR="$EMPO_DIR/empo-worktrees"
 export RHL_DIR="$EMPO_DIR/main"
 
-alias empo_start_ticket='cd $RHL_DIR; gl; gcb $(pbpaste); gp --no-verify; gback; wtaa'
+alias empo_start_ticket='cd $RHL_DIR; gl; gcb $(clippaste); gp --no-verify; gback; wtaa'
 
 alias zroot="z \$(git_current_branch)"
 alias zbe="zroot; z workspaces/backend-api/"
@@ -128,13 +128,15 @@ aws_set_profile() {
     export AWS_PROFILE=$profile
     echo "✅ AWS_PROFILE set to: **$AWS_PROFILE**"
 
-    # Update environment files
+    # Update environment files. BSD sed needs `-i ''`; GNU sed needs plain `-i`.
+    local sed_inplace=(sed -i)
+    [[ "$(uname -s)" == "Darwin" ]] && sed_inplace=(sed -i '')
     if [[ "$profile" == *staging* || "$profile" == *base* ]]; then
-      sed -i '' "s/^.*AWS_PROFILE=.*/AWS_PROFILE=$profile/" ~/.aws/.envrc.staging
-      echo "📝 Updated ~/.aws/.envrc.staging"
+      "${sed_inplace[@]}" "s/^.*AWS_PROFILE=.*/AWS_PROFILE=$profile/" ~/.aws/.envrc.staging
+      echo "Updated ~/.aws/.envrc.staging"
     elif [[ "$profile" == *prod* || "$profile" == *production* ]]; then
-      sed -i '' "s/^.*AWS_PROFILE=.*/AWS_PROFILE=$profile/" ~/.aws/.envrc.prod
-      echo "📝 Updated ~/.aws/.envrc.prod"
+      "${sed_inplace[@]}" "s/^.*AWS_PROFILE=.*/AWS_PROFILE=$profile/" ~/.aws/.envrc.prod
+      echo "Updated ~/.aws/.envrc.prod"
     fi
 
     # Optional: Auto-login check (Uncomment if you want it to check SSO status)
@@ -145,9 +147,9 @@ aws_set_profile() {
 }
 
 # --- CI/CD ---
-RERUN_DIR='/Users/joe/Projects/js_for_fun/rerun-github-qa-tests'
+RERUN_DIR="$JS_DIR/rerun-github-qa-tests"
 
-alias rerun-cicd-url='bun run --cwd $RERUN_DIR monitor --url $(pbpaste)'
+alias rerun-cicd-url='bun run --cwd $RERUN_DIR monitor --url $(clippaste)'
 alias rerun-cicd='bun run --cwd $RERUN_DIR monitor'
 
 # --- Terraform ---
@@ -202,7 +204,7 @@ tf_unlock() {
   fi
 
   echo "tf_unlock_post_aws"
-  echo "tf_unlock_post_aws" | pbcopy
+  echo "tf_unlock_post_aws" | clipcopy
 }
 
 tf_unlock_post_aws() {
@@ -230,7 +232,7 @@ tf_unlock_fe() {
 
 # --- Testing ---
 # 2026-06-01 empo scripts directory
-export SCRIPTS_DIR='/Users/joe/Projects/empo_health/scripts'
+export SCRIPTS_DIR="$EMPO_DIR/scripts"
 
 # 2026-06-01
 # Updates docker compose for e2e tests
@@ -275,7 +277,7 @@ yarn_test_find_run() {
     # Use the ${(@f)variable} trick in ZSH to handle spaces in filenames correctly
     yarn test --watch ${(f)tests}
     echo "yarn test --watch ${(@f)tests}"
-    echo -n "yarn test --watch ${(@f)tests}" | pbcopy
+    echo -n "yarn test --watch ${(@f)tests}" | clipcopy
   fi
 }
 # 2026-03-10 yarn test for qa
@@ -286,8 +288,8 @@ yarn_test_qa_find_run() {
     # Use the ${(@f)variable} trick in ZSH to handle spaces in filenames correctly
     yarn test ${(f)tests}
     echo "clipboard updated with: yarn test ${(@f)tests}"
-    echo -n "yarn test ${(@f)tests}; say 'finished with kew eigh tests'" | pbcopy
-    say 'finished with queue ah tests'
+    echo -n "yarn test ${(@f)tests}; notify_done finished with queue ah tests" | clipcopy
+    notify_done 'finished with queue ah tests'
   fi
 }
 
@@ -300,7 +302,7 @@ yarn_test_e2e_find_run() {
     # Use the ${(@f)variable} trick in ZSH to handle spaces in filenames correctly
     yarn test:e2e --watch -- ${(f)tests}
     echo "yarn test:e2e --watch -- ${(@f)tests}"
-    echo "yarn test:e2e --watch -- ${(@f)tests}" | pbcopy
+    echo "yarn test:e2e --watch -- ${(@f)tests}" | clipcopy
   fi
 }
 
@@ -309,7 +311,7 @@ brd() {
   local demo_file=$(fd '\.ts$' | fzf -m --preview "bat --color=always {}" --header "Select demo (Tab to multi-select)")
   bun run ${(f)demo_file}
   echo "bun run ${(f)demo_file}"
-  echo "bun run ${(f)demo_file}" | pbcopy
+  echo "bun run ${(f)demo_file}" | clipcopy
 }
 
 backend_start() {
