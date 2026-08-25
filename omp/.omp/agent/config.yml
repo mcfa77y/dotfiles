@@ -9,6 +9,7 @@ modelRoles:
   tiny: devin/swe-1-6-fast
   task: devin/gpt-5-6-luna:medium
   advisor: devin/glm-5-2
+  default: devin/glm-5-2
 defaultThinkingLevel: auto
 retry: 
   fallbackChains: 

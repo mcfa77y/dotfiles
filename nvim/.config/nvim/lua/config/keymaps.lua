@@ -65,7 +65,7 @@ map({ "n", "x" }, "<leader>cP", function()
   else
     text = path .. ":" .. l1 .. "-" .. l2
   end
-  vim.fn.setreg("+", text)
+  vim.fn.setreg("+", "@" .. text)
   vim.notify("Copied relative path: " .. text)
 end, { desc = "Copy relative file path" })
 
