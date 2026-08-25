@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+if command -v cmux >/dev/null 2>&1 && command -v cmux-current-title >/dev/null 2>&1 && [ -n "${CMUX_SURFACE_ID:-}" ]; then
+  original_title="$(cmux-current-title 2>/dev/null || true)"
+  cmux rename-tab --surface "$CMUX_SURFACE_ID" "neovim $(basename "$PWD")" 2>/dev/null || true
+  nvim "$@"
+  exit_code=$?
+  if [ -n "$original_title" ]; then
+    cmux rename-tab --surface "$CMUX_SURFACE_ID" "$original_title" 2>/dev/null || true
+  else
+    cmux tab-action --action clear-name --surface "$CMUX_SURFACE_ID" 2>/dev/null || true
+  fi
+  exit "$exit_code"
+fi
+
+exec nvim "$@"
