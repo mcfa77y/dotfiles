@@ -6,6 +6,9 @@ fi
 # --- Ollama ---
 alias ask="ollama run gemma4:latest"
 
+
+# --- Clipman ---
+alias clipman='XAUTHORITY=$(systemctl --user show-environment | sed -n s/^XAUTHORITY=//p) GDK_BACKEND=x11 GSK_RENDERER=cairo /snap/bin/clipman'
 # --- Nx ---
 alias nxl='bun run "$JS_DIR/nx-utils/src/index.ts"'
 alias nxu='bun run "$JS_DIR/nx-utils/src/utils.ts"'

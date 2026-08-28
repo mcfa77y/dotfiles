@@ -172,4 +172,3 @@ Each package contains files exactly where they should appear under `$HOME`:
 - Existing real files at target paths must be backed up or moved before Stow can link over them.
 - The shell config uses guarded paths and `$HOME` so it can run on Ubuntu and macOS.
 - Optional tools such as `starship`, `direnv`, `carapace`, `pyenv`, `brew`, clipboard tools, and notification tools are loaded only when installed.
-
