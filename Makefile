@@ -1,5 +1,5 @@
 # Common Stow packages shared across platforms
-COMMON_PACKAGES = act atuin bash bat btop bun gh ghostty git glow lazygit neofetch nvim powerline ranger starship tabtab thefuck vim worktrunk yazi zsh
+COMMON_PACKAGES = act atuin bash bat btop bun gh ghostty git glow lazygit neofetch nvim omp powerline ranger starship tabtab thefuck vim worktrunk yazi zsh
 LINUX_PACKAGES = gtk-2.0
 MACOS_PACKAGES = iterm2 karabiner
 
