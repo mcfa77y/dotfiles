@@ -42,9 +42,6 @@ alias wtnew='HERE=$(pwd); cd $RHL_DIR; wt switch --config "$GIT_TOOL_JS_DIR/.con
 # - git push no verify
 alias gpnv='git push --no-verify'
 
-# 2026-04-02 Git rebase with stash pop
-alias ggrbom='gstashd && grbom && gstashp'
-
 # Gitkraken launch 2024-02-29 happy leap year!
 unalias gg 2>/dev/null
 gg() { command gk graph --gitkraken "$@"; }
@@ -71,7 +68,7 @@ wtjs-cli() {
 
 # 2026-02-13
 # change directory to a worktree
-alias wts='wt switch'
+alias wts='zrhl; wt switch; cdev'
 
 # 2026-08-19 worktrees list
 alias wtl='wt list'
@@ -99,5 +96,43 @@ function git_bak() {
 }
 
 # 2026-07-31 sparse-checkout
-alias git-fix-unable-to-rmdir='git sparse-checkout set .github/workflows .yarn workspaces/backend-api workspaces/frontend-app workspaces/helper-scripts workspaces/qa workspaces/workspaces/helper-scripts'
-alias git-fix-submodule='git submodule sync; git submodule update --init --recursive'
+alias git-fix-unable-to-rmdir='git sparse-checkout set .github/.yarn workspaces/backend-api workspaces/frontend-app workspaces/helper-scripts workspaces/qa workspaces/workspaces/helper-scripts'
+
+# 2026-08-27
+function sync-stack() {
+  local base stashed=0
+  if [ -z "$1" ]; then
+    command -v fzf >/dev/null || {
+      echo "fzf is required for interactive mode"
+      return 1
+    }
+    base=$(git for-each-ref --format='%(if)%(symref)%(then)%(else)%(refname:lstrip=3)%(end)' refs/remotes/origin | sed '/^$/d' | fzf --prompt='Base branch: ') || return 1
+    [ -n "$base" ] || return 1
+  else
+    base="${1#origin/}"
+  fi
+  if ! git diff-index --quiet HEAD -- 2>/dev/null; then
+    echo "Stashing uncommitted changes..."
+    git stash push -m "sync-stack auto-stash" || return 1
+    stashed=1
+  fi
+  if git fetch origin "$base" && git rebase "origin/$base" && git push --force-with-lease; then
+    if [ "$stashed" -eq 1 ]; then
+      echo "Popping stashed changes..."
+      git stash pop
+    fi
+  else
+    if [ "$stashed" -eq 1 ]; then
+      echo "Rebase/push failed. Your uncommitted changes are preserved in stash:"
+      git stash list -1
+    fi
+    return 1
+  fi
+}
+
+function sync-4119() {
+  sync-stack rhl-4119-scaffold-workspacesmock-services-nestjs-package-docker-setup
+}
+
+# 2026-04-02 Git rebase with stash pop
+alias ggrbom='sync-stack main'

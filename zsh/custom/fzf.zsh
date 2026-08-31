@@ -68,6 +68,7 @@ fzf_multi_select() {
   [[ -n "$1" ]] && query_opt=(-q "$1")
   fzf -m "${query_opt[@]}" --preview 'if [ -d {} ]; then eza --group-directories-first --git-ignore --tree --icons --level 2 --color=always {} | head -200; else bat --color=always --style=numbers,changes --decorations=always {}; fi' --header "Select files (Tab to multi-select)"
 }
+
 fzf_select() {
   local query_opt=()
   [[ -n "$1" ]] && query_opt=(-q "$1")
@@ -85,6 +86,10 @@ cut1() {
 
 fzf_select_cut1() {
   fzf_select "$1" | cut1
+}
+
+fzf_select_cut2() {
+  fzf_select "$1" | cutN 2
 }
 # 2026-06-29
 # nvim with fuzzy finder

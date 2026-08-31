@@ -1,0 +1,5 @@
+interface:
+  display_name: "Teach"
+  short_description: "Teach me a concept over multiple sessions"
+policy:
+  allow_implicit_invocation: false

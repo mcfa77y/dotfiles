@@ -6,7 +6,7 @@
 [push]
 	default = current
 [alias]
-  delete-stashes = "!f() { git stash list | grep \"dm\" | awk '{print $1}' | xargs -I {} git stash drop {};};"
+  delete-stashes = "!f() { git stash list | grep \"delete me\" | awk '{print $1}' | xargs -I {} git stash drop {};};"
 	reset-file = "!f() { git checkout main -- \"$1\"; }; f"
 	rsoft = reset --soft @{u}
 
@@ -26,7 +26,8 @@
 	aiModelProvider = ollama
 	aiOllamaModelName = qwen3:14b
 [diff]
-	tool = nvimdiff
+	; tool = nvimdiff
+	tool = delta
 
 [interactive]
     diffFilter = delta --color-only

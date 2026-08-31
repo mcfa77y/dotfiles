@@ -11,13 +11,15 @@ description: Commits and pushes changed files while excluding local dev/test fil
    - `playwright.config.ts`
    - `docker.compose.yml`
    - `test-setup.helper.ts`
-3. **Linting**: Check `.commitlintrc.json` and ensure the commit message adheres to the rules. Lets also add the linear ticket to the commit message title.
-4. **Commit**: Commit the allowed changes.
-5. **Push**:
+3. **Linting**: Check `.commitlintrc.json` and ensure the commit message adheres to the rules.
+
+- Use Conventional Commits format (e.g., feat:, fix:, docs:, chore:, refactor:) in the subject line.
+- **Do NOT include the ticket ID in the commit message.** A `prepare-commit-msg` git hook automatically extracts the ticket number from the branch name and prepends it. Including it manually causes duplicate ticket IDs (e.g., `feat: rhl-4120 - rhl-4120 - ...`).
+- Example: `git commit -m "feat: Scale staging backend-api ECS CPU and memory"` on branch `rhl-4095-...` becomes `feat: rhl-4095 - Scale staging backend-api ECS CPU and memory` after the hook runs.
+1. **Commit**: Commit the allowed changes.
+2. **Push**:
    - If changes are infrastructure-only (`*.tf`, `*.yml`), run `git push --no-verify`
    - Otherwise run `git push`
-
-
 
 ## Linear IDs
 

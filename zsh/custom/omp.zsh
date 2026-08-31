@@ -3,18 +3,17 @@
 export OMP_CONFIG_DIR="$HOME/.omp/agent"
 
 omp-devin() {
+  command omp update
   command omp --config "$OMP_CONFIG_DIR/config.yml.devin" "$@"
 }
 
-omp-gemini() {
-  command omp --config "$OMP_CONFIG_DIR/config.yml.google-antigravity" "$@"
-}
-
 omp-empo() {
+  command omp update
   command omp --config "$OMP_CONFIG_DIR/config.yml.empo-ai" "$@"
 }
 
 omp-empo-mix() {
+  command omp update
   command omp --config "$OMP_CONFIG_DIR/config.yml.empo-ai-mix" "$@"
 }
 
@@ -25,9 +24,6 @@ omp-profile() {
   case "$profile" in
   devin)
     omp-devin "$@"
-    ;;
-  gemini | antigravity)
-    omp-gemini "$@"
     ;;
   empo)
     omp-empo "$@"

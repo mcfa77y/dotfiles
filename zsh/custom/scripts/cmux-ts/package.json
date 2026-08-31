@@ -1,0 +1,28 @@
+{
+  "name": "cmux-ts",
+  "type": "module",
+  "private": true,
+  "main": "src/index.ts",
+  "module": "src/index.ts",
+  "bin": {
+    "cmux-ts": "src/index.ts"
+  },
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "build": "bun build --compile --outfile bin/cmux-ts src/index.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "commander": "^15.0.0"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^9.3.0",
+    "@types/bun": "latest",
+    "eslint": "^10.8.0"
+  }
+}
