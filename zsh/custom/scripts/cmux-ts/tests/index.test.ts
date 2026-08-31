@@ -32,6 +32,18 @@ describe('cmux-ts commander CLI program', () => {
     expect(optionNames).toContain('--nvim')
     expect(optionNames).toContain('--terminal')
   })
+
+  test('dev command accepts positional path with --focus true', () => {
+    const program = createProgram()
+    const parsed = program.parseOptions(['dev', '/some/path', '--omp', 'custom-omp', '--focus', 'true'])
+    expect(parsed.operands).toEqual(['dev', '/some/path'])
+  })
+
+  test('dev command accepts positional path with --focus false', () => {
+    const program = createProgram()
+    const parsed = program.parseOptions(['dev', '/some/path', '--focus', 'false'])
+    expect(parsed.operands).toEqual(['dev', '/some/path'])
+  })
 })
 
 describe('git helpers', () => {

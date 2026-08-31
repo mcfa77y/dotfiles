@@ -46,13 +46,13 @@ export function registerTabCommand(program: Command): void {
     .description('Create a new surface/tab, rename it, and execute a command in it')
     .requiredOption('-n, --name <tab_name>', 'Name / title of the new tab')
     .requiredOption('-c, --command <command_to_run>', 'Command to execute in the new tab')
-    .option('-f, --focus', 'Switch focus to the new tab (default: false)', false)
+    .option('-f, --focus [boolean]', 'Switch focus to the new tab (default: false)')
     .option('--cwd <path>', 'Working directory for the tab (default: current directory)')
     .option('-w, --workspace <id>', 'Target workspace ID/ref')
     .action(async (opts: {
       name: string
       command: string
-      focus?: boolean
+      focus?: boolean | string
       cwd?: string
       workspace?: string
     }) => {
@@ -60,7 +60,7 @@ export function registerTabCommand(program: Command): void {
         await createTab({
           name: opts.name,
           command: opts.command,
-          focus: opts.focus,
+          focus: opts.focus === undefined ? false : (typeof opts.focus === 'boolean' ? opts.focus : String(opts.focus).toLowerCase() !== 'false'),
           cwd: opts.cwd,
           workspace: opts.workspace,
         })

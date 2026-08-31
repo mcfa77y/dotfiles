@@ -161,7 +161,7 @@ export function registerDevCommand(program: Command): void {
     .description('Workspace development launcher with omp (left) and nvim + terminal tabs (right)')
     .option('-d, --cwd <path>', 'Working directory path')
     .option('--dir <path>', 'Working directory path (alias for --cwd)')
-    .option('-f, --focus', 'Focus the new workspace (default: true)', true)
+    .option('-f, --focus [boolean]', 'Focus the new workspace (default: true)')
     .option('--no-focus', 'Do not focus the new workspace')
     .option('--omp <command>', 'Command to run in left pane (default: omp-empo)', 'omp-empo')
     .option('--nvim <command>', 'Command to run in right pane tab 1 (default: nvim .)', 'nvim .')
@@ -169,7 +169,7 @@ export function registerDevCommand(program: Command): void {
     .action(async (targetPath?: string, opts?: {
       dir?: string
       cwd?: string
-      focus?: boolean
+      focus?: boolean | string
       omp?: string
       nvim?: string
       terminal?: string
@@ -178,7 +178,7 @@ export function registerDevCommand(program: Command): void {
         const resolvedCwd = targetPath || opts?.dir || opts?.cwd || process.cwd()
         await launchDevWorkspace({
           cwd: resolvedCwd,
-          focus: opts?.focus,
+          focus: opts?.focus === undefined ? undefined : String(opts.focus).toLowerCase() !== 'false',
           ompCommand: opts?.omp,
           nvimCommand: opts?.nvim,
           terminalCommand: opts?.terminal,
