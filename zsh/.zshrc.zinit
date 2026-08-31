@@ -90,6 +90,7 @@ zinit snippet OMZP::colored-man-pages
 
 # Load local custom plugins
 zinit light ~/dotfiles/zsh/custom/plugins/nx-completion
+zinit light ~/dotfiles/zsh/custom/plugins/cmux-completion
 
 log_time_lap "Plugins Loaded"
 

@@ -1,0 +1,1002 @@
+#compdef cmux
+# zsh completion for cmux CLI — hand-crafted (cmux has no `completion` subcommand)
+# Generated from `cmux --help` command list.
+
+_cmux() {
+    local context state line
+    typeset -A opt_args
+
+    _arguments -C \
+        '(-h --help)'{-h,--help}'[show help]' \
+        '--password[socket auth password]:password:' \
+        '--id-format[output id format]:format:(refs uuids both)' \
+        '1: :_cmux_commands' \
+        '*:: :->args'
+
+    case $state in
+        args)
+            case $line[1] in
+                welcome|shortcuts|ping|version|capabilities|restore-session)
+                    ;;
+                reload-config|refresh-surfaces|surface-health|debug-terminals)
+                    ;;
+                list-windows|current-window|new-window|list-workspaces)
+                    ;;
+                list-panes|list-pane-surfaces|list-panels|list-notifications)
+                    ;;
+                current-workspace|sidebar-state|simulate-app-active|popup)
+                    ;;
+                list-buffers|clear-log|list-log|jump-to-unread)
+                    ;;
+                disable-browser|enable-browser|browser-status)
+                    ;;
+                docs)
+                    _arguments \
+                        '1:topic:(settings shortcuts api browser agents dock sidebars)'
+                    ;;
+                settings)
+                    _arguments \
+                        '1: :->sub'
+                    case $state in
+                        sub)
+                            _values 'settings' \
+                                'open[open settings UI]' \
+                                'path[print settings file path]' \
+                                'docs[print settings docs]'
+                            ;;
+                    esac
+                    ;;
+                config)
+                    _values 'config action' \
+                        'doctor' 'check' 'validate' 'path' 'paths' \
+                        'docs' 'documentation' 'reload'
+                    ;;
+                agent-hibernation)
+                    _values 'state' on off
+                    ;;
+                feed)
+                    _values 'feed action' tui clear
+                    ;;
+                themes)
+                    _values 'themes action' list set clear
+                    ;;
+                auth)
+                    _values 'auth action' status login logout
+                    ;;
+                login|logout)
+                    ;;
+                claude-teams|codex-teams|omo|omx|omc)
+                    _message "agent args (passed through)"
+                    ;;
+                hooks)
+                    _cmux_hooks
+                    ;;
+                vm|cloud)
+                    _cmux_vm
+                    ;;
+                remotes|remote)
+                    _cmux_remotes
+                    ;;
+                ai-accounts)
+                    _values 'ai-accounts action' list upload remove
+                    ;;
+                todo)
+                    _cmux_todo
+                    ;;
+                workspace)
+                    _cmux_workspace
+                    ;;
+                right-sidebar)
+                    _values 'right-sidebar action' \
+                        toggle show hide focus set mode \
+                        files find vault sessions feed dock
+                    _cmux_target_opts
+                    ;;
+                sidebar)
+                    _values 'sidebar action' validate reload select open
+                    _message "sidebar name"
+                    ;;
+                set-app-focus)
+                    _values 'focus state' active inactive clear
+                    ;;
+                surface)
+                    _arguments \
+                        '1:subcommand:(resume)' \
+                        '*:: :->resume-args'
+                    case $state in
+                        resume-args)
+                            _values 'resume action' set show get clear
+                            _cmux_target_opts
+                            ;;
+                    esac
+                    ;;
+                restore)
+                    _arguments \
+                        '--surface[restore surface]:id:' \
+                        '1:kind:' \
+                        '2:checkpoint-id:'
+                    ;;
+                open)
+                    _arguments \
+                        '*:path-or-url:_files'
+                    _cmux_target_opts
+                    ;;
+                diff)
+                    _cmux_diff
+                    ;;
+                feedback)
+                    _arguments \
+                        '--email[email]:email:' \
+                        '--body[body text]:text:' \
+                        '*--image[image path]:file:_files'
+                    ;;
+                markdown)
+                    _arguments \
+                        '1:action:(open)' \
+                        '2:path:_files' \
+                        '--focus[focus]:bool:(true false)'
+                    ;;
+                events)
+                    _arguments \
+                        '--after[sequence number]:seq:' \
+                        '--cursor-file[cursor file]:file:_files' \
+                        '--name[event name]:name:' \
+                        '--category[category]:category:' \
+                        '--reconnect' \
+                        '--limit[number]:n:' \
+                        '--no-ack' \
+                        '--no-heartbeat'
+                    ;;
+                rpc)
+                    _arguments \
+                        '1:method:' \
+                        '2:json-params:'
+                    ;;
+                simulator|ios)
+                    _message "simulator subcommand"
+                    _cmux_target_opts
+                    ;;
+                identify)
+                    _cmux_target_opts
+                    _arguments '--no-caller'
+                    ;;
+                tree)
+                    _arguments '--all'
+                    _cmux_target_opts
+                    ;;
+                top)
+                    _arguments '--all' '--processes' \
+                        '--sort[sort by]:key:(cpu mem proc)' \
+                        '--flat' \
+                        '--format[format]:fmt:(tree tsv)'
+                    _cmux_target_opts
+                    ;;
+                memory)
+                    _arguments '--all' '--groups[count]:n:'
+                    _cmux_target_opts
+                    ;;
+                focus-window|close-window)
+                    _arguments '--window[id|ref]:id:'
+                    ;;
+                move-workspace-to-window)
+                    _arguments '--workspace[id|ref]:id:' '--window[id|ref]:id:'
+                    ;;
+                reorder-workspace)
+                    _arguments \
+                        '--workspace[id|ref]:id:' \
+                        '--index[position]:n:' \
+                        '--before[id|ref]:id:' \
+                        '--after[id|ref]:id:' \
+                        '--window[id|ref]:id:' \
+                        '--dry-run'
+                    ;;
+                reorder-workspaces)
+                    _arguments \
+                        '--order[comma-separated order]:order:' \
+                        '--window[id|ref]:id:' \
+                        '--dry-run'
+                    ;;
+                workspace-action)
+                    _arguments \
+                        '--action[action name]:name:' \
+                        '--title[title]:text:' \
+                        '--color[color]:color:' \
+                        '--description[description]:text:'
+                    _cmux_target_opts
+                    ;;
+                move-tab-to-new-workspace)
+                    _arguments \
+                        '--tab[id|ref]:id:' '--title[text]:text:'
+                    _cmux_target_opts
+                    ;;
+                new-workspace)
+                    _arguments \
+                        '--name[title]:text:' \
+                        '--description[description]:text:' \
+                        '--cwd[working directory]:dir:_files -/' \
+                        '--command[command]:text:' \
+                        '--layout[json layout]:json:' \
+                        '--group[group id|ref]:id:' \
+                        '--group-placement[placement]:placement:(afterCurrent top end)' \
+                        '--group-reference[workspace]:id:'
+                    _cmux_target_opts
+                    ;;
+                ssh|mosh|mosh-tmux|ssh-tmux)
+                    _arguments \
+                        '1:destination:' \
+                        '--name[title]:text:' \
+                        '--command[command]:text:' \
+                        '--port[port]:n:' \
+                        '--identity[identity file]:file:_files' \
+                        {-A,--forward-agent} \
+                        {-a,--no-forward-agent} \
+                        '--ssh-option[ssh option]:opt:' \
+                        '--session[session name]:name:' \
+                        '--new-window' \
+                        '--no-focus'
+                    _cmux_target_opts
+                    ;;
+                ssh-session-list)
+                    _arguments '--all-workspaces'
+                    _cmux_target_opts
+                    ;;
+                ssh-session-attach)
+                    _arguments \
+                        '--session-id[session id]:id:' \
+                        '--split[split direction]:dir:(left right up down)'
+                    _cmux_target_opts
+                    ;;
+                ssh-session-cleanup)
+                    _arguments \
+                        '--session-id[session id]:id:' \
+                        '--all'
+                    _cmux_target_opts
+                    ;;
+                remote-daemon-status)
+                    _arguments \
+                        '--os[os]:os:(darwin linux)' \
+                        '--arch[arch]:arch:(arm64 amd64)'
+                    ;;
+                new-split)
+                    _arguments '1:direction:(left right up down)'
+                    _cmux_target_opts
+                    _arguments '--panel[id|ref]:id:'
+                    ;;
+                focus-pane)
+                    _arguments '--pane[id|ref]:id:'
+                    _cmux_target_opts
+                    ;;
+                new-pane)
+                    _arguments \
+                        '--type[pane type]:type:(terminal browser simulator)' \
+                        '--direction[direction]:dir:(left right up down)' \
+                        '--url[url]:url:' \
+                        '--profile[profile]:profile:'
+                    _cmux_target_opts
+                    ;;
+                new-surface)
+                    _arguments \
+                        '--type[surface type]:type:(terminal browser simulator agent-session)' \
+                        '--provider[agent provider]:provider:(codex claude opencode)' \
+                        '--renderer[renderer]:renderer:(react solid)' \
+                        '--url[url]:url:'
+                    _cmux_target_opts
+                    ;;
+                close-surface)
+                    _cmux_target_opts
+                    ;;
+                move-surface)
+                    _arguments \
+                        '--surface[id|ref]:id:' \
+                        '--pane[id|ref]:id:' \
+                        '--before[id|ref]:id:' \
+                        '--after[id|ref]:id:' \
+                        '--index[position]:n:'
+                    _cmux_target_opts
+                    ;;
+                split-off)
+                    _arguments \
+                        '--surface[id|ref]:id:' \
+                        '1:direction:(left right up down)'
+                    _cmux_target_opts
+                    ;;
+                reorder-surface)
+                    _arguments \
+                        '--surface[id|ref]:id:' \
+                        '--index[position]:n:' \
+                        '--before[id|ref]:id:' \
+                        '--after[id|ref]:id:'
+                    _cmux_target_opts
+                    ;;
+                tab-action)
+                    _arguments \
+                        '--action[action name]:name:' \
+                        '--tab[id|ref]:id:' \
+                        '--title[text]:text:' \
+                        '--url[url]:url:'
+                    _cmux_target_opts
+                    ;;
+                rename-tab)
+                    _arguments '1:title:'
+                    _cmux_target_opts
+                    ;;
+                drag-surface-to-split)
+                    _arguments \
+                        '--surface[id|ref]:id:' \
+                        '1:direction:(left right up down)'
+                    _cmux_target_opts
+                    ;;
+                trigger-flash)
+                    _cmux_target_opts
+                    ;;
+                focus-panel)
+                    _arguments '--panel[id|ref]:id:'
+                    _cmux_target_opts
+                    ;;
+                close-workspace|select-workspace)
+                    _arguments '--workspace[id|ref]:id:'
+                    _cmux_target_opts
+                    ;;
+                rename-workspace)
+                    _arguments '1:title:'
+                    _cmux_target_opts
+                    ;;
+                rename-window)
+                    _arguments '1:title:'
+                    _cmux_target_opts
+                    ;;
+                current-workspace)
+                    _cmux_target_opts
+                    ;;
+                read-screen|capture-pane)
+                    _arguments '--scrollback' '--lines[n]:n:'
+                    _cmux_target_opts
+                    ;;
+                send)
+                    _arguments '1:text:'
+                    _cmux_target_opts
+                    ;;
+                send-key)
+                    _arguments '1:key:'
+                    _cmux_target_opts
+                    ;;
+                send-panel)
+                    _arguments '--panel[id|ref]:id:' '1:text:'
+                    _cmux_target_opts
+                    ;;
+                send-key-panel)
+                    _arguments '--panel[id|ref]:id:' '1:key:'
+                    _cmux_target_opts
+                    ;;
+                notify)
+                    _arguments \
+                        '--title[title]:text:' \
+                        '--subtitle[subtitle]:text:' \
+                        '--body[body]:text:'
+                    _cmux_target_opts
+                    ;;
+                dismiss-notification)
+                    _arguments '--id[uuid]:uuid:' '--all-read'
+                    ;;
+                mark-notification-read)
+                    _arguments '--id[uuid]:uuid:' '--all'
+                    _cmux_target_opts
+                    ;;
+                open-notification)
+                    _arguments '--id[uuid]:uuid:'
+                    ;;
+                clear-notifications)
+                    _cmux_target_opts
+                    ;;
+                set-status)
+                    _arguments \
+                        '1:key:' '2:value:' \
+                        '--icon[icon name]:name:' \
+                        '--color[color]:color:' \
+                        '--priority[priority]:n:'
+                    _cmux_target_opts
+                    ;;
+                clear-status)
+                    _arguments '1:key:'
+                    _cmux_target_opts
+                    ;;
+                list-status)
+                    _cmux_target_opts
+                    ;;
+                set-progress)
+                    _arguments '1:progress:(0.0 0.1 0.2 0.25 0.3 0.4 0.5 0.6 0.7 0.75 0.8 0.9 1.0)' \
+                        '--label[label]:text:'
+                    _cmux_target_opts
+                    ;;
+                clear-progress)
+                    _cmux_target_opts
+                    ;;
+                log)
+                    _arguments \
+                        '--level[level]:level:' \
+                        '--source[source name]:name:' \
+                        '1:message:'
+                    _cmux_target_opts
+                    ;;
+                simulate-sidebar-drag)
+                    _arguments \
+                        '--window[id|ref]:id:' \
+                        '--from[workspace]:ws:' \
+                        '--to[workspace]:ws:' \
+                        '--duration-ms[duration]:n:' \
+                        '--steps[steps]:n:'
+                    ;;
+                # tmux compatibility commands
+                resize-pane)
+                    _arguments \
+                        '--pane[id|ref]:id:' \
+                        '(-L)-L[resize left]' \
+                        '(-R)-R[resize right]' \
+                        '(-U)-U[resize up]' \
+                        '(-D)-D[resize down]' \
+                        '--amount[amount]:n:'
+                    _cmux_target_opts
+                    ;;
+                pipe-pane)
+                    _arguments '--command[shell command]:text:'
+                    _cmux_target_opts
+                    ;;
+                wait-for)
+                    _arguments \
+                        '(-S --signal)'{-S,--signal}'[signal]' \
+                        '1:name:' \
+                        '--timeout[timeout]:seconds:'
+                    ;;
+                swap-pane)
+                    _arguments \
+                        '--pane[id|ref]:id:' \
+                        '--target-pane[id|ref]:id:'
+                    _cmux_target_opts
+                    ;;
+                break-pane)
+                    _cmux_target_opts
+                    ;;
+                join-pane)
+                    _arguments '--target-pane[id|ref]:id:'
+                    _cmux_target_opts
+                    ;;
+                next-window|previous-window|last-window)
+                    _cmux_target_opts
+                    ;;
+                last-pane)
+                    _cmux_target_opts
+                    ;;
+                find-window)
+                    _arguments '--content' '--select' '1:query:'
+                    _cmux_target_opts
+                    ;;
+                clear-history)
+                    _cmux_target_opts
+                    ;;
+                set-hook)
+                    _arguments '--list' '--unset[event]:event:' '1:event:' '2:command:'
+                    ;;
+                bind-key|unbind-key|copy-mode)
+                    _message "tmux compat command"
+                    ;;
+                set-buffer)
+                    _arguments '--name[name]:name:' '1:text:'
+                    ;;
+                paste-buffer)
+                    _arguments '--name[name]:name:'
+                    _cmux_target_opts
+                    ;;
+                respawn-pane)
+                    _arguments '--command[command]:text:'
+                    _cmux_target_opts
+                    ;;
+                display-message)
+                    _arguments '(-p --print)'{-p,--print}'[print]' '1:text:'
+                    ;;
+                browser)
+                    _cmux_browser
+                    ;;
+                help)
+                    _values 'help topic' $(_cmux_command_names)
+                    ;;
+            esac
+            ;;
+    esac
+}
+
+# Common target options shared by many commands
+_cmux_target_opts() {
+    _arguments \
+        '--workspace[workspace id|ref|index]:id:' \
+        '--surface[surface id|ref|index]:id:' \
+        '--window[window id|ref|index]:id:' \
+        '--focus[focus]:bool:(true false)' \
+        '--no-focus'
+}
+
+_cmux_command_names() {
+    local -a cmds
+    cmds=(
+        welcome docs settings config shortcuts disable-browser enable-browser
+        browser-status agent-hibernation restore restore-session open diff
+        feedback feed themes claude-teams codex-teams omo omx omc hooks
+        ping version capabilities events auth login logout vm remotes
+        ai-accounts rpc simulator ios identify list-windows current-window
+        new-window focus-window close-window move-workspace-to-window
+        reorder-workspace reorder-workspaces workspace-action workspace
+        move-tab-to-new-workspace list-workspaces new-workspace ssh
+        mosh mosh-tmux ssh-tmux ssh-session-list ssh-session-attach
+        ssh-session-cleanup remote-daemon-status new-split list-panes
+        list-pane-surfaces tree top memory focus-pane new-pane new-surface
+        close-surface move-surface split-off reorder-surface tab-action
+        surface rename-tab drag-surface-to-split refresh-surfaces
+        reload-config surface-health debug-terminals trigger-flash
+        list-panels focus-panel close-workspace select-workspace
+        rename-workspace rename-window current-workspace read-screen
+        send send-key send-panel send-key-panel notify list-notifications
+        dismiss-notification mark-notification-read open-notification
+        jump-to-unread clear-notifications right-sidebar sidebar
+        set-status clear-status list-status set-progress clear-progress
+        log clear-log list-log sidebar-state set-app-focus
+        simulate-app-active simulate-sidebar-drag capture-pane resize-pane
+        pipe-pane wait-for swap-pane break-pane join-pane next-window
+        previous-window last-window last-pane find-window clear-history
+        set-hook popup bind-key unbind-key copy-mode set-buffer
+        list-buffers paste-buffer respawn-pane display-message markdown
+        browser help
+    )
+    print -l $cmds
+}
+
+_cmux_commands() {
+    local -a cmds
+    cmds=(
+        'welcome:welcome screen'
+        'docs:open documentation'
+        'settings:manage settings'
+        'config:config doctor/validate/reload'
+        'shortcuts:list keyboard shortcuts'
+        'disable-browser:disable browser'
+        'enable-browser:enable browser'
+        'browser-status:show browser status'
+        'agent-hibernation:toggle agent hibernation'
+        'restore:restore from checkpoint'
+        'restore-session:restore session'
+        'open:open path or URL in workspace'
+        'diff:open diff in browser split'
+        'feedback:send feedback'
+        'feed:feed tui or clear'
+        'themes:manage themes'
+        'claude-teams:claude teams passthrough'
+        'codex-teams:codex teams passthrough'
+        'omo:opencode passthrough'
+        'omx:omx passthrough'
+        'omc:omc passthrough'
+        'hooks:manage agent hooks'
+        'ping:ping cmux socket'
+        'version:show version'
+        'capabilities:list capabilities'
+        'events:stream events'
+        'auth:auth status/login/logout'
+        'login:alias for auth login'
+        'logout:alias for auth logout'
+        'vm:cloud VM management'
+        'cloud:alias for vm'
+        'remotes:manage remotes'
+        'remote:alias for remotes'
+        'ai-accounts:manage AI accounts'
+        'rpc:raw RPC call'
+        'simulator:simulator control'
+        'ios:iOS simulator control'
+        'identify:identify caller'
+        'list-windows:list windows'
+        'current-window:show current window'
+        'new-window:create new window'
+        'focus-window:focus a window'
+        'close-window:close a window'
+        'move-workspace-to-window:move workspace to window'
+        'reorder-workspace:reorder a workspace'
+        'reorder-workspaces:reorder workspaces'
+        'workspace-action:workspace action'
+        'workspace:workspace status'
+        'move-tab-to-new-workspace:move tab to new workspace'
+        'list-workspaces:list workspaces'
+        'new-workspace:create new workspace'
+        'ssh:SSH connection'
+        'mosh:Mosh connection'
+        'mosh-tmux:Mosh+tmux connection'
+        'ssh-tmux:SSH+tmux connection'
+        'ssh-session-list:list SSH sessions'
+        'ssh-session-attach:attach SSH session'
+        'ssh-session-cleanup:cleanup SSH sessions'
+        'remote-daemon-status:remote daemon status'
+        'new-split:create new split'
+        'list-panes:list panes'
+        'list-pane-surfaces:list pane surfaces'
+        'tree:show workspace tree'
+        'top:show resource usage'
+        'memory:show memory usage'
+        'focus-pane:focus a pane'
+        'new-pane:create new pane'
+        'new-surface:create new surface'
+        'close-surface:close a surface'
+        'move-surface:move a surface'
+        'split-off:split off a surface'
+        'reorder-surface:reorder a surface'
+        'tab-action:tab action'
+        'surface:surface resume'
+        'rename-tab:rename a tab'
+        'drag-surface-to-split:drag surface to split'
+        'refresh-surfaces:refresh surfaces'
+        'reload-config:reload config'
+        'surface-health:surface health check'
+        'debug-terminals:debug terminals'
+        'trigger-flash:trigger flash'
+        'list-panels:list panels'
+        'focus-panel:focus a panel'
+        'close-workspace:close workspace'
+        'select-workspace:select workspace'
+        'rename-workspace:rename workspace'
+        'rename-window:rename window'
+        'current-workspace:show current workspace'
+        'read-screen:read terminal screen'
+        'send:send text to terminal'
+        'send-key:send key to terminal'
+        'send-panel:send text to panel'
+        'send-key-panel:send key to panel'
+        'notify:send notification'
+        'list-notifications:list notifications'
+        'dismiss-notification:dismiss notification'
+        'mark-notification-read:mark notification read'
+        'open-notification:open notification'
+        'jump-to-unread:jump to unread'
+        'clear-notifications:clear notifications'
+        'right-sidebar:right sidebar control'
+        'sidebar:sidebar control'
+        'set-status:set status'
+        'clear-status:clear status'
+        'list-status:list status'
+        'set-progress:set progress'
+        'clear-progress:clear progress'
+        'log:log a message'
+        'clear-log:clear log'
+        'list-log:list log entries'
+        'sidebar-state:show sidebar state'
+        'set-app-focus:set app focus'
+        'simulate-app-active:simulate app active'
+        'simulate-sidebar-drag:simulate sidebar drag'
+        'capture-pane:capture pane (tmux compat)'
+        'resize-pane:resize pane (tmux compat)'
+        'pipe-pane:pipe pane (tmux compat)'
+        'wait-for:wait for signal (tmux compat)'
+        'swap-pane:swap pane (tmux compat)'
+        'break-pane:break pane (tmux compat)'
+        'join-pane:join pane (tmux compat)'
+        'next-window:next window (tmux compat)'
+        'previous-window:previous window (tmux compat)'
+        'last-window:last window (tmux compat)'
+        'last-pane:last pane (tmux compat)'
+        'find-window:find window (tmux compat)'
+        'clear-history:clear history (tmux compat)'
+        'set-hook:set hook (tmux compat)'
+        'popup:popup (tmux compat)'
+        'bind-key:bind key (tmux compat)'
+        'unbind-key:unbind key (tmux compat)'
+        'copy-mode:copy mode (tmux compat)'
+        'set-buffer:set buffer (tmux compat)'
+        'list-buffers:list buffers (tmux compat)'
+        'paste-buffer:paste buffer (tmux compat)'
+        'respawn-pane:respawn pane (tmux compat)'
+        'display-message:display message (tmux compat)'
+        'markdown:open markdown in viewer panel'
+        'browser:browser automation'
+        'help:show help'
+    )
+    _describe 'cmux command' cmds
+}
+
+_cmux_hooks() {
+    _arguments \
+        '1: :->sub'
+    case $state in
+        sub)
+            _values 'hooks action' \
+                'setup[setup hooks]' \
+                'uninstall[uninstall hooks]' \
+                'feed[feed events]'
+            ;;
+    esac
+    _arguments '--agent[agent name]:name:'
+}
+
+_cmux_vm() {
+    _values 'vm action' \
+        'base[base VM]' \
+        'new[create new VM]' \
+        'ls[list VMs]' \
+        'status[VM status]' \
+        'snapshot[snapshot VM]' \
+        'fork[fork VM]' \
+        'restore[restore VM]' \
+        'rm[remove VM]' \
+        'exec[execute on VM]' \
+        'shell[shell on VM]' \
+        'ssh[SSH to VM]'
+}
+
+_cmux_remotes() {
+    _values 'remotes action' \
+        'list[list remotes]' \
+        'add[add remote]' \
+        'remove[remove remote]'
+    _arguments \
+        '--route[host:port]:route:' \
+        '--tag[tag]:tag:' \
+        '--json[JSON output]'
+}
+
+_cmux_todo() {
+    _values 'todo action' \
+        'add[add todo item]' \
+        'list[list todo items]' \
+        'check[check todo item]' \
+        'uncheck[uncheck todo item]' \
+        'start[start todo item]' \
+        'rm[remove todo item]' \
+        'clear[clear all items]'
+    _cmux_target_opts
+}
+
+_cmux_workspace() {
+    _arguments '1: :->sub'
+    case $state in
+        sub)
+            _values 'workspace action' \
+                'status[show or set workspace status]' \
+                'set[set workspace status lane]'
+            ;;
+    esac
+    _cmux_target_opts
+}
+
+_cmux_diff() {
+    _arguments \
+        '1:patch-file:_files' \
+        '--source[diff source]:source:(unstaged staged branch last-turn)' \
+        '--unstaged' '--staged' '--branch' '--last-turn' \
+        '--cwd[working directory]:dir:_files -/' \
+        '--base[base ref]:ref:' \
+        '--title[title]:text:' \
+        '--layout[layout]:layout:(split unified)' \
+        '--font-size[font size]:points:'
+    _cmux_target_opts
+}
+
+_cmux_browser() {
+    local context state line
+    typeset -A opt_args
+
+    _arguments -C \
+        '--surface[surface id|ref|index]:id:' \
+        '1: :_cmux_browser_subcommands' \
+        '*:: :->browser-args'
+
+    case $state in
+        browser-args)
+            case $line[1] in
+                disable|enable|status)
+                    ;;
+                open|open-split)
+                    _arguments '1:url:' '--profile[profile]:profile:'
+                    _arguments '--focus[focus]:bool:(true false)'
+                    ;;
+                goto|navigate)
+                    _arguments '1:url:' '--snapshot-after'
+                    ;;
+                back|forward|reload)
+                    _arguments '--snapshot-after'
+                    ;;
+                react-grab)
+                    _values 'react-grab action' toggle
+                    _arguments '--surface[id]:id:' '--return-to[terminal surface]:id:'
+                    ;;
+                devtools)
+                    _values 'devtools action' toggle console
+                    _arguments '--surface[id]:id:'
+                    ;;
+                focus-mode)
+                    _values 'focus-mode action' enter exit toggle
+                    _arguments '--surface[id]:id:'
+                    ;;
+                design-mode)
+                    _values 'design-mode action' enable disable toggle status
+                    _arguments '--surface[id]:id:'
+                    ;;
+                zoom)
+                    _values 'zoom action' in out reset
+                    _arguments '--surface[id]:id:'
+                    ;;
+                history)
+                    _values 'history action' clear
+                    _arguments '--force'
+                    ;;
+                url|get-url)
+                    ;;
+                snapshot)
+                    _arguments \
+                        '--interactive' '-i' \
+                        '--cursor' \
+                        '--compact' \
+                        '--max-depth[depth]:n:' \
+                        '--selector[css selector]:css:'
+                    ;;
+                eval)
+                    _arguments '1:script:'
+                    ;;
+                wait)
+                    _arguments \
+                        '--selector[css selector]:css:' \
+                        '--text[text]:text:' \
+                        '--url-contains[text]:text:' \
+                        '--load-state[state]:state:(interactive complete)' \
+                        '--function[js function]:js:' \
+                        '--timeout-ms[timeout]:ms:'
+                    ;;
+                click|dblclick|hover|focus|check|uncheck|scroll-into-view)
+                    _arguments '1:selector:' '--snapshot-after'
+                    ;;
+                type)
+                    _arguments '1:selector:' '2:text:' '--snapshot-after'
+                    ;;
+                fill)
+                    _arguments '1:selector:' '2:text:' '--snapshot-after'
+                    ;;
+                press|keydown|keyup)
+                    _arguments '1:key:' '--snapshot-after'
+                    ;;
+                select)
+                    _arguments '1:selector:' '2:value:' '--snapshot-after'
+                    ;;
+                scroll)
+                    _arguments \
+                        '--selector[css selector]:css:' \
+                        '--dx[delta x]:n:' \
+                        '--dy[delta y]:n:' \
+                        '--snapshot-after'
+                    ;;
+                screenshot)
+                    _arguments '--out[output path]:file:_files' '--json'
+                    ;;
+                get)
+                    _values 'get type' url title text html value attr count box styles
+                    ;;
+                is)
+                    _values 'is check' visible enabled checked
+                    _arguments '1:selector:'
+                    ;;
+                find)
+                    _values 'find type' role text label placeholder alt title testid first last nth
+                    ;;
+                frame)
+                    _arguments '1:selector:'
+                    ;;
+                dialog)
+                    _values 'dialog action' accept dismiss
+                    _arguments '1:text:'
+                    ;;
+                download)
+                    _arguments \
+                        '1:action:(wait)' \
+                        '--path[download path]:dir:_files -/' \
+                        '--timeout-ms[timeout]:ms:'
+                    ;;
+                profiles)
+                    _values 'profiles action' list add rename clear delete
+                    _arguments '--force'
+                    ;;
+                import)
+                    _message "import args"
+                    ;;
+                cookies)
+                    _values 'cookies action' get set clear
+                    ;;
+                storage)
+                    _values 'storage type' local session
+                    _arguments '1:action:(get set clear)'
+                    ;;
+                tab)
+                    _values 'tab action' new list switch close
+                    ;;
+                console)
+                    _values 'console action' list clear
+                    ;;
+                errors)
+                    _values 'errors action' list clear
+                    ;;
+                highlight)
+                    _arguments '1:selector:'
+                    ;;
+                state)
+                    _values 'state action' save load
+                    _arguments '1:path:_files'
+                    ;;
+                addinitscript)
+                    _arguments '1:script:'
+                    ;;
+                addscript)
+                    _arguments '1:script:'
+                    ;;
+                addstyle)
+                    _arguments '1:css:'
+                    ;;
+                identify)
+                    _arguments '--surface[id]:id:'
+                    ;;
+            esac
+            ;;
+    esac
+}
+
+_cmux_browser_subcommands() {
+    local -a subs
+    subs=(
+        'disable:disable browser'
+        'enable:enable browser'
+        'status:browser status'
+        'open:open URL in browser split'
+        'open-split:open URL in new browser split'
+        'goto:navigate to URL'
+        'navigate:navigate to URL'
+        'back:browser back'
+        'forward:browser forward'
+        'reload:reload page'
+        'react-grab:toggle react-grab'
+        'devtools:toggle devtools'
+        'focus-mode:focus mode control'
+        'design-mode:design mode control'
+        'zoom:zoom control'
+        'history:browser history'
+        'url:get current URL'
+        'get-url:get current URL'
+        'snapshot:accessibility snapshot'
+        'eval:evaluate JavaScript'
+        'wait:wait for condition'
+        'click:click element'
+        'dblclick:double-click element'
+        'hover:hover element'
+        'focus:focus element'
+        'check:check checkbox'
+        'uncheck:uncheck checkbox'
+        'scroll-into-view:scroll element into view'
+        'type:type text into element'
+        'fill:fill element'
+        'press:press key'
+        'keydown:keydown'
+        'keyup:keyup'
+        'select:select option'
+        'scroll:scroll page'
+        'screenshot:take screenshot'
+        'get:get property'
+        'is:check element state'
+        'find:find element'
+        'frame:switch frame'
+        'dialog:handle dialog'
+        'download:download file'
+        'profiles:manage profiles'
+        'import:import data'
+        'cookies:manage cookies'
+        'storage:manage storage'
+        'tab:manage tabs'
+        'console:manage console'
+        'errors:manage errors'
+        'highlight:highlight element'
+        'state:save/load state'
+        'addinitscript:add init script'
+        'addscript:add script'
+        'addstyle:add CSS style'
+        'identify:identify browser surface'
+    )
+    _describe 'browser subcommand' subs
+}
+
+_cmux "$@"
