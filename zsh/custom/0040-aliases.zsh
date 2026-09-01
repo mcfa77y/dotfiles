@@ -27,7 +27,8 @@ else
   alias lst='ls -la'
 fi
 
-alias cd='z'
+alias z='cd'
+alias zi='cdi'
 alias ..='cd ..'
 alias z-='cd -'
 alias z2='cd ../../'

@@ -39,6 +39,10 @@ alias wtexisting='HERE=$(pwd); cd $RHL_DIR; wt switch --config "$GIT_TOOL_JS_DIR
 # alias wtaa='HERE=$(pwd); cd $GIT_TOOL_JS_DIR; bun run cli create $(clippaste)'
 alias wtnew='HERE=$(pwd); cd $RHL_DIR; wt switch --config "$GIT_TOOL_JS_DIR/.config/wt.toml" --create $(clippaste); cd $HERE'
 
+# 2026-08-31
+# remove worktree
+alias wtrm='wt remove  --force  --force-delete '
+
 # - git push no verify
 alias gpnv='git push --no-verify'
 

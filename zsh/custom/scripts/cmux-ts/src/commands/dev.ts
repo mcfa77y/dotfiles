@@ -76,63 +76,63 @@ export async function launchDevWorkspace(options: LaunchDevOptions = {}): Promis
   }
 
   // Create right pane split (Tab 1: nvim, Tab 2: terminal)
-  let rightNvimSurface: string | undefined
-  let rightTerminalSurface: string | undefined
-
-  try {
-    const paneRes = await cmux.newPane({
-      workspace: wsRef,
-      type: 'terminal',
-      direction: 'right',
-      focus: false,
-    })
-    rightNvimSurface = paneRes.surface_ref || paneRes.surface_id
-    const rightPane = paneRes.pane_ref || paneRes.pane_id
-
-    // Setup Tab 1 in right pane: nvim
-    if (rightNvimSurface) {
-      await cmux.renameTab({
-        workspace: wsRef,
-        surface: rightNvimSurface,
-        title: nvimTitle,
-      })
-      await cmux.send({
-        workspace: wsRef,
-        surface: rightNvimSurface,
-        text: nvimCmd,
-      })
-    }
-
-    // Setup Tab 2 in right pane: terminal (focused to be the visible tab in the right pane)
-    if (rightPane) {
-      const tab2Res = await cmux.createSurface({
-        cwd,
-        focus: true,
-        workspace: wsRef,
-        pane: rightPane,
-      })
-      rightTerminalSurface = tab2Res.surface_ref || tab2Res.surface_id
-
-      if (rightTerminalSurface) {
-        await cmux.renameTab({
-          workspace: wsRef,
-          surface: rightTerminalSurface,
-          title: terminalTitle,
-        })
-        if (terminalCmd) {
-          await cmux.send({
-            workspace: wsRef,
-            surface: rightTerminalSurface,
-            text: terminalCmd,
-          })
-        }
-      }
-    }
-  }
-  catch {
-    // Non-fatal if right pane creation fails
-  }
-
+  // let rightNvimSurface: string | undefined
+  // let rightTerminalSurface: string | undefined
+  //
+  // try {
+  //   const paneRes = await cmux.newPane({
+  //     workspace: wsRef,
+  //     type: 'terminal',
+  //     direction: 'right',
+  //     focus: false,
+  //   })
+  //   rightNvimSurface = paneRes.surface_ref || paneRes.surface_id
+  //   const rightPane = paneRes.pane_ref || paneRes.pane_id
+  //
+  //   // Setup Tab 1 in right pane: nvim
+  //   if (rightNvimSurface) {
+  //     await cmux.renameTab({
+  //       workspace: wsRef,
+  //       surface: rightNvimSurface,
+  //       title: nvimTitle,
+  //     })
+  //     await cmux.send({
+  //       workspace: wsRef,
+  //       surface: rightNvimSurface,
+  //       text: nvimCmd,
+  //     })
+  //   }
+  //
+  //   // Setup Tab 2 in right pane: terminal (focused to be the visible tab in the right pane)
+  //   if (rightPane) {
+  //     const tab2Res = await cmux.createSurface({
+  //       cwd,
+  //       focus: true,
+  //       workspace: wsRef,
+  //       pane: rightPane,
+  //     })
+  //     rightTerminalSurface = tab2Res.surface_ref || tab2Res.surface_id
+  //
+  //     if (rightTerminalSurface) {
+  //       await cmux.renameTab({
+  //         workspace: wsRef,
+  //         surface: rightTerminalSurface,
+  //         title: terminalTitle,
+  //       })
+  //       if (terminalCmd) {
+  //         await cmux.send({
+  //           workspace: wsRef,
+  //           surface: rightTerminalSurface,
+  //           text: terminalCmd,
+  //         })
+  //       }
+  //     }
+  //   }
+  // }
+  // catch {
+  //   // Non-fatal if right pane creation fails
+  // }
+  //
   // Ensure overall workspace focus is on the left pane (omp)
   try {
     const paneList = await cmux.listPanes({ workspace: wsRef })
@@ -148,8 +148,8 @@ export async function launchDevWorkspace(options: LaunchDevOptions = {}): Promis
   return {
     workspaceRef: wsRef,
     leftSurface,
-    rightSurface: rightNvimSurface,
-    rightTerminalSurface,
+    // rightSurface: rightNvimSurface,
+    // rightTerminalSurface,
   }
 }
 
