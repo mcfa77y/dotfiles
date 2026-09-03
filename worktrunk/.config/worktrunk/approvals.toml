@@ -114,4 +114,48 @@ ${AI_HARNESS:-agy} .
   # ${EDITOR:-agy-ide} . >/dev/null 2>&1 &
   ${AI_HARNESS:-agy} . >/dev/null 2>&1 &
   """,
+    """
+export CMUX_QUIET=1
+command -v cmux >/dev/null 2>&1 && cmux ping >/dev/null 2>&1 || exit 0
+command -v jq >/dev/null 2>&1 || exit 0
+
+# Skip if a cmux workspace for this branch already exists
+WORKSPACE_REF=$(cmux list-workspaces --json 2>/dev/null | jq -r --arg t "{{ branch | sanitize }}" '.workspaces[] | select(.title == $t) | .ref' | head -1)
+[ -n "$WORKSPACE_REF" ] && exit 0
+
+HARNESS_CMD="${AI_HARNESS:-omp-empo}"
+CMUX_TS_BIN="$HOME/dotfiles/zsh/custom/scripts/cmux-ts/bin/cmux-ts"
+
+if [ -x "$CMUX_TS_BIN" ]; then
+  "$CMUX_TS_BIN" dev "{{ worktree_path }}" --omp "$HARNESS_CMD" --focus true
+else
+  bun run --cwd "$HOME/dotfiles/zsh/custom/scripts/cmux-ts" src/index.ts dev "{{ worktree_path }}" --omp "$HARNESS_CMD" --focus true
+fi
+""",
+    "git sparse-checkout set .github .yarn workspaces/backend-api workspaces/frontend-app workspaces/helper-scripts workspaces/qa workspaces/mock-services",
+    "mkdir -p {{ worktree_path }}/.config && ln -sf {{ repo_path }}/.config/wt.toml {{ worktree_path }}/.config/wt.toml",
+    """
+mkdir -p {{ worktree_path }}/workspaces/backend-api {{ worktree_path }}/workspaces/frontend-app {{ worktree_path }}/workspaces/qa {{ worktree_path }}/workspaces/helper-scripts/rhl-api-tools {{ worktree_path }}/.vscode
+
+[ -f "{{ repo_path }}/../env/.env.backend-api" ] && ln -sf {{ repo_path }}/../env/.env.backend-api {{ worktree_path }}/workspaces/backend-api/.env
+[ -f "{{ repo_path }}/../env/.env.frontend-app" ] && ln -sf {{ repo_path }}/../env/.env.frontend-app {{ worktree_path }}/workspaces/frontend-app/.env
+[ -f "{{ repo_path }}/../env/.env.qa" ] && ln -sf {{ repo_path }}/../env/.env.qa {{ worktree_path }}/workspaces/qa/.env
+[ -f "{{ repo_path }}/../env/.env.mock-services" ] && ln -sf {{ repo_path }}/../env/.env.mo  {{ worktree_path }}/workspaces/mock-services/.env
+[ -f "{{ repo_path }}/../env/.env.rhl-api-tools" ] && ln -sf {{ repo_path }}/../env/.env.rhl-api-tools {{ worktree_path }}/workspaces/helper-scripts/rhl-api-tools/.env
+[ -f "{{ repo_path }}/../env/vscode/launch.json" ] && ln -sf {{ repo_path }}/../env/vscode/launch.json {{ worktree_path }}/.vscode/
+[ -f "{{ repo_path }}/../env/vscode/tasks.json" ] && ln -sf {{ repo_path }}/../env/vscode/tasks.json {{ worktree_path }}/.vscode/
+true
+""",
+    """
+mkdir -p {{ worktree_path }}/workspaces/backend-api {{ worktree_path }}/workspaces/frontend-app {{ worktree_path }}/workspaces/qa {{ worktree_path }}/workspaces/helper-scripts/rhl-api-tools {{ worktree_path }}/.vscode
+
+[ -f "{{ repo_path }}/../env/.env.backend-api" ] && ln -sf {{ repo_path }}/../env/.env.backend-api {{ worktree_path }}/workspaces/backend-api/.env
+[ -f "{{ repo_path }}/../env/.env.frontend-app" ] && ln -sf {{ repo_path }}/../env/.env.frontend-app {{ worktree_path }}/workspaces/frontend-app/.env
+[ -f "{{ repo_path }}/../env/.env.qa" ] && ln -sf {{ repo_path }}/../env/.env.qa {{ worktree_path }}/workspaces/qa/.env
+[ -f "{{ repo_path }}/../env/.env.mock-services" ] && ln -sf {{ repo_path }}/../env/.env.mock-services  {{ worktree_path }}/workspaces/mock-services/.env
+[ -f "{{ repo_path }}/../env/.env.rhl-api-tools" ] && ln -sf {{ repo_path }}/../env/.env.rhl-api-tools {{ worktree_path }}/workspaces/helper-scripts/rhl-api-tools/.env
+[ -f "{{ repo_path }}/../env/vscode/launch.json" ] && ln -sf {{ repo_path }}/../env/vscode/launch.json {{ worktree_path }}/.vscode/
+[ -f "{{ repo_path }}/../env/vscode/tasks.json" ] && ln -sf {{ repo_path }}/../env/vscode/tasks.json {{ worktree_path }}/.vscode/
+true
+""",
 ]

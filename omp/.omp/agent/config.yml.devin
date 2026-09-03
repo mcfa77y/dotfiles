@@ -1,36 +1,36 @@
 setupVersion: 1
 modelRoles:
-  default: devin/glm-5-2-1m
-  smol: devin/glm-5-2-1m
+  default: devin/glm-5-3-1m:high
+  smol: devin/glm-5-3-flash-1m:low
   slow: devin/claude-opus-5-high
   vision: devin/gemini-3-7-flash-medium
   plan: devin/gpt-5-6-luna:low
   designer: devin/claude-sonnet-5-medium
-  commit: devin/glm-5-2-1m
+  commit: devin/glm-5-3-flash-1m:low
   tiny: devin/swe-1-7-lightning
-  task: devin/glm-5-2-1m
-  advisor: devin/glm-5-2-1m
+  task: devin/glm-5-3-1m:high
+  advisor: devin/glm-5-3-1m:high
 defaultThinkingLevel: auto
 retry:
   fallbackChains:
     default:
-      - devin/swe-1-7:medium
       - devin/glm-5-2-1m
+      - devin/swe-1-7:medium
     slow:
       - devin/claude-sonnet-5-medium
       - devin/gpt-5-6-luna:medium
     task:
-      - devin/swe-1-7:medium
       - devin/glm-5-2-1m
+      - devin/swe-1-7:medium
     smol:
       - devin/swe-1-7-lightning
-      - devin/swe-1-6-fast
+      - devin/glm-5-2-1m
     vision:
       - devin/gemini-3-7-flash-low
       - devin/gemini-3-6-flash
     plan:
       - devin/gpt-5-6-luna:medium
-      - devin/glm-5-2-1m
+      - devin/glm-5-3-1m:high
     designer:
       - devin/claude-sonnet-5-low
       - devin/gpt-5-6-luna:medium
@@ -41,31 +41,31 @@ retry:
       - devin/swe-1-6-fast
       - devin/glm-5-2-1m
     advisor:
-      - devin/swe-1-7-lightning
       - devin/glm-5-2-1m
-dev: 
+      - devin/swe-1-7-lightning
+dev:
   autoqaConsent: granted
 symbolPreset: nerd
-prewalk: 
+prewalk:
   enabled: true
-autolearn: 
+autolearn:
   enabled: true
-github: 
+github:
   enabled: true
-composer: 
+composer:
   shape: box
-spelling: 
+spelling:
   autocomplete: false
 autoResume: true
-startup: 
+startup:
   setupWizard: false
-marketplace: 
+marketplace:
   autoUpdate: auto
-memory: 
+memory:
   backend: mnemopi
-mnemopi: 
+mnemopi:
   scoping: global
-astGrep: 
+astGrep:
   enabled: true
-theme: 
+theme:
   dark: dark-synthwave

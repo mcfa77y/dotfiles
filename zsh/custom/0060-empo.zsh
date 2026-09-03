@@ -11,6 +11,7 @@ alias zroot="z \$(git_current_branch)"
 alias zbe="zroot; z workspaces/backend-api/"
 alias zfe="zroot; z workspaces/frontend-app/"
 alias zqa="zroot; z workspaces/qa/"
+alias zms="zroot; z workspaces/mock-services/"
 alias zrat="zroot; z workspaces/helper-scripts/rhl-api-tools/"
 
 alias zempo='cd $EMPO_DIR'

@@ -16,8 +16,6 @@ alias gstash='git stash push -m '
 alias gstashd='git stash push -m "delete me: $(gtimestamp)"'
 alias gstashp='git stash pop'
 alias gback='git checkout -'
-alias gmain='gstash "switching to main: $(gtimestamp)"; gcm; gl'
-alias gpull='gstashd; git pull; gstashp'
 
 # Prune stale branches
 alias gprune='uv run $GIT_TOOL_DIR/git_stale_branches.py --directory $PWD'
@@ -33,11 +31,11 @@ alias wls='uv run $GIT_TOOL_DIR/git_worktree_list.py --directory $PWD'
 alias wtc='wt --config "$GIT_TOOL_JS_DIR/.config/wt.toml"'
 # - add working tree from existing remote branch
 # alias wta='uv run $GIT_TOOL_DIR/git_worktree_and_branches.py --here_directory $PWD'
-alias wtexisting='HERE=$(pwd); cd $RHL_DIR; wt switch --config "$GIT_TOOL_JS_DIR/.config/wt.toml" --remotes $(clippaste); cd $HERE'
+alias wtexisting='HERE=$(pwd); cd $RHL_DIR; gf; wt switch --config "$GIT_TOOL_JS_DIR/.config/wt.toml" --remotes $(clippaste); cd $HERE'
 
 # - add worktree from clipboard
 # alias wtaa='HERE=$(pwd); cd $GIT_TOOL_JS_DIR; bun run cli create $(clippaste)'
-alias wtnew='HERE=$(pwd); cd $RHL_DIR; wt switch --config "$GIT_TOOL_JS_DIR/.config/wt.toml" --create $(clippaste); cd $HERE'
+alias wtnew='HERE=$(pwd); cd $RHL_DIR; gf; wt switch --config "$GIT_TOOL_JS_DIR/.config/wt.toml" --create $(clippaste); cd $HERE'
 
 # 2026-08-31
 # remove worktree
@@ -140,3 +138,6 @@ function sync-4119() {
 
 # 2026-04-02 Git rebase with stash pop
 alias ggrbom='sync-stack main'
+
+# 2026-09-01 Git rebase onto current branch
+alias gpull='sync-stack $(git rev-parse --abbrev-ref HEAD)'

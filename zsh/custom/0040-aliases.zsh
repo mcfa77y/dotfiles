@@ -6,7 +6,6 @@ fi
 # --- Ollama ---
 alias ask="ollama run gemma4:latest"
 
-
 # --- Clipman ---
 alias clipman='XAUTHORITY=$(systemctl --user show-environment | sed -n s/^XAUTHORITY=//p) GDK_BACKEND=x11 GSK_RENDERER=cairo /snap/bin/clipman'
 # --- Nx ---
@@ -53,3 +52,6 @@ alias nomz='nvim $OMZ_CUSTOM_DIR/0040-aliases.zsh'
 alias nzsh='nvim ~/.zshrc'
 alias zomz='cd $OMZ_CUSTOM_DIR'
 alias fomz='zomz; nvim $(fzf_multi_select); cd -; sz'
+
+# 2026-09-02 copy path to clipboard macos
+alias copy_path='pwd | pbcopy'
