@@ -1,20 +1,28 @@
-# Oh My Pi profile helpers
+# Oh My Pi profile helpers with Headroom context compression
 
 export OMP_CONFIG_DIR="$HOME/.omp/agent"
 
+_omp_launch() {
+  if command -v headroom >/dev/null 2>&1; then
+    headroom wrap omp -- "$@"
+  else
+    command omp "$@"
+  fi
+}
+
 omp-devin() {
   command omp update
-  command omp --config "$OMP_CONFIG_DIR/config.yml.devin" "$@"
+  _omp_launch --config "$OMP_CONFIG_DIR/config.yml.devin" "$@"
 }
 
 omp-empo() {
   command omp update
-  command omp --config "$OMP_CONFIG_DIR/config.yml.empo-ai" "$@"
+  _omp_launch --config "$OMP_CONFIG_DIR/config.yml.empo-ai" "$@"
 }
 
 omp-empo-mix() {
   command omp update
-  command omp --config "$OMP_CONFIG_DIR/config.yml.empo-ai-mix" "$@"
+  _omp_launch --config "$OMP_CONFIG_DIR/config.yml.empo-ai-mix" "$@"
 }
 
 omp-profile() {

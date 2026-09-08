@@ -25,3 +25,8 @@ export YAZI_CONFIG_DIR="$HOME/.config/yazi"
 
 # --- Oh My Zsh ---
 OMZ_CUSTOM_DIR="$HOME/dotfiles/zsh/custom"
+
+# --- Headroom AI Context Compression ---
+export OPENAI_TARGET_API_URL='https://ai.empohealth.com/v1'
+export HEADROOM_HOST='127.0.0.1'
+export HEADROOM_PORT=8787

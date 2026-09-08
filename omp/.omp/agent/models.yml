@@ -1,3 +1,6 @@
+# managed by `headroom wrap omp` — do not hand-edit while wrapped.
+# `headroom unwrap omp` restores the pre-wrap file (or removes this one
+# if it did not exist). The original is kept at <models.yml.headroom-backup>.
 providers:
   omlx:
     baseUrl: http://127.0.0.1:8080/v1
@@ -5,3 +8,5 @@ providers:
     apiKey: sk-omlx-wh6lYDweyFp8x1PnUoWpTPt7
     discovery:
       type: openai-models-list
+  anthropic:
+    baseUrl: http://127.0.0.1:8787/p/remote-health-link.rhl-4200
