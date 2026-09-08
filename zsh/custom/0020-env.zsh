@@ -30,3 +30,4 @@ OMZ_CUSTOM_DIR="$HOME/dotfiles/zsh/custom"
 export OPENAI_TARGET_API_URL='https://ai.empohealth.com/v1'
 export HEADROOM_HOST='127.0.0.1'
 export HEADROOM_PORT=8787
+export EMPO_AI_BASE_URL='http://127.0.0.1:8787/v1'

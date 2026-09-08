@@ -9,4 +9,4 @@ providers:
     discovery:
       type: openai-models-list
   anthropic:
-    baseUrl: http://127.0.0.1:8787/p/remote-health-link.rhl-4200
+    baseUrl: http://127.0.0.1:8787/p/.omp
