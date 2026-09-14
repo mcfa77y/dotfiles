@@ -84,7 +84,6 @@ composer:
   shape: box
 spelling: 
   autocomplete: false
-autoResume: true
 startup: 
   setupWizard: false
 marketplace: 

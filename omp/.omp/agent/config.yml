@@ -1,6 +1,6 @@
 setupVersion: 1
 modelRoles:
-  default: devin/glm-5-3-1m
+  default: empo-ai/google/gemini-3.7-flash
   smol: empo-ai/google/gemini-3.5-flash:low
   slow: empo-ai/google/gemini-3.1-pro:high
   vision: empo-ai/google/gemini-3.7-flash:medium
@@ -65,7 +65,6 @@ composer:
   shape: box
 spelling:
   autocomplete: false
-autoResume: true
 startup:
   setupWizard: false
 marketplace:

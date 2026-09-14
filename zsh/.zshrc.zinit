@@ -217,3 +217,8 @@ path_prepend "$HOME/.local/bin"
 # Google Cloud SDK.
 if [ -f "$PROJECTS_DIR/git-apps/google-cloud-sdk/path.zsh.inc" ]; then . "$PROJECTS_DIR/git-apps/google-cloud-sdk/path.zsh.inc"; fi
 if [ -f "$PROJECTS_DIR/git-apps/google-cloud-sdk/completion.zsh.inc" ]; then . "$PROJECTS_DIR/git-apps/google-cloud-sdk/completion.zsh.inc"; fi
+
+# Headroom configuration
+export HEADROOM_MODE=token
+export HEADROOM_OUTPUT_SHAPER=0
+export HEADROOM_OUTPUT_HOLDOUT=0
