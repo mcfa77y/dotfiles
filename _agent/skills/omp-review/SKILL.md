@@ -1,11 +1,18 @@
 ---
 name: omp-review
-description: Perform a rigorous, multi-faceted code review inspired by oh-my-pi /review with target selection, parallel reviewer subagents, prioritized findings (P0-P3), confidence scores, and structured verdicts.
+description: Perform a rigorous, multi-faceted code review inspired by oh-my-pi /review with target selection, parallel reviewer subagents, prioritized findings (P0-P3), confidence scores, and structured verdicts. Use ONLY in non-oh-my-pi harnesses (Claude Code, Codex, Cursor, Devin, Antigravity, OpenCode). In Oh My Pi (omp), use native /review instead.
 ---
 
 # Code Review Skill (oh-my-pi /review style)
 
 Perform a comprehensive, structured code review using parallel specialized subagents, a prioritized findings matrix (P0–P3), confidence scoring, and explicit verdicts (`APPROVE`, `REQUEST_CHANGES`, `COMMENT`).
+
+## Harness Gate
+
+**CRITICAL**: This skill MUST NOT be used when running inside an Oh My Pi (`omp`) harness. Oh My Pi provides a native `/review` command and reviewer workflows.
+
+- **Non-Oh My Pi harnesses (Claude Code, Codex, Cursor, Devin, Antigravity, OpenCode)**: Proceed with this skill to emulate Oh My Pi's multi-faceted review process.
+- **Oh My Pi (`omp`)**: Stop immediately. Do not run this skill. Prompt the user to run `/review` or invoke the native review workflow directly.
 
 ---
 
