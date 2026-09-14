@@ -25,15 +25,40 @@ If the target scope is ambiguous or not specified by the user, inspect the git s
 ## 2. Gather Changes & Code Context
 
 1. Run `git diff` or `git status` to identify all modified, added, or deleted files.
-2. Review relevant surrounding context and imports in the touched files using `view_file` or `grep_search`.
+2. Review relevant surrounding context and imports in the touched files using `read` or `grep`.
 3. Check repository guidelines (e.g. `AGENTS.md`, `.commitlintrc.json`, lint/test rules) to ensure project conventions are evaluated.
 
+### Graphify Architectural & Impact Analysis
+When `graphify-out/graph.json` exists in the repository root, run Graphify before dispatching reviewers to map blast radius and architectural risk:
+
+1. **Blast Radius Analysis (`graphify affected`)**:
+   For every modified exported symbol, service, or interface:
+   ```bash
+   graphify affected "<SymbolName>"
+   ```
+   - Identify all downstream callers, imports, and dependent test suites across monorepo workspaces.
+   - **Omission Check**: Verify whether any affected callers or test suites were omitted from the PR diff.
+2. **Architectural Hub & God Node Check (`graphify god-nodes`)**:
+   ```bash
+   graphify god-nodes --top 10
+   ```
+   - Check if touched symbols rank among high-degree architectural hubs (e.g. `UserService`, `DashboardPage`).
+   - If a modified symbol is a high-degree hub, raise reviewer scrutiny for regressions, fan-out bugs, and tight coupling.
+3. **Layering & Call Path Verification (`graphify path`)**:
+   ```bash
+   graphify path "<CallerEntrypoint>" "<ModifiedService>"
+   ```
+   - Verify that execution paths respect boundaries (e.g. Controller → Service → Store) without layer violations.
+4. **Context on Unfamiliar Symbols (`graphify explain`)**:
+   ```bash
+   graphify explain "<SymbolName>"
+   ```
+   - Inspect symbol type, definition location, community cluster, and immediate connections without reading dozens of raw files.
 ---
 
 ## 3. Delegate to Parallel Reviewer Subagents
 
-To avoid blind spots and maximize depth, spawn specialized subagents via `invoke_subagent` (or evaluate each facet systematically):
-
+To avoid blind spots and maximize depth, spawn specialized subagents via `task` (or evaluate each facet systematically). Supply the **affected callers** and **hub status** discovered via Graphify directly in the subagents' context:
 1. **Security & Vulnerability Reviewer**:
    - Injection risks, authentication/authorization checks, secrets exposure.
    - Input validation, boundary checks, concurrency/race conditions, and unsafe operations.
@@ -76,6 +101,15 @@ Render the review results directly in the response using the following structure
 - **Verdict**: `[APPROVE | REQUEST_CHANGES | COMMENT]`
 - **Scope**: `<e.g., branch feature/xyz against main (5 files changed, +120/-45 lines)>`
 - **Findings Count**: `X Critical (P0), Y High (P1), Z Medium (P2), N Nits (P3)`
+- **Architectural Blast Radius (Graphify)**: `<e.g., 23 downstream callers affected across 3 workspaces; modified hub UserService (166 edges)>`
+
+---
+
+## 🌐 Architectural Impact (Graphify)
+*(Include when `graphify-out/graph.json` is available)*
+- **Modified Architectural Hubs**: `<Hub name and edge count, or None>`
+- **Downstream Consumers Impacted**: `<List of key callers / services>`
+- **Omitted Callers / Uncovered Tests**: `<List any affected files missing from the PR diff, or None>`
 
 ---
 

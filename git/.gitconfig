@@ -9,6 +9,7 @@
   delete-stashes = "!f() { git stash list | grep \"delete me\" | awk '{print $1}' | xargs -I {} git stash drop {};};"
 	reset-file = "!f() { git checkout main -- \"$1\"; }; f"
 	rsoft = reset --soft @{u}
+	gpull = !git pull && graphify update .
 
 [init]
 	defaultBranch = main

@@ -13,16 +13,19 @@ When this skill is invoked, follow these steps to perform a code review on the c
 
 2. **Analyze Code Changes**:
    Review the changes specifically focusing on:
+   - **Architectural Blast Radius (Graphify)**: If `graphify-out/graph.json` exists:
+     - Run `graphify affected "<ChangedSymbol>"` for modified interfaces, services, or models to detect every caller and test suite across workspaces.
+     - Run `graphify god-nodes` to check if changes touch high-degree architectural hubs (`UserService`, `DashboardPage`, `Authorize()`).
+     - Run `graphify explain "<Symbol>"` to understand context on unfamiliar modified code without costly grep scans.
+     - **Check for Omissions**: Flag any downstream consumers or test suites that depend on the modified symbol but were not updated in the PR.
    - **Security and Vulnerabilities**: Identify any insecure patterns, unvalidated inputs, or exposed credentials.
    - **Performance Optimizations**: Look for inefficient algorithms, unnecessary re-renders, or expensive queries.
    - **Code Style and Best Practices**: Ensure the code is readable, maintainable, and adheres to standard best practices.
    - **Test Coverage and Quality**: Check if new features or fixes include appropriate tests (unit/integration) and evaluate the quality of those tests.
-
 3. **Generate Review Report**:
    - Compile your findings into a structured Markdown document.
-   - Include a high-level summary, file-by-file feedback, and clear, actionable suggestions.
+   - Include a high-level summary, an **Architectural Impact & Blast Radius** section (documenting affected callers and hubs from Graphify), file-by-file feedback, and clear, actionable suggestions.
    - If there are no issues in a category, explicitly state that it looks good.
-
 4. **Output to `docs/`**:
    - Save the review report in the `docs/` directory of the current repository workspace (e.g., `docs/pr_review_<branch_name>.md`).
    - Note: Per global rules, files under `docs/` are treated as local helper/configuration files and should not be committed unless explicitly requested.

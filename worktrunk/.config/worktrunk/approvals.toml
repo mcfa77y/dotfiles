@@ -158,4 +158,25 @@ mkdir -p {{ worktree_path }}/workspaces/backend-api {{ worktree_path }}/workspac
 [ -f "{{ repo_path }}/../env/vscode/tasks.json" ] && ln -sf {{ repo_path }}/../env/vscode/tasks.json {{ worktree_path }}/.vscode/
 true
 """,
+    "git sparse-checkout set .github .yarn workspaces/backend-api workspaces/frontend-app workspaces/helper-scripts workspaces/qa workspaces/mock-services graphify-out",
+    """
+if [ -d "{{ repo_path }}/graphify-out" ]; then
+  mkdir -p {{ worktree_path }}/graphify-out
+  cp -R {{ repo_path }}/graphify-out/. {{ worktree_path }}/graphify-out/ 2>/dev/null || true
+fi
+""",
+    """
+mkdir -p {{ worktree_path }}/workspaces/backend-api {{ worktree_path }}/workspaces/frontend-app {{ worktree_path }}/workspaces/qa {{ worktree_path }}/workspaces/mock-services {{ worktree_path }}/workspaces/helper-scripts/rhl-api-tools {{ worktree_path }}/.vscode
+
+[ -f "{{ repo_path }}/../env/.env.backend-api" ] && ln -sf {{ repo_path }}/../env/.env.backend-api {{ worktree_path }}/workspaces/backend-api/.env
+[ -f "{{ repo_path }}/../env/.env.frontend-app" ] && ln -sf {{ repo_path }}/../env/.env.frontend-app {{ worktree_path }}/workspaces/frontend-app/.env
+[ -f "{{ repo_path }}/../env/.env.qa" ] && ln -sf {{ repo_path }}/../env/.env.qa {{ worktree_path }}/workspaces/qa/.env
+[ -f "{{ repo_path }}/../env/.env.mock-services" ] && ln -sf {{ repo_path }}/../env/.env.mock-services  {{ worktree_path }}/workspaces/mock-services/.env
+[ -f "{{ repo_path }}/../env/.env.rhl-api-tools" ] && ln -sf {{ repo_path }}/../env/.env.rhl-api-tools {{ worktree_path }}/workspaces/helper-scripts/rhl-api-tools/.env
+[ -f "{{ repo_path }}/../env/vscode/launch.json" ] && ln -sf {{ repo_path }}/../env/vscode/launch.json {{ worktree_path }}/.vscode/
+[ -f "{{ repo_path }}/../env/vscode/tasks.json" ] && ln -sf {{ repo_path }}/../env/vscode/tasks.json {{ worktree_path }}/.vscode/
+true
+""",
+    "git push -u origin {{ branch }} --no-verify || true",
+    "command -v graphify >/dev/null 2>&1 && (cd {{ worktree_path }} && graphify update . >/dev/null 2>&1 &) || true",
 ]
