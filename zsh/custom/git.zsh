@@ -28,14 +28,14 @@ alias wprune='uv run $GIT_TOOL_DIR/git_worktree_prune.py --directory $PWD'
 alias wls='uv run $GIT_TOOL_DIR/git_worktree_list.py --directory $PWD'
 
 # - use worktrunk with config
-alias wtc='wt --config "$GIT_TOOL_JS_DIR/.config/wt.toml"'
+alias wtc='wt'
 # - add working tree from existing remote branch
 # alias wta='uv run $GIT_TOOL_DIR/git_worktree_and_branches.py --here_directory $PWD'
-alias wtexisting='HERE=$(pwd); cd $RHL_DIR; gf; wt switch --config "$GIT_TOOL_JS_DIR/.config/wt.toml" --remotes $(clippaste); cd $HERE'
+alias wtexisting='HERE=$(pwd); cd $RHL_DIR; gf; wt switch --remotes $(clippaste); cd $HERE'
 
 # - add worktree from clipboard
 # alias wtaa='HERE=$(pwd); cd $GIT_TOOL_JS_DIR; bun run cli create $(clippaste)'
-alias wtnew='HERE=$(pwd); cd $RHL_DIR; gf; wt switch --config "$GIT_TOOL_JS_DIR/.config/wt.toml" --create $(clippaste); cd $HERE'
+alias wtnew='HERE=$(pwd); cd $RHL_DIR; gf; wt switch --create $(clippaste); cd $HERE'
 
 # 2026-08-31
 # remove worktree
@@ -138,6 +138,7 @@ function sync-4119() {
 
 # 2026-04-02 Git rebase with stash pop
 alias ggrbom='sync-stack main'
+alias ggrbomp='sync-stack main; gp'
 
 # 2026-09-01 Git rebase onto current branch
 alias gpull='sync-stack $(git rev-parse --abbrev-ref HEAD)'

@@ -37,7 +37,7 @@ Use this skill to create a ticket for changes you have already staged in git.
 5. **Stash Changes**: `git stash push --staged -m "stashed-for-<linear-issue>"`
 6. **Create Worktree**: Lower-case the issue ID and run:
    ```bash
-   wt switch --create --config $GIT_TOOL_JS_DIR/.config/wt.toml <lowercase-ticket-id>
+   wt switch --create <lowercase-ticket-id>
    ```
 7. **Apply Stash**: Switch `Cwd` to the new worktree and run `git stash pop`.
 
