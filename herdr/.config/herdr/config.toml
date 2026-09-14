@@ -1,0 +1,7 @@
+onboarding = false
+
+[[keys.command]]
+key = "ctrl+t"
+type = "shell"
+command = "\"$HERDR_BIN_PATH\" plugin pane open --plugin cesarferreira.herdr-palette --entrypoint picker"
+description = "command palette"

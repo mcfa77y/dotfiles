@@ -1,6 +1,9 @@
 .DS_Store
 *.log
-*~
+herdr/*.log
+herdr/release-notes.json
+herdr/session.json
+herdr/.plugins.lock
 .vscode/
 /gk/
 /oh-my-zsh/

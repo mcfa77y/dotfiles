@@ -1,0 +1,47 @@
+[
+  {
+    "plugin_id": "cesarferreira.herdr-palette",
+    "name": "Herdr Palette",
+    "version": "0.4.0",
+    "min_herdr_version": "0.7.0",
+    "description": "Fuzzy command palette that teaches effective Herdr shortcuts",
+    "manifest_path": "/home/joe/.config/herdr/plugins/github/cesarferreira.herdr-palette-57e12190d726/herdr-plugin.toml",
+    "plugin_root": "/home/joe/.config/herdr/plugins/github/cesarferreira.herdr-palette-57e12190d726",
+    "enabled": true,
+    "platforms": [
+      "linux",
+      "macos"
+    ],
+    "build": [
+      {
+        "command": [
+          "bun",
+          "install",
+          "--production"
+        ]
+      }
+    ],
+    "panes": [
+      {
+        "id": "picker",
+        "title": "Herdr Palette",
+        "placement": "popup",
+        "width": "80%",
+        "height": 20,
+        "command": [
+          "bun",
+          "run",
+          "src/main.ts"
+        ]
+      }
+    ],
+    "source": {
+      "kind": "github",
+      "owner": "cesarferreira",
+      "repo": "herdr-palette",
+      "resolved_commit": "9ca24b801cc0f484ac4287c69936481d9b6232f7",
+      "managed_path": "/home/joe/.config/herdr/plugins/github/cesarferreira.herdr-palette-57e12190d726",
+      "installed_unix_ms": 1789065619495
+    }
+  }
+]
