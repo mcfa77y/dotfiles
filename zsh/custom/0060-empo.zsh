@@ -152,6 +152,7 @@ RERUN_DIR="$JS_DIR/rerun-github-qa-tests"
 
 alias rerun-cicd-url='bun run --cwd $RERUN_DIR monitor --url $(clippaste)'
 alias rerun-cicd='bun run --cwd $RERUN_DIR monitor'
+alias monitor-cicd='bun run --cwd $RERUN_DIR monitor:pr'
 
 # --- Terraform ---
 alias zfetf="cd workspaces/frontend-app/infrastructure/stacks/staging"
