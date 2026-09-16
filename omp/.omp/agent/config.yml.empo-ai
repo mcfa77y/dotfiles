@@ -2,9 +2,9 @@ setupVersion: 1
 modelRoles:
   default: empo-ai/google/gemini-3.8-flash:high
   smol: empo-ai/google/gemini-3.5-flash-lite:low
-  slow: empo-ai/google/gemini-3.8-flash:high
+  slow: empo-ai/anthropic/claude-opus-5:high
   vision: empo-ai/google/gemini-3.8-flash:medium
-  plan: empo-ai/google/gemini-3.8-flash:high
+  plan: empo-ai/anthropic/claude-opus-5:medium
   designer: empo-ai/google/gemini-3.8-flash:medium
   commit: empo-ai/google/gemini-3.5-flash-lite:low
   tiny: empo-ai/google/gemini-3.5-flash-lite:minimal
@@ -15,31 +15,27 @@ retry:
   fallbackChains:
     default:
       - empo-ai/google/gemini-3.8-flash:medium
-      - empo-ai/google/gemini-3.8-flash:low
       - empo-ai/google/gemini-3.5-flash:high
       - empo-ai/google/gemini-3.5-flash:medium
-      - empo-ai/google/gemini-3.5-flash-lite:medium
     slow:
-      - empo-ai/google/gemini-3.8-flash:medium
+      - empo-ai/anthropic/claude-opus-5:medium
       - empo-ai/anthropic/claude-opus-4-7:high
-      - empo-ai/google/gemini-3.5-flash:high
-      - empo-ai/google/gemini-3.5-flash:medium
+      - empo-ai/google/gemini-3.8-flash:medium
     task:
       - empo-ai/google/gemini-3.8-flash:low
       - empo-ai/google/gemini-3.5-flash:medium
-      - empo-ai/google/gemini-3.5-flash-lite:medium
-      - empo-ai/google/gemini-3.5-flash-lite:low
+      - empo-ai/google/gemini-3.5-flash:low
     smol:
       - empo-ai/google/gemini-3.5-flash-lite:minimal
       - empo-ai/google/gemini-3.5-flash:low
-      - empo-ai/google/gemini-3.5-flash-lite:medium
+      - empo-ai/google/gemini-3.5-flash:minimal
     vision:
       - empo-ai/google/gemini-3.8-flash:low
       - empo-ai/google/gemini-3.5-flash:medium
       - empo-ai/google/gemini-3.5-flash:low
     plan:
-      - empo-ai/google/gemini-3.8-flash:medium
-      - empo-ai/anthropic/claude-opus-4-7:high
+      - empo-ai/anthropic/claude-opus-5:low
+      - empo-ai/google/gemini-3.8-flash:high
       - empo-ai/google/gemini-3.5-flash:high
     designer:
       - empo-ai/google/gemini-3.8-flash:low
@@ -48,9 +44,10 @@ retry:
     commit:
       - empo-ai/google/gemini-3.5-flash-lite:minimal
       - empo-ai/google/gemini-3.5-flash:low
-    tiny:
-      - empo-ai/google/gemini-3.5-flash-lite:minimal
       - empo-ai/google/gemini-3.5-flash:minimal
+    tiny:
+      - empo-ai/google/gemini-3.5-flash:minimal
+      - empo-ai/google/gemini-3.5-flash:low
     advisor:
       - empo-ai/google/gemini-3.8-flash:low
       - empo-ai/google/gemini-3.5-flash:medium
