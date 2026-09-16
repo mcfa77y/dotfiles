@@ -1,13 +1,13 @@
 setupVersion: 1
 modelRoles:
   default: empo-ai/google/gemini-3.8-flash:high
-  smol: empo-ai/google/gemini-3.5-flash:low
+  smol: empo-ai/google/gemini-3.5-flash-lite:low
   slow: empo-ai/google/gemini-3.8-flash:high
   vision: empo-ai/google/gemini-3.8-flash:medium
   plan: empo-ai/google/gemini-3.8-flash:high
   designer: empo-ai/google/gemini-3.8-flash:medium
-  commit: empo-ai/google/gemini-3.6-flash:low
-  tiny: empo-ai/google/gemini-3.5-flash:low
+  commit: empo-ai/google/gemini-3.5-flash-lite:low
+  tiny: empo-ai/google/gemini-3.5-flash-lite:minimal
   task: empo-ai/google/gemini-3.8-flash:medium
   advisor: empo-ai/google/gemini-3.8-flash:medium
 defaultThinkingLevel: auto
@@ -15,62 +15,46 @@ retry:
   fallbackChains:
     default:
       - empo-ai/google/gemini-3.8-flash:medium
-      - empo-ai/google/gemini-3.7-flash:high
-      - empo-ai/google/gemini-3.6-flash:high
-      - empo-ai/google/gemini-3.5-flash:high
       - empo-ai/google/gemini-3.8-flash:low
-      - empo-ai/google/gemini-3.7-flash:low
-      - empo-ai/google/gemini-3.6-flash:medium
+      - empo-ai/google/gemini-3.5-flash:high
       - empo-ai/google/gemini-3.5-flash:medium
+      - empo-ai/google/gemini-3.5-flash-lite:medium
     slow:
       - empo-ai/google/gemini-3.8-flash:medium
-      - empo-ai/google/gemini-3.7-flash:high
-      - empo-ai/google/gemini-3.6-flash:high
+      - empo-ai/anthropic/claude-opus-4-7:high
       - empo-ai/google/gemini-3.5-flash:high
-      - empo-ai/google/gemini-3.7-flash:medium
-      - empo-ai/google/gemini-3.6-flash:medium
+      - empo-ai/google/gemini-3.5-flash:medium
     task:
       - empo-ai/google/gemini-3.8-flash:low
-      - empo-ai/google/gemini-3.7-flash:medium
-      - empo-ai/google/gemini-3.6-flash:medium
       - empo-ai/google/gemini-3.5-flash:medium
-      - empo-ai/google/gemini-3.6-flash:low
-      - empo-ai/google/gemini-3.5-flash:low
+      - empo-ai/google/gemini-3.5-flash-lite:medium
+      - empo-ai/google/gemini-3.5-flash-lite:low
     smol:
-      - empo-ai/google/gemini-3.6-flash:low
-      - empo-ai/google/gemini-3.7-flash:low
+      - empo-ai/google/gemini-3.5-flash-lite:minimal
       - empo-ai/google/gemini-3.5-flash:low
-      - empo-ai/google/gemini-3.6-flash:medium
-      - empo-ai/google/gemini-3.5-flash:medium
+      - empo-ai/google/gemini-3.5-flash-lite:medium
     vision:
       - empo-ai/google/gemini-3.8-flash:low
-      - empo-ai/google/gemini-3.7-flash:medium
-      - empo-ai/google/gemini-3.6-flash:medium
       - empo-ai/google/gemini-3.5-flash:medium
+      - empo-ai/google/gemini-3.5-flash:low
     plan:
       - empo-ai/google/gemini-3.8-flash:medium
-      - empo-ai/google/gemini-3.7-flash:high
-      - empo-ai/google/gemini-3.6-flash:high
+      - empo-ai/anthropic/claude-opus-4-7:high
       - empo-ai/google/gemini-3.5-flash:high
-      - empo-ai/google/gemini-3.7-flash:medium
     designer:
       - empo-ai/google/gemini-3.8-flash:low
-      - empo-ai/google/gemini-3.7-flash:medium
-      - empo-ai/google/gemini-3.6-flash:medium
       - empo-ai/google/gemini-3.5-flash:medium
+      - empo-ai/google/gemini-3.5-flash:low
     commit:
-      - empo-ai/google/gemini-3.6-flash:low
-      - empo-ai/google/gemini-3.7-flash:low
+      - empo-ai/google/gemini-3.5-flash-lite:minimal
       - empo-ai/google/gemini-3.5-flash:low
     tiny:
-      - empo-ai/google/gemini-3.6-flash:low
-      - empo-ai/google/gemini-3.7-flash:low
-      - empo-ai/google/gemini-3.5-flash:low
+      - empo-ai/google/gemini-3.5-flash-lite:minimal
+      - empo-ai/google/gemini-3.5-flash:minimal
     advisor:
       - empo-ai/google/gemini-3.8-flash:low
-      - empo-ai/google/gemini-3.7-flash:medium
-      - empo-ai/google/gemini-3.6-flash:medium
       - empo-ai/google/gemini-3.5-flash:medium
+      - empo-ai/google/gemini-3.5-flash:low
 dev: 
   autoqaConsent: granted
 symbolPreset: nerd
