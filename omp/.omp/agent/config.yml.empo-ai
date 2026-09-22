@@ -1,77 +1,83 @@
-setupVersion: 1
+setupVersion: 2
 modelRoles:
-  default: empo-ai/anthropic/claude-opus-5:high
-  smol: empo-ai/anthropic/claude-3-5-sonnet
+  default: empo-ai/google/gemini-3.8-flash:high
+  task: empo-ai/google/gemini-3.8-flash:high
   slow: empo-ai/anthropic/claude-opus-5:high
-  vision: empo-ai/anthropic/claude-opus-5:medium
   plan: empo-ai/anthropic/claude-opus-5:medium
-  designer: empo-ai/anthropic/claude-opus-5:medium
-  commit: empo-ai/anthropic/claude-3-5-sonnet
-  tiny: empo-ai/anthropic/claude-3-5-sonnet
-  task: empo-ai/anthropic/claude-opus-5:medium
-  advisor: empo-ai/anthropic/claude-opus-5:medium
+  vision: empo-ai/google/gemini-3.8-flash:high
+  designer: empo-ai/google/gemini-3.8-flash:high
+  advisor: empo-ai/google/gemini-3.8-flash:high
+  smol: empo-ai/google/gemini-3.5-flash:low
+  commit: empo-ai/google/gemini-3.5-flash-lite:minimal
+  tiny: empo-ai/google/gemini-3.5-flash-lite:minimal
 defaultThinkingLevel: auto
 retry:
   fallbackChains:
     default:
-      - empo-ai/anthropic/claude-opus-5:medium
-      - empo-ai/anthropic/claude-opus-4-7:high
-      - empo-ai/anthropic/claude-opus-4-7:medium
+      - empo-ai/google/gemini-3.8-flash:medium
+      - empo-ai/google/gemini-3.5-flash:high
+      - empo-ai/google/gemini-2.5-flash:high
     slow:
       - empo-ai/anthropic/claude-opus-5:medium
       - empo-ai/anthropic/claude-opus-4-7:high
-      - empo-ai/anthropic/claude-opus-4-7:medium
+      - empo-ai/google/gemini-2.5-pro:high
     task:
-      - empo-ai/anthropic/claude-opus-5:low
-      - empo-ai/anthropic/claude-opus-4-7:medium
-      - empo-ai/anthropic/claude-opus-4-7:low
+      - empo-ai/google/gemini-3.8-flash:medium
+      - empo-ai/google/gemini-3.5-flash:high
+      - empo-ai/google/gemini-2.5-flash:high
     smol:
-      - empo-ai/anthropic/claude-opus-5:low
-      - empo-ai/anthropic/claude-opus-4-7:low
+      - empo-ai/google/gemini-3.5-flash-lite:low
+      - empo-ai/google/gemini-2.5-flash:low
     vision:
-      - empo-ai/anthropic/claude-opus-5:low
-      - empo-ai/anthropic/claude-opus-4-7:medium
-      - empo-ai/anthropic/claude-3-5-sonnet
+      - empo-ai/google/gemini-3.8-flash:medium
+      - empo-ai/google/gemini-3.5-flash:high
+      - empo-ai/google/gemini-2.5-pro:high
     plan:
       - empo-ai/anthropic/claude-opus-5:low
       - empo-ai/anthropic/claude-opus-4-7:medium
-      - empo-ai/anthropic/claude-opus-4-7:low
-    designer:
-      - empo-ai/anthropic/claude-opus-5:low
-      - empo-ai/anthropic/claude-opus-4-7:medium
-      - empo-ai/anthropic/claude-3-5-sonnet
+      - empo-ai/google/gemini-2.5-pro:medium
     commit:
-      - empo-ai/anthropic/claude-opus-5:low
-      - empo-ai/anthropic/claude-opus-4-7:low
+      - empo-ai/google/gemini-3.5-flash:minimal
+      - empo-ai/google/gemini-2.5-flash:minimal
     tiny:
-      - empo-ai/anthropic/claude-opus-5:low
-      - empo-ai/anthropic/claude-opus-4-7:low
+      - empo-ai/google/gemini-3.5-flash:minimal
+      - empo-ai/google/gemini-2.5-flash:minimal
+    designer:
+      - empo-ai/google/gemini-3.8-flash:medium
+      - empo-ai/google/gemini-3.5-flash:high
+      - empo-ai/google/gemini-2.5-pro:high
     advisor:
-      - empo-ai/anthropic/claude-opus-5:low
-      - empo-ai/anthropic/claude-opus-4-7:medium
-      - empo-ai/anthropic/claude-opus-4-7:low
-dev: 
+      - empo-ai/google/gemini-3.8-flash:medium
+      - empo-ai/google/gemini-3.5-flash:high
+      - empo-ai/google/gemini-2.5-pro:high
+dev:
   autoqaConsent: granted
 symbolPreset: nerd
-prewalk: 
+prewalk:
   enabled: true
-autolearn: 
+autolearn:
   enabled: true
-github: 
+github:
   enabled: true
-composer: 
-  shape: box
-spelling: 
+composer:
+  shape: field
+spelling:
   autocomplete: false
-startup: 
+startup:
   setupWizard: false
-marketplace: 
+marketplace:
   autoUpdate: auto
-memory: 
+memory:
   backend: mnemopi
-mnemopi: 
+mnemopi:
   scoping: global
-astGrep: 
+astGrep:
   enabled: true
-theme: 
+theme:
   dark: dark-synthwave
+advisor:
+  enabled: false
+  syncBacklog: "1"
+providers:
+  webSearchOrder:
+    []
