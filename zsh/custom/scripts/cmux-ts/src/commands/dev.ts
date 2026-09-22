@@ -42,8 +42,8 @@ export async function launchDevWorkspace(options: LaunchDevOptions = {}): Promis
 
   const focus = options.focus ?? true
   const ompCmd = options.ompCommand || 'omp-empo'
-  const nvimCmd = options.nvimCommand || 'nvim .'
-  const terminalCmd = options.terminalCommand
+  // const nvimCmd = options.nvimCommand || 'nvim .'
+  // const terminalCmd = options.terminalCommand
 
   const res = await cmux.createWorkspace({
     name: wsTitle,
