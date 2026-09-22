@@ -153,6 +153,8 @@ RERUN_DIR="$JS_DIR/rerun-github-qa-tests"
 alias rerun-cicd-url='bun run --cwd $RERUN_DIR monitor --url $(clippaste)'
 alias rerun-cicd='bun run --cwd $RERUN_DIR monitor'
 alias monitor-cicd='bun run --cwd $RERUN_DIR monitor:pr'
+alias monitor-cicd-url='bun run --cwd $RERUN_DIR monitor:pr --pr $(clippaste)'
+alias monitor-cicd-here='bun run --cwd $RERUN_DIR monitor:pr --pr $(gh pr view --json url --jq .url)'
 
 # --- Terraform ---
 alias zfetf="cd workspaces/frontend-app/infrastructure/stacks/staging"
@@ -271,6 +273,35 @@ local_playwright() {
   cd "$HERE" || exit
 }
 
+# 2026-09-17
+# Configure QA environment variables for current branch/commit (overrides previous branch values)
+local_qa_env() {
+  local HERE=$(pwd)
+  local WORKTREE_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+  local QA_DIR="$WORKTREE_ROOT/workspaces/qa"
+  if [ ! -d "$QA_DIR" ]; then
+    zqa 2>/dev/null
+    QA_DIR=$(pwd)
+  fi
+  local ENV_FILE="$QA_DIR/.env"
+
+  local QA_COMMIT_HASH=$(git -C "$WORKTREE_ROOT" rev-parse --short HEAD 2>/dev/null)
+  local QA_BRANCH_NAME_FULL=$(git -C "$WORKTREE_ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null)
+  local QA_BRANCH_NAME=$(echo "$QA_BRANCH_NAME_FULL" | cut -c1-8)
+  local LINEAR_TICKET_NUMBER=$(echo "$QA_BRANCH_NAME_FULL" | sed -E -n 's/.*rhl-([0-9]+).*/\1/p')
+
+  local SET_ENV_TS="$HOME/Projects/js_for_fun/git-tools-js/scripts/set-env-if-unset.ts"
+  if [ -f "$SET_ENV_TS" ] && command -v bun >/dev/null 2>&1; then
+    bun run "$SET_ENV_TS" "$ENV_FILE" --override \
+      "QA_COMMIT_HASH=$QA_COMMIT_HASH" \
+      "QA_BRANCH_NAME_FULL=$QA_BRANCH_NAME_FULL" \
+      "QA_BRANCH_NAME=$QA_BRANCH_NAME" \
+      "LINEAR_TICKET_NUMBER=$LINEAR_TICKET_NUMBER"
+  fi
+
+  cd "$HERE" || exit
+}
+
 # 2026-03-04 yarn test finds test files in a directory,
 yarn_test_find_run() {
   # fd ignores node_modules by default
@@ -331,6 +362,7 @@ frontend_start() {
 # 2026-06-09 start app and server local_playwright
 local_start_app_and_server() {
   local_playwright
+  local_qa_env
   local_e2e
   cmux-tab --name "FE Server" --command "frontend_start"
   cmux-tab --name "BE Server" --command "backend_start"
