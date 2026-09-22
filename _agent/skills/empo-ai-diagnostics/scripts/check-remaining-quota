@@ -1,0 +1,176 @@
+#!/usr/bin/env python3
+"""
+Inspect remaining daily quota and token capacity for Empo AI models.
+
+Tracks trailing 24-hour spend against Cloudflare AI Gateway's $40.00 / 86,400s
+spend limit (rule '09d3d265'), and calculates remaining dollar and token headroom.
+"""
+
+import argparse
+from datetime import datetime, timedelta
+import glob
+import json
+import os
+import re
+import sys
+
+DAILY_SPEND_LIMIT = 40.00  # USD per 86,400s fixed window
+
+# Pricing rates ($ per token)
+RATES = {
+    "google/gemini-3.8-flash": {"input": 0.75 / 1_000_000, "output": 3.75 / 1_000_000, "blended": 0.80 / 1_000_000},
+    "google/gemini-2.5-flash": {"input": 0.30 / 1_000_000, "output": 2.50 / 1_000_000, "blended": 0.35 / 1_000_000},
+    "google/gemini-2.5-pro":   {"input": 1.25 / 1_000_000, "output": 10.00 / 1_000_000, "blended": 1.45 / 1_000_000},
+    "google/gemini-3.5-flash": {"input": 1.50 / 1_000_000, "output": 9.00 / 1_000_000, "blended": 1.70 / 1_000_000},
+    "google/gemini-3.7-flash": {"input": 0.75 / 1_000_000, "output": 3.75 / 1_000_000, "blended": 0.80 / 1_000_000},
+}
+
+def normalize_model_id(raw_model):
+    if not raw_model:
+        return "unknown"
+    m = raw_model.replace("empo-ai/", "")
+    if not m.startswith("google/") and not m.startswith("anthropic/"):
+        if "gemini" in m:
+            m = f"google/{m}"
+        elif "claude" in m:
+            m = f"anthropic/{m}"
+    return m
+
+def format_tokens(num):
+    if num >= 1_000_000_000:
+        return f"{num / 1_000_000_000:.2f}B"
+    if num >= 1_000_000:
+        return f"{num / 1_000_000:.2f}M"
+    if num >= 1_000:
+        return f"{num / 1_000:.1f}k"
+    return f"{int(num)}"
+
+def render_progress_bar(pct, width=30):
+    clamped = max(0.0, min(100.0, pct))
+    filled = int(width * (clamped / 100.0))
+    bar = "=" * filled + "-" * (width - filled)
+    return f"[{bar}] {clamped:.1f}%"
+
+def get_trailing_24h_metrics():
+    now = datetime.now()
+    cutoff_date = (now - timedelta(days=1)).strftime("%Y-%m-%d")
+    sessions_dir = os.path.expanduser("~/.omp/agent/sessions")
+    if not os.path.isdir(sessions_dir):
+        return 0.0, {}, 0, 0
+
+    files = glob.glob(f"{sessions_dir}/**/*.jsonl", recursive=True)
+    recent_files = [f for f in files if re.search(r"20\d\d-\d\d-\d\d", f) and re.search(r"20\d\d-\d\d-\d\d", f).group(0) >= cutoff_date]
+
+    total_24h_spend = 0.0
+    total_24h_tokens = 0
+    total_24h_turns = 0
+    by_model = {}
+
+    for path in recent_files:
+        try:
+            with open(path, "r", encoding="utf-8", errors="ignore") as fp:
+                for line in fp:
+                    if not line.strip():
+                        continue
+                    try:
+                        record = json.loads(line)
+                    except Exception:
+                        continue
+                    if record.get("type") == "message":
+                        msg = record.get("message", {})
+                        if msg.get("role") == "assistant":
+                            m = msg.get("model")
+                            if not m:
+                                continue
+                            clean_m = normalize_model_id(m)
+                            usage = msg.get("usage", {})
+                            ctx = msg.get("contextSnapshot", {})
+                            in_tok = usage.get("input", 0) if isinstance(usage, dict) else 0
+                            out_tok = usage.get("output", 0) if isinstance(usage, dict) else 0
+                            if in_tok == 0 and isinstance(ctx, dict):
+                                in_tok = ctx.get("promptTokens", 0) or ctx.get("nonMessageTokens", 0)
+
+                            rate = RATES.get(clean_m, {"input": 0.75 / 1_000_000, "output": 3.75 / 1_000_000})
+                            cost = (in_tok * rate["input"]) + (out_tok * rate["output"])
+
+                            total_24h_spend += cost
+                            total_24h_tokens += (in_tok + out_tok)
+                            total_24h_turns += 1
+
+                            if clean_m not in by_model:
+                                by_model[clean_m] = {"spend": 0.0, "turns": 0, "tokens": 0}
+                            by_model[clean_m]["spend"] += cost
+                            by_model[clean_m]["turns"] += 1
+                            by_model[clean_m]["tokens"] += (in_tok + out_tok)
+        except Exception:
+            pass
+
+    return total_24h_spend, by_model, total_24h_tokens, total_24h_turns
+
+def main():
+    parser = argparse.ArgumentParser(description="Check remaining daily quota and token capacity.")
+    parser.add_argument("--json", action="store_true", help="Output remaining quota as JSON")
+    parser.add_argument("-q", "--quiet", action="store_true", help="One-line summary")
+    args = parser.parse_args()
+
+    spend_24h, by_model, total_tokens, total_turns = get_trailing_24h_metrics()
+    remaining_dollars = max(0.0, DAILY_SPEND_LIMIT - spend_24h)
+    pct_used = (spend_24h / DAILY_SPEND_LIMIT) * 100.0
+    pct_remaining = max(0.0, 100.0 - pct_used)
+
+    # Compute remaining token capacity per model
+    remaining_tokens = {}
+    for m_id, r in RATES.items():
+        if m_id in ["google/gemini-3.8-flash", "google/gemini-2.5-flash", "google/gemini-2.5-pro", "google/gemini-3.5-flash"]:
+            blended = r.get("blended", 0.80 / 1_000_000)
+            tokens = int(remaining_dollars / blended)
+            est_turns = int(tokens / 14_000)  # average turn size ~14k tokens
+            remaining_tokens[m_id] = {
+                "tokens": tokens,
+                "formatted_tokens": format_tokens(tokens),
+                "est_turns": est_turns
+            }
+
+    if args.quiet:
+        print(f"${remaining_dollars:.2f} remaining ({pct_remaining:.1f}%) | {format_tokens(remaining_tokens['google/gemini-3.8-flash']['tokens'])} tokens (Gemini 3.8 Flash)")
+        return
+
+    if args.json:
+        data = {
+            "daily_limit_usd": DAILY_SPEND_LIMIT,
+            "trailing_24h_spend_usd": round(spend_24h, 2),
+            "remaining_budget_usd": round(remaining_dollars, 2),
+            "pct_used": round(pct_used, 1),
+            "pct_remaining": round(pct_remaining, 1),
+            "models_remaining_tokens": remaining_tokens,
+            "models_trailing_spend": {m: round(d["spend"], 2) for m, d in by_model.items()}
+        }
+        print(json.dumps(data, indent=2))
+        return
+
+    print("=" * 78)
+    print("EMPO AI DAILY QUOTA & REMAINING HEADROOM")
+    print("=" * 78)
+    print(f"Spend Cap Rule:         Rule '09d3d265' ($40.00 per 86,400s fixed window)")
+    print(f"Trailing 24h Spend:     ${spend_24h:.2f} of ${DAILY_SPEND_LIMIT:.2f}")
+    print(f"Remaining Budget:       ${remaining_dollars:.2f} ({pct_remaining:.1f}% remaining)")
+    print(f"24h Utilization:        {render_progress_bar(pct_used)}")
+    print("-" * 78)
+
+    print("Estimated Remaining Token Capacity for Today:")
+    print(f"{'Model':<28} | {'Remaining Tokens':<18} | {'Est. Agent Turns'}")
+    print("-" * 78)
+    for m_id, cap in remaining_tokens.items():
+        print(f"{m_id:<28} | ~{cap['formatted_tokens']:<16} | ~{cap['est_turns']} turns")
+
+    if by_model:
+        print("-" * 78)
+        print("Spend by Model in Last 24 Hours:")
+        for m, d in sorted(by_model.items(), key=lambda x: x[1]["spend"], reverse=True):
+            if d["spend"] > 0:
+                print(f"  {m:<26} : ${d['spend']:<6.2f} ({d['turns']} turns, {format_tokens(d['tokens'])} tokens)")
+
+    print("=" * 78)
+
+if __name__ == "__main__":
+    main()

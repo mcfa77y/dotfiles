@@ -8,10 +8,68 @@ description: Post structured inline review comments and top-level review summari
 Use this workflow to publish code review findings and inline diff comments directly to GitHub Pull Requests in RHL repositories.
 
 ## Prerequisites
+
 - Active GitHub authentication via `gh auth status` or GitHub MCP tools.
 - PR number / URL and review report (e.g., from `rhl-review-pr` output in `docs/` or session findings).
 
-## Procedure
+## Recommended: Automated Submission via Helper Script
+
+The skill includes a dedicated helper script `scripts/post-review.py` that:
+1. Automatically resolves the PR's target `headRefOid` commit SHA.
+2. Validates that inline comment line numbers belong to valid diff hunks (preventing GitHub `422 Unprocessable Entity` rejections by safely falling back out-of-hunk notes to the review summary).
+3. Submits the unified review via `POST /repos/{owner}/{repo}/pulls/{pr}/reviews`.
+4. Verifies posted comments and outputs the direct review URL.
+
+### Usage Examples
+
+#### Option 1: CLI Flags with Comments File / String
+```bash
+python3 scripts/post-review.py \
+  --repo <OWNER>/<REPO> \
+  --pr <PR_NUMBER_OR_URL> \
+  --event APPROVE \
+  --body "Executive summary..." \
+  --comments '[{"path": "path/to/file.ts", "line": 42, "body": "🟡 **Medium**: Description..."}]'
+```
+
+Or using separate markdown summary and JSON comments files:
+```bash
+python3 scripts/post-review.py \
+  --pr <PR_NUMBER> \
+  --event REQUEST_CHANGES \
+  --body-file docs/pr_review_summary.md \
+  --comments-file docs/inline_comments.json
+```
+
+#### Option 2: Full JSON via Stdin or `--input`
+```bash
+cat << 'EOF' | python3 scripts/post-review.py --pr <PR_NUMBER>
+{
+  "event": "APPROVE",
+  "body": "Executive summary markdown...",
+  "comments": [
+    {
+      "path": "workspaces/backend-api/sources/app.ts",
+      "line": 15,
+      "side": "RIGHT",
+      "body": "ℹ️ **Note**: Actionable note here..."
+    }
+  ]
+}
+EOF
+```
+
+#### Option 3: Pre-flight Dry Run
+Validate line numbers and inspect the assembled payload without posting to GitHub:
+```bash
+python3 scripts/post-review.py --pr <PR_NUMBER> --body "Summary" --comments-file comments.json --dry-run
+```
+
+---
+
+## Manual Procedure (Fallback)
+
+If running without the script, follow these manual steps:
 
 ### 1. Fetch PR & Commit Details
 Retrieve the latest commit SHA (`headRefOid`) and PR metadata:
@@ -20,7 +78,7 @@ gh pr view <PR_NUMBER> --repo <OWNER>/<REPO> --json headRefOid,headRefName,title
 ```
 
 ### 2. Map Findings to Diff Lines
-Ensure line numbers match the diff hunk positions on the current HEAD commit:
+Ensure line numbers match diff hunk positions on the current HEAD commit:
 - Read PR diffs via `pr://<owner>/<repo>/<PR>/diff/<index>` or `git diff origin/main...HEAD <path>`.
 - Target modified/added lines on the `RIGHT` side (new version).
 - For deletions, reference the line adjacent to the deleted hunk on `RIGHT`, or specify `side: "LEFT"` when anchoring directly to the removed line.

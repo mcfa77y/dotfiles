@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+"""
+Replay an HTTP 400 error request captured in ~/.omp/logs/http-400-requests/
+Useful for reproducing proxy and model payload errors.
+"""
+
+import argparse
+import glob
+import json
+import os
+import sys
+import urllib.error
+import urllib.request
+
+DEFAULT_USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+)
+
+
+def find_latest_log():
+    logs_dir = os.path.expanduser("~/.omp/logs/http-400-requests")
+    if not os.path.exists(logs_dir):
+        print(f"[-] No logs directory found at {logs_dir}")
+        return None
+    files = glob.glob(os.path.join(logs_dir, "*.json"))
+    if not files:
+        print(f"[-] No HTTP 400 logs found in {logs_dir}")
+        return None
+    files.sort(key=lambda p: os.path.getmtime(p), reverse=True)
+    return files[0]
+
+
+def replay(log_path: str, override_url: str = None):
+    print("=" * 60)
+    print(f"Replaying Request Log: {log_path}")
+    print("=" * 60)
+
+    with open(log_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    target_url = override_url or data.get("url")
+    provider = data.get("provider")
+    model = data.get("model") or data.get("body", {}).get("model")
+    headers = data.get("headers", {})
+    body = data.get("body")
+
+    print(f"[*] Provider: {provider}")
+    print(f"[*] Model:    {model}")
+    print(f"[*] Target:   {target_url}")
+
+    if "User-Agent" not in headers:
+        headers["User-Agent"] = DEFAULT_USER_AGENT
+    if "Content-Type" not in headers:
+        headers["Content-Type"] = "application/json"
+
+    # Print summary of body
+    if isinstance(body, dict):
+        messages = body.get("messages", [])
+        print(f"[*] Body Keys: {list(body.keys())}")
+        print(f"[*] Message Count: {len(messages)}")
+        if messages:
+            print(f"[*] Last message role: {messages[-1].get('role')}")
+            content = messages[-1].get("content")
+            if isinstance(content, str):
+                print(f"[*] Last message snippet: {content[:150]!r}")
+
+    req_bytes = json.dumps(body).encode("utf-8") if body is not None else None
+    req = urllib.request.Request(
+        target_url,
+        data=req_bytes,
+        headers=headers,
+        method=data.get("method", "POST"),
+    )
+
+    print("\n" + "-" * 60)
+    print("Sending Request...")
+    print("-" * 60)
+
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            print(f"[+] HTTP Status: {resp.status} {resp.reason}")
+            resp_body = resp.read().decode("utf-8", errors="replace")
+            print(f"[+] Response (first 500 chars):\n{resp_body[:500]}")
+    except urllib.error.HTTPError as e:
+        print(f"[-] HTTP Error: {e.code} {e.reason}")
+        resp_body = e.read().decode("utf-8", errors="replace")
+        print(f"[-] Error Body:\n{resp_body[:1000]}")
+    except Exception as e:
+        print(f"[-] Execution Error: {e}")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Replay captured HTTP 400 requests from ~/.omp/logs/http-400-requests/")
+    parser.add_argument("--file", help="Path to specific HTTP request log JSON file")
+    parser.add_argument("--url", help="Override destination URL (e.g. http://127.0.0.1:8787/v1/chat/completions)")
+    args = parser.parse_args()
+
+    target_file = args.file
+    if not target_file:
+        target_file = find_latest_log()
+        if not target_file:
+            sys.exit(1)
+
+    replay(target_file, override_url=args.url)
+
+
+if __name__ == "__main__":
+    main()

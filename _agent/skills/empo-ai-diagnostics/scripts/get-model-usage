@@ -1,0 +1,373 @@
+#!/usr/bin/env python3
+"""
+Inspect model pricing, token usage, rate limits, spend caps, and token capacities.
+
+Sources:
+1. Dynamic Model Catalog & Pricing: https://ai.empohealth.com/v1/models
+2. Gateway Daily Spend Limits: Cloudflare AI Gateway rule '09d3d265' ($40 / 86,400s)
+3. Historical Session Analysis: ~/.omp/agent/sessions/ (*.jsonl files)
+   Supports: --week, --days <N>, --since <YYYY-MM-DD>, --month <YYYY-MM>, --limits
+4. API Per-request Usage Probe: Non-streaming & streaming completion usage headers
+"""
+
+import argparse
+from datetime import date, datetime, timedelta
+import glob
+import json
+import os
+import re
+import sqlite3
+import sys
+import urllib.error
+import urllib.request
+
+DEFAULT_USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+)
+
+# Known Gateway limits (derived from error code 2045 / rule '09d3d265')
+DAILY_SPEND_LIMIT = 40.00  # USD per 86,400s fixed window
+
+# Standard Upstream Vertex AI Throughput Quotas (Tier default)
+VERTEX_QUOTAS = {
+    "google/gemini-3.8-flash": {"rpm": "1,000 req/min", "tpm": "4,000,000 tokens/min", "context_window": "1,048,576"},
+    "google/gemini-3.5-flash": {"rpm": "1,000 req/min", "tpm": "4,000,000 tokens/min", "context_window": "1,048,576"},
+    "google/gemini-2.5-flash": {"rpm": "1,000 req/min", "tpm": "4,000,000 tokens/min", "context_window": "1,048,576"},
+    "google/gemini-2.5-pro":   {"rpm": "360 req/min",   "tpm": "4,000,000 tokens/min", "context_window": "2,097,152"},
+}
+
+DEFAULT_RATES = {
+    "google/gemini-3.8-flash": {"input_cost_per_token": 0.75 / 1_000_000, "output_cost_per_token": 3.75 / 1_000_000},
+    "google/gemini-3.5-flash": {"input_cost_per_token": 1.50 / 1_000_000, "output_cost_per_token": 9.00 / 1_000_000},
+    "google/gemini-3.5-flash-lite": {"input_cost_per_token": 0.30 / 1_000_000, "output_cost_per_token": 2.50 / 1_000_000},
+    "google/gemini-2.5-flash": {"input_cost_per_token": 0.30 / 1_000_000, "output_cost_per_token": 2.50 / 1_000_000},
+    "google/gemini-2.5-pro": {"input_cost_per_token": 1.25 / 1_000_000, "output_cost_per_token": 10.00 / 1_000_000},
+    "google/gemini-3.7-flash": {"input_cost_per_token": 0.75 / 1_000_000, "output_cost_per_token": 3.75 / 1_000_000},
+    "google/gemini-3.6-flash": {"input_cost_per_token": 0.75 / 1_000_000, "output_cost_per_token": 3.75 / 1_000_000},
+}
+
+def get_token():
+    db_path = os.path.expanduser("~/.omp/agent/agent.db")
+    if not os.path.exists(db_path):
+        return None
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    cur.execute("SELECT data FROM auth_credentials WHERE provider = 'empo-ai' ORDER BY id DESC LIMIT 1")
+    row = cur.fetchone()
+    if not row:
+        return None
+    cred = json.loads(row[0]) if isinstance(row[0], str) else row[0]
+    return cred.get("access", "")
+
+def get_model_catalog(token):
+    url = "https://ai.empohealth.com/v1/models"
+    req = urllib.request.Request(
+        url,
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/json",
+            "User-Agent": DEFAULT_USER_AGENT
+        }
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            catalog = {}
+            for m in data.get("data", []):
+                catalog[m["id"]] = m
+            return catalog
+    except Exception as e:
+        print(f"[-] Error fetching pricing from {url}: {e}")
+        return {}
+
+def format_tokens(num):
+    if num >= 1_000_000_000:
+        return f"{num / 1_000_000_000:.2f}B"
+    if num >= 1_000_000:
+        return f"{num / 1_000_000:.2f}M"
+    if num >= 1_000:
+        return f"{num / 1_000:.1f}k"
+    return f"{int(num)}"
+
+def normalize_model_id(raw_model):
+    if not raw_model:
+        return "unknown"
+    m = raw_model.replace("empo-ai/", "")
+    if not m.startswith("google/") and not m.startswith("anthropic/"):
+        if "gemini" in m:
+            m = f"google/{m}"
+        elif "claude" in m:
+            m = f"anthropic/{m}"
+    return m
+
+def calculate_trailing_24h_spend(catalog):
+    now = datetime.now()
+    cutoff_date = (now - timedelta(days=1)).strftime("%Y-%m-%d")
+    sessions_dir = os.path.expanduser("~/.omp/agent/sessions")
+    if not os.path.isdir(sessions_dir):
+        return 0.0, {}
+
+    files = glob.glob(f"{sessions_dir}/**/*.jsonl", recursive=True)
+    recent_files = [f for f in files if re.search(r"20\d\d-\d\d-\d\d", f) and re.search(r"20\d\d-\d\d-\d\d", f).group(0) >= cutoff_date]
+
+    total_24h = 0.0
+    by_model = {}
+
+    for path in recent_files:
+        try:
+            with open(path, "r", encoding="utf-8", errors="ignore") as fp:
+                for line in fp:
+                    if not line.strip():
+                        continue
+                    try:
+                        record = json.loads(line)
+                    except Exception:
+                        continue
+                    if record.get("type") == "message":
+                        msg = record.get("message", {})
+                        if msg.get("role") == "assistant":
+                            m = msg.get("model")
+                            if not m:
+                                continue
+                            clean_m = normalize_model_id(m)
+                            usage = msg.get("usage", {})
+                            ctx = msg.get("contextSnapshot", {})
+                            in_tok = usage.get("input", 0) if isinstance(usage, dict) else 0
+                            out_tok = usage.get("output", 0) if isinstance(usage, dict) else 0
+                            if in_tok == 0 and isinstance(ctx, dict):
+                                in_tok = ctx.get("promptTokens", 0) or ctx.get("nonMessageTokens", 0)
+
+                            m_info = catalog.get(clean_m) or DEFAULT_RATES.get(clean_m, {})
+                            in_rate = m_info.get("input_cost_per_token", 0.75 / 1_000_000)
+                            out_rate = m_info.get("output_cost_per_token", 3.75 / 1_000_000)
+                            cost = (in_tok * in_rate) + (out_tok * out_rate)
+
+                            total_24h += cost
+                            by_model[clean_m] = by_model.get(clean_m, 0.0) + cost
+        except Exception:
+            pass
+
+    return total_24h, by_model
+
+def analyze_sessions(filter_type, filter_val):
+    sessions_dir = os.path.expanduser("~/.omp/agent/sessions")
+    if not os.path.isdir(sessions_dir):
+        return {}, "Directory not found"
+
+    files = glob.glob(f"{sessions_dir}/**/*.jsonl", recursive=True)
+    matched_files = []
+    
+    for path in files:
+        m = re.search(r"(20\d\d-\d\d-\d\d)", path)
+        if not m:
+            continue
+        file_date_str = m.group(1)
+
+        if filter_type == "since":
+            if file_date_str >= filter_val:
+                matched_files.append((file_date_str, path))
+        elif filter_type == "month":
+            if file_date_str.startswith(filter_val):
+                matched_files.append((file_date_str, path))
+        else:
+            matched_files.append((file_date_str, path))
+
+    totals = {}
+    for file_date, path in matched_files:
+        file_models = set()
+        file_turns = {}
+        file_input = {}
+        file_output = {}
+        try:
+            with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                for line in f:
+                    if not line.strip():
+                        continue
+                    try:
+                        record = json.loads(line)
+                    except Exception:
+                        continue
+                    if record.get("type") == "message":
+                        msg = record.get("message", {})
+                        if msg.get("role") == "assistant":
+                            m = msg.get("model")
+                            p = msg.get("provider")
+                            if p == "empo-ai" or (m and ("gemini" in m or "claude" in m)):
+                                clean_m = normalize_model_id(m)
+                                file_models.add(clean_m)
+                                
+                                usage = msg.get("usage", {})
+                                ctx = msg.get("contextSnapshot", {})
+                                
+                                in_tok = usage.get("input", 0) if isinstance(usage, dict) else 0
+                                out_tok = usage.get("output", 0) if isinstance(usage, dict) else 0
+                                
+                                if in_tok == 0 and isinstance(ctx, dict):
+                                    in_tok = ctx.get("promptTokens", 0) or ctx.get("nonMessageTokens", 0)
+                                    
+                                file_turns[clean_m] = file_turns.get(clean_m, 0) + 1
+                                file_input[clean_m] = file_input.get(clean_m, 0) + in_tok
+                                file_output[clean_m] = file_output.get(clean_m, 0) + out_tok
+        except Exception:
+            pass
+
+        for clean_m in file_models:
+            if clean_m not in totals:
+                totals[clean_m] = {
+                    "sessions": 0,
+                    "turns": 0,
+                    "input_tokens": 0,
+                    "output_tokens": 0,
+                    "total_tokens": 0
+                }
+            totals[clean_m]["sessions"] += 1
+            totals[clean_m]["turns"] += file_turns.get(clean_m, 0)
+            totals[clean_m]["input_tokens"] += file_input.get(clean_m, 0)
+            totals[clean_m]["output_tokens"] += file_output.get(clean_m, 0)
+            totals[clean_m]["total_tokens"] += (file_input.get(clean_m, 0) + file_output.get(clean_m, 0))
+
+    return totals, len(matched_files)
+
+def display_limits_and_capacity(catalog):
+    print("\n" + "=" * 105)
+    print(f"GATEWAY SPEND CAP & MODEL TOKEN CAPACITIES (Rule '09d3d265')")
+    print("=" * 105)
+    
+    spend_24h, by_model = calculate_trailing_24h_spend(catalog)
+    remaining_budget = max(0.0, DAILY_SPEND_LIMIT - spend_24h)
+    pct_used = (spend_24h / DAILY_SPEND_LIMIT) * 100
+
+    print(f"Daily Spend Cap:       ${DAILY_SPEND_LIMIT:.2f} per 24 hours (86,400s fixed window)")
+    print(f"Trailing 24h Spend:    ${spend_24h:.2f} ({pct_used:.1f}% consumed)")
+    print(f"Current Headroom:      ${remaining_budget:.2f} remaining in 24h window")
+    
+    print("\nDaily Maximum Token Capacities under the $40.00 Cap:")
+    print(f"{'Model':<28} | {'Pure Input Cap':<16} | {'Realistic Coding Workload Cap':<30} | {'Throughput Quota (TPM / RPM)'}")
+    print("-" * 105)
+
+    primary_models = [
+        ("google/gemini-3.8-flash", 0.75, 3.75, 0.80),
+        ("google/gemini-3.5-flash", 1.50, 9.00, 1.70),
+        ("google/gemini-2.5-flash", 0.30, 2.50, 0.35),
+        ("google/gemini-2.5-pro",   1.25, 10.00, 1.45),
+    ]
+
+    for m_id, in_p, out_p, blended in primary_models:
+        pure_input_cap = (DAILY_SPEND_LIMIT / in_p) * 1_000_000
+        agent_workload_cap = (DAILY_SPEND_LIMIT / blended) * 1_000_000
+        vq = VERTEX_QUOTAS.get(m_id, {"rpm": "1,000 req/min", "tpm": "4,000,000 tokens/min"})
+        q_str = f"{vq['tpm']} / {vq['rpm']}"
+        print(f"{m_id:<28} | {format_tokens(pure_input_cap):<16} | ~{format_tokens(agent_workload_cap)} tokens/day (~3.5k turns) | {q_str}")
+
+def main():
+    parser = argparse.ArgumentParser(description="Inspect model pricing, token usage, rate limits, and capacities.")
+    parser.add_argument("--week", action="store_true", help="Filter session logs for current week (Monday to today)")
+    parser.add_argument("--days", type=int, help="Filter session logs for last N days (e.g. --days 7)")
+    parser.add_argument("--since", help="Filter session logs since YYYY-MM-DD")
+    parser.add_argument("--month", help="Filter session logs for specific month (YYYY-MM)")
+    parser.add_argument("--limits", "--capacity", dest="limits", action="store_true", help="Display spend limits, token capacities, and 24h headroom")
+    parser.add_argument("--test-api", action="store_true", help="Send a small probe to inspect API usage payload")
+    parser.add_argument("--model", default="google/gemini-3.8-flash", help="Model to probe for API usage payload")
+    args = parser.parse_args()
+
+    token = get_token()
+    if not token:
+        print("[-] Could not retrieve OAuth token from ~/.omp/agent/agent.db")
+        sys.exit(1)
+
+    today = date.today()
+    if args.week:
+        start_of_week = today - timedelta(days=today.weekday())
+        filter_type = "since"
+        filter_val = start_of_week.isoformat()
+        filter_label = f"Current Week ({filter_val} to {today.isoformat()})"
+    elif args.days:
+        since_date = today - timedelta(days=args.days)
+        filter_type = "since"
+        filter_val = since_date.isoformat()
+        filter_label = f"Last {args.days} Days (Since {filter_val})"
+    elif args.since:
+        filter_type = "since"
+        filter_val = args.since
+        filter_label = f"Since {filter_val}"
+    elif args.month:
+        filter_type = "month"
+        filter_val = args.month
+        filter_label = f"Month {filter_val}"
+    else:
+        start_of_week = today - timedelta(days=today.weekday())
+        filter_type = "since"
+        filter_val = start_of_week.isoformat()
+        filter_label = f"Current Week ({filter_val} to {today.isoformat()})"
+
+    print("=" * 105)
+    print("EMPO AI MODEL USAGE, RATES & COST REPORT")
+    print("=" * 105)
+
+    catalog = get_model_catalog(token)
+
+    # 1. Pricing Catalog
+    print(f"\n1. Registered Models & Token Rates (ai.empohealth.com):")
+    print(f"{'Model ID':<32} | {'Input Cost/1M':<14} | {'Output Cost/1M':<15} | {'Max Output'}")
+    print("-" * 105)
+    for m_id, m in catalog.items():
+        in_cost = m.get("input_cost_per_token", 0) * 1_000_000
+        out_cost = m.get("output_cost_per_token", 0) * 1_000_000
+        max_out = m.get("max_output_tokens", 0)
+        print(f"{m_id:<32} | ${in_cost:<13.2f} | ${out_cost:<14.2f} | {max_out}")
+
+    # 2. Session Logs Breakdown & Cost
+    session_totals, matched_count = analyze_sessions(filter_type, filter_val)
+    if session_totals:
+        print(f"\n2. Session Usage & Inference Spend Breakdown [{filter_label}] ({matched_count} session files):")
+        print(f"{'Model':<30} | {'Sessions':<8} | {'Turns':<6} | {'Input Tokens':<14} | {'Output Tokens':<14} | {'Input $':<9} | {'Output $':<9} | {'Total $'}")
+        print("-" * 105)
+        
+        tot_sess = 0
+        tot_turns = 0
+        tot_input = 0
+        tot_output = 0
+        tot_input_cost = 0.0
+        tot_output_cost = 0.0
+        tot_spend = 0.0
+
+        for m, s in sorted(session_totals.items(), key=lambda x: x[1]["turns"], reverse=True):
+            sess = s["sessions"]
+            turns = s["turns"]
+            in_tok = s["input_tokens"]
+            out_tok = s["output_tokens"]
+            
+            m_info = catalog.get(m) or DEFAULT_RATES.get(m, {})
+            in_rate = m_info.get("input_cost_per_token", 0.75 / 1_000_000)
+            out_rate = m_info.get("output_cost_per_token", 3.75 / 1_000_000)
+            
+            in_cost = in_tok * in_rate
+            out_cost = out_tok * out_rate
+            item_spend = in_cost + out_cost
+            
+            tot_sess += sess
+            tot_turns += turns
+            tot_input += in_tok
+            tot_output += out_tok
+            tot_input_cost += in_cost
+            tot_output_cost += out_cost
+            tot_spend += item_spend
+
+            print(f"{m:<30} | {sess:<8} | {turns:<6} | {format_tokens(in_tok):<14} | {format_tokens(out_tok):<14} | ${in_cost:<8.4f} | ${out_cost:<8.4f} | ${item_spend:<.4f}")
+
+        print("-" * 105)
+        print(f"{'TOTAL':<30} | {tot_sess:<8} | {tot_turns:<6} | {format_tokens(tot_input):<14} | {format_tokens(tot_output):<14} | ${tot_input_cost:<8.4f} | ${tot_output_cost:<8.4f} | ${tot_spend:<.4f}")
+    else:
+        print(f"\n2. Session Usage Breakdown [{filter_label}]: No sessions found matching criteria.")
+
+    # 3. Limits & Token Capacities
+    if args.limits:
+        display_limits_and_capacity(catalog)
+
+    # 4. Optional Live API Probe
+    if args.test_api:
+        test_api_usage_reporting(token, args.model)
+
+if __name__ == "__main__":
+    main()

@@ -11,12 +11,46 @@ description: Creates a GitHub Pull Request describing changes on the current bra
 4. **Reviewers**:
    - Baseline: `pm-pp`, `simon57b`, `singhmadhurima123`
    - If `*.tf`, `*.yml`, or `*.yaml` files changed, add `edahlseng`
-5. **Generate Content**:
+5. **Generate Content & Adhere to PR Lint Rules**:
    - Read `git log origin/main..HEAD --oneline`
-   - Extract Linear ticket from branch name (`git branch --show-current`). If it matches `rhl-\d+`, suffix the PR title with `(RHL-1234)`.
-6. **Create PR**:
+   - **PR Title**:
+     - Format: `<type>: <Subject> (RHL-XXXX)` (e.g., `feat: Add cohort configuration update (RHL-4296)`).
+     - Conventional commit type (`feat:`, `fix:`, `refactor:`, `perf:`, `chore:`, etc.).
+     - **Hard constraint**: The entire title **must not exceed 72 characters** (including the ` (RHL-XXXX)` suffix).
+     - No trailing period.
+   - **PR Body**: Must follow the exact structure required by `scripts/lint-pull-request.js`:
+     - Must start with a blank line after the title.
+     - Must contain exactly these 3 sections in this exact order using **Level 2 Setext headers** where the underline length matches the header title length exactly:
+     ```markdown
+     Detailed Description
+     --------------------
+
+     <Overview, changes, and verification details. Use level 3 headings (###) or bullets if needed; do not use level 1 or 2 headings.>
+
+     Relevant Linear Tickets
+     -----------------------
+
+     This change contributes to RHL-XXXX.
+
+     Reviews and Merging
+     -------------------
+     ```
+     - Underline lengths:
+       - `Detailed Description` -> `--------------------` (20 hyphens)
+       - `Relevant Linear Tickets` -> `-----------------------` (23 hyphens)
+       - `Reviews and Merging` -> `-------------------` (19 hyphens)
+     - `Detailed Description` and `Relevant Linear Tickets` sections must each start and end with a blank line.
+     - `Relevant Linear Tickets` content must strictly match `This change contributes to RHL-XXXX.` (or comma-separated `This change contributes to RHL-1234, RHL-5678.`).
+     - `Reviews and Merging` section must be left empty.
+6. **Validate Locally**:
+   - Verify title length <= 72 characters.
+   - Run validation before submission:
+     ```bash
+     printf '%s\n\n%s\n' "<Title>" "<Body>" | ./scripts/lint-pull-request.js
+     ```
+7. **Create PR**:
    ```bash
-   gh pr create --title "<Title>" --body "<Description>" --reviewer "<Reviewers>"
+   gh pr create --title "<Title>" --body "<Body>" --reviewer "<Reviewers>"
    ```
    *(Or use the `github-mcp-server/create_pull_request` tool)*
 

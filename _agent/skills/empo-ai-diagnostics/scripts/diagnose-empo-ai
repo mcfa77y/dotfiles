@@ -1,0 +1,215 @@
+#!/usr/bin/env python3
+"""
+empo-ai health diagnostic script
+Checks auth tokens in agent.db and legacy stores, verifies connectivity with
+Cloudflare Access and ai.empohealth.com, and tests model completion endpoints.
+"""
+
+import argparse
+import datetime
+import json
+import os
+import sqlite3
+import sys
+import urllib.error
+import urllib.request
+
+EMPO_ISSUER = "https://ai.empohealth.com"
+DEFAULT_USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+)
+
+
+def get_active_credentials():
+    # 1. Check omp agent.db (primary modern location)
+    db_path = os.path.expanduser("~/.omp/agent/agent.db")
+    if os.path.exists(db_path):
+        try:
+            conn = sqlite3.connect(db_path)
+            cur = conn.cursor()
+            cur.execute(
+                "SELECT data, disabled_cause FROM auth_credentials "
+                "WHERE provider = 'empo-ai' ORDER BY id DESC LIMIT 1"
+            )
+            row = cur.fetchone()
+            if row:
+                data_str, disabled_cause = row
+                cred = json.loads(data_str) if isinstance(data_str, str) else data_str
+                return {
+                    "source": "agent.db",
+                    "disabled_cause": disabled_cause,
+                    "access": cred.get("access"),
+                    "refresh": cred.get("refresh"),
+                    "expires": cred.get("expires"),
+                    "accountId": cred.get("accountId"),
+                }
+        except Exception as e:
+            print(f"[!] Warning: failed reading agent.db: {e}")
+
+    # 2. Check legacy ~/.pi/agent/auth.json
+    auth_path = os.path.expanduser("~/.pi/agent/auth.json")
+    if os.path.exists(auth_path):
+        try:
+            with open(auth_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if "empo-ai" in data:
+                    cred = data["empo-ai"]
+                    return {
+                        "source": "~/.pi/agent/auth.json",
+                        "disabled_cause": None,
+                        "access": cred.get("access"),
+                        "refresh": cred.get("refresh"),
+                        "expires": cred.get("expires"),
+                        "accountId": cred.get("accountId") or cred.get("client", {}).get("client_id"),
+                    }
+        except Exception as e:
+            print(f"[!] Warning: failed reading auth.json: {e}")
+
+    return None
+
+
+def check_auth():
+    print("=" * 60)
+    print("1. Checking Empo AI OAuth Credentials")
+    print("=" * 60)
+
+    cred = get_active_credentials()
+    if not cred or not cred.get("access"):
+        print("[-] FAIL: No active empo-ai OAuth credentials found.")
+        print("    Remediation: Run `/login empo-ai` in your omp harness.")
+        return None
+
+    print(f"[+] Source: {cred['source']}")
+    if cred.get("disabled_cause"):
+        print(f"[-] Status: Disabled ({cred['disabled_cause']})")
+    else:
+        print("[+] Status: Active")
+
+    expires_ts = cred.get("expires")
+    if expires_ts:
+        expires_dt = datetime.datetime.fromtimestamp(expires_ts / 1000.0, tz=datetime.timezone.utc)
+        now_dt = datetime.datetime.now(datetime.timezone.utc)
+        diff = (expires_dt - now_dt).total_seconds()
+        print(f"[+] Token Expiration: {expires_dt.strftime('%Y-%m-%d %H:%M:%S UTC')}")
+        if diff > 0:
+            print(f"[+] Token Remaining: {diff / 3600.0:.2f} hours")
+        else:
+            print(f"[-] Token EXPIRED {abs(diff) / 3600.0:.2f} hours ago!")
+            print("    Remediation: Run `/login empo-ai` in your omp harness.")
+            return None
+    else:
+        print("[*] Expiration: Not specified")
+
+    print(f"[+] Access Token: {cred['access'][:12]}... (length {len(cred['access'])})")
+    print(f"[+] Refresh Token: {'Present' if cred.get('refresh') else 'Missing'}")
+    return cred
+
+
+def check_upstream_api(token: str):
+    print("\n" + "=" * 60)
+    print("2. Checking Connectivity & Models Catalog (ai.empohealth.com)")
+    print("=" * 60)
+
+    url = f"{EMPO_ISSUER}/v1/models"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "User-Agent": DEFAULT_USER_AGENT,
+        "Accept": "application/json",
+    }
+
+    req = urllib.request.Request(url, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            models = data.get("data", [])
+            print(f"[+] Successfully connected to {url} (HTTP {resp.status})")
+            print(f"[+] Available models ({len(models)}):")
+            for m in models:
+                mid = m.get("id")
+                mname = m.get("name", "")
+                print(f"    • {mid:<35} {mname}")
+            return [m.get("id") for m in models]
+    except urllib.error.HTTPError as e:
+        print(f"[-] FAIL: HTTP Error {e.code}: {e.reason}")
+        err_body = e.read().decode("utf-8", errors="replace")
+        print(f"    Response preview: {err_body[:300]}")
+        return None
+    except Exception as e:
+        print(f"[-] FAIL: Connection failed: {e}")
+        return None
+
+
+def test_completion(token: str, model_id: str):
+    print("\n" + "=" * 60)
+    print(f"3. Testing Chat Completion with `{model_id}`")
+    print("=" * 60)
+
+    url = f"{EMPO_ISSUER}/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "User-Agent": DEFAULT_USER_AGENT,
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "model": model_id,
+        "messages": [{"role": "user", "content": "hello. respond with 'ok'"}],
+        "max_tokens": 10,
+    }
+
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers=headers,
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            print(f"[+] Completion Successful (HTTP {resp.status})")
+            print(f"[+] Response model: {data.get('model')}")
+            content = data.get("content") or data.get("choices", [{}])[0].get("message", {}).get("content")
+            print(f"[+] Content: {json.dumps(content)}")
+            usage = data.get("usage")
+            if usage:
+                print(f"[+] Token Usage: {usage}")
+            return True
+    except urllib.error.HTTPError as e:
+        print(f"[-] FAIL: HTTP Error {e.code}: {e.reason}")
+        err_body = e.read().decode("utf-8", errors="replace")
+        print(f"    Response preview: {err_body[:400]}")
+        return False
+    except Exception as e:
+        print(f"[-] FAIL: Completion failed: {e}")
+        return False
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Empo AI Provider Health Diagnostics")
+    parser.add_argument(
+        "--model",
+        default="anthropic/claude-opus-5",
+        help="Model ID to use for completion test (default: anthropic/claude-opus-5)",
+    )
+    args = parser.parse_args()
+
+    cred = check_auth()
+    if not cred or not cred.get("access"):
+        sys.exit(1)
+
+    models = check_upstream_api(cred["access"])
+    if not models:
+        sys.exit(1)
+
+    target_model = args.model if args.model in models else models[0]
+    success = test_completion(cred["access"], target_model)
+    if not success:
+        sys.exit(1)
+
+    print("\n" + "=" * 60)
+    print("[+] All diagnostics passed cleanly.")
+    print("=" * 60)
+
+
+if __name__ == "__main__":
+    main()

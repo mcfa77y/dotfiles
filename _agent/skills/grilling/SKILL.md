@@ -5,9 +5,16 @@ description: Grill the user relentlessly about a plan, decision, or idea. Use wh
 
 Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision branches into the decisions that hang off it.
 
-Work the tree in **rounds**. The **frontier** is every decision whose prerequisites are already settled: the questions you can ask _now_ without guessing at answers you haven't heard yet. Ask the whole frontier in one round: number each question and give your recommended answer. Then wait for the user's answers before the next round.
+Work the tree in **rounds**. The **frontier** is every decision whose prerequisites are already settled: the questions you can ask _now_ without guessing at answers you haven't heard yet. Ask the whole frontier in one round: present each question with concrete options and state your recommended answer. Then wait for the user's answers before the next round.
 
-Format a round like so:
+Present the frontier questions as an interactive prompt using the `ask` tool whenever available:
+- Group all open frontier questions in a single `ask` call.
+- Provide concise, distinct `options` with tradeoffs explained in `description`.
+- Mark your recommended option index with `recommended: <index>`.
+- Use `header` for a short display chip (e.g., "Execution", "Status Check").
+- Use `multi: true` only if choices are non-exclusive.
+
+If the `ask` tool is not available in the harness, format the round in chat text like so:
 
 ```
 ❓ **Q1** - **<question title>**: <question body, might be multiple paragraphs, including multiple choices>

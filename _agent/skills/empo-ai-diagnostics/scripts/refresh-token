@@ -1,0 +1,56 @@
+#!/usr/bin/env bun
+import { Database } from "bun:sqlite";
+import { refreshTokens } from "/Users/joe/Projects/empo_health/empo-worktrees/pi-extension-empo-ai-providers/workspaces/oh-my-pi-extention-empo-ai-provider/authorization.ts";
+import os from "node:os";
+import path from "node:path";
+
+const ISSUER_URI = "https://ai.empohealth.com";
+const dbPath = path.join(os.homedir(), ".omp/agent/agent.db");
+
+async function main() {
+  const db = new Database(dbPath);
+  const row = db.query("SELECT id, data FROM auth_credentials WHERE provider = 'empo-ai' ORDER BY id DESC LIMIT 1").get() as { id: number, data: string } | null;
+
+  if (!row) {
+    console.error("No empo-ai credential found in agent.db");
+    process.exit(1);
+  }
+
+  const cred = JSON.parse(row.data);
+  const clientId = cred.accountId || cred.client?.client_id;
+  const refreshToken = cred.refresh;
+
+  if (!clientId || !refreshToken) {
+    console.error("Missing clientId or refreshToken in stored credential", cred);
+    process.exit(1);
+  }
+
+  console.log(`Refreshing token for client_id=${clientId}...`);
+  try {
+    const refreshed = await refreshTokens(ISSUER_URI, {
+      client: { client_id: clientId },
+      refresh: refreshToken,
+    });
+
+    console.log("Token successfully refreshed!");
+    console.log(`New Access Token: ${refreshed.access.slice(0, 15)}... (len ${refreshed.access.length})`);
+    console.log(`New Expiration: ${new Date(refreshed.expires).toISOString()}`);
+
+    // Update credential object
+    cred.access = refreshed.access;
+    cred.refresh = refreshed.refresh;
+    cred.expires = refreshed.expires;
+    cred.accountId = refreshed.accountId;
+
+    db.query("UPDATE auth_credentials SET data = ?, disabled_cause = NULL WHERE id = ?").run(
+      JSON.stringify(cred),
+      row.id
+    );
+    console.log("agent.db updated successfully!");
+  } catch (err) {
+    console.error("Failed to refresh token:", err);
+    process.exit(1);
+  }
+}
+
+main();
