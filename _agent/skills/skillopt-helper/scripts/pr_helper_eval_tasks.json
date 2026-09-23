@@ -3,7 +3,7 @@
   "project": "/Users/joe/Projects/empo_health/remote-health-link",
   "transcript_source": "synthetic_benchmark",
   "n_sessions": 4,
-  "target_skill_path": "/Users/joe/.gemini/config/skills/empo-pr-helper/SKILL.md",
+  "target_skill_path": "/Users/joe/.gemini/config/skills/rhl-pr-helper/SKILL.md",
   "reviewed": true,
   "tasks": [
     {
@@ -56,8 +56,8 @@
       "source_sessions": [],
       "split": "train",
       "origin": "synthetic",
-      "derived_from": "empo-pr-helper",
-      "skill_hint": "empo-pr-helper"
+      "derived_from": "rhl-pr-helper",
+      "skill_hint": "rhl-pr-helper"
     },
     {
       "id": "pr-task-fix-multi-tickets",
@@ -104,8 +104,8 @@
       "source_sessions": [],
       "split": "train",
       "origin": "synthetic",
-      "derived_from": "empo-pr-helper",
-      "skill_hint": "empo-pr-helper"
+      "derived_from": "rhl-pr-helper",
+      "skill_hint": "rhl-pr-helper"
     },
     {
       "id": "pr-task-val-chore-deps",
@@ -152,8 +152,8 @@
       "source_sessions": [],
       "split": "val",
       "origin": "synthetic",
-      "derived_from": "empo-pr-helper",
-      "skill_hint": "empo-pr-helper"
+      "derived_from": "rhl-pr-helper",
+      "skill_hint": "rhl-pr-helper"
     },
     {
       "id": "pr-task-val-long-title-truncation",
@@ -201,8 +201,8 @@
       "source_sessions": [],
       "split": "val",
       "origin": "synthetic",
-      "derived_from": "empo-pr-helper",
-      "skill_hint": "empo-pr-helper"
+      "derived_from": "rhl-pr-helper",
+      "skill_hint": "rhl-pr-helper"
     }
   ]
 }

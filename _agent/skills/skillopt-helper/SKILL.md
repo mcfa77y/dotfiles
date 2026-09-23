@@ -57,7 +57,7 @@ uv run scripts/eval_runner.py --skill-path /path/to/SKILL.md --backend mock
 # Run evaluation with an active agent backend (e.g. pi, claude, codex):
 uv run scripts/eval_runner.py \
   --backend pi \
-  --skill-path /Users/joe/.gemini/config/skills/empo-pr-helper/SKILL.md \
+  --skill-path /Users/joe/.gemini/config/skills/rhl-pr-helper/SKILL.md \
   --project /Users/joe/Projects/empo_health/remote-health-link
 
 # Live run: stages proposed changes under .skillopt/ for review
@@ -70,7 +70,7 @@ Generates deterministic test benchmarks (`pr_helper_eval_tasks.json`) with `trai
 ```bash
 uv run scripts/generate_pr_tasks.py \
   --output scripts/pr_helper_eval_tasks.json \
-  --skill-path /Users/joe/.gemini/config/skills/empo-pr-helper/SKILL.md
+  --skill-path /Users/joe/.gemini/config/skills/rhl-pr-helper/SKILL.md
 ```
 
 ### 3. `test_judges.py`
@@ -108,7 +108,7 @@ skillopt-sleep dry-run \
   --source pi \
   --project /Users/joe/Projects/empo_health/remote-health-link \
   --lookback-hours 0 \
-  --target-skill-path /Users/joe/.gemini/config/skills/empo-pr-helper/SKILL.md \
+  --target-skill-path /Users/joe/.gemini/config/skills/rhl-pr-helper/SKILL.md \
   --backend pi \
   --progress
 ```

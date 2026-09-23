@@ -16,7 +16,7 @@ import json
 import os
 import sys
 
-DEFAULT_SKILL_PATH = "/Users/joe/.gemini/config/skills/empo-pr-helper/SKILL.md"
+DEFAULT_SKILL_PATH = "/Users/joe/.gemini/config/skills/rhl-pr-helper/SKILL.md"
 DEFAULT_OUTPUT_PATH = os.path.join(os.path.dirname(__file__), "pr_helper_eval_tasks.json")
 
 def build_pr_tasks(project_dir: str, skill_path: str) -> dict:
@@ -46,8 +46,8 @@ def build_pr_tasks(project_dir: str, skill_path: str) -> dict:
             "source_sessions": [],
             "split": "train",
             "origin": "synthetic",
-            "derived_from": "empo-pr-helper",
-            "skill_hint": "empo-pr-helper",
+            "derived_from": "rhl-pr-helper",
+            "skill_hint": "rhl-pr-helper",
         },
         {
             "id": "pr-task-fix-multi-tickets",
@@ -73,8 +73,8 @@ def build_pr_tasks(project_dir: str, skill_path: str) -> dict:
             "source_sessions": [],
             "split": "train",
             "origin": "synthetic",
-            "derived_from": "empo-pr-helper",
-            "skill_hint": "empo-pr-helper",
+            "derived_from": "rhl-pr-helper",
+            "skill_hint": "rhl-pr-helper",
         },
         {
             "id": "pr-task-val-chore-deps",
@@ -100,8 +100,8 @@ def build_pr_tasks(project_dir: str, skill_path: str) -> dict:
             "source_sessions": [],
             "split": "val",
             "origin": "synthetic",
-            "derived_from": "empo-pr-helper",
-            "skill_hint": "empo-pr-helper",
+            "derived_from": "rhl-pr-helper",
+            "skill_hint": "rhl-pr-helper",
         },
         {
             "id": "pr-task-val-long-title-truncation",
@@ -127,8 +127,8 @@ def build_pr_tasks(project_dir: str, skill_path: str) -> dict:
             "source_sessions": [],
             "split": "val",
             "origin": "synthetic",
-            "derived_from": "empo-pr-helper",
-            "skill_hint": "empo-pr-helper",
+            "derived_from": "rhl-pr-helper",
+            "skill_hint": "rhl-pr-helper",
         },
     ]
 

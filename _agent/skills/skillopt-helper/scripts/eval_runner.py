@@ -19,7 +19,7 @@ import os
 import subprocess
 import sys
 
-DEFAULT_SKILL_PATH = "/Users/joe/.gemini/config/skills/empo-pr-helper/SKILL.md"
+DEFAULT_SKILL_PATH = "/Users/joe/.gemini/config/skills/rhl-pr-helper/SKILL.md"
 DEFAULT_TASKS_FILE = os.path.join(os.path.dirname(__file__), "pr_helper_eval_tasks.json")
 DEFAULT_PROJECT = "/Users/joe/Projects/empo_health/remote-health-link"
 

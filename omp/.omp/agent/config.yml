@@ -1,6 +1,6 @@
 setupVersion: 2
 modelRoles:
-  default: empo-ai/google/gemini-3.8-flash
+  default: devin/swe-1-6-fast
   task: empo-ai/google/gemini-3.8-flash
   slow: empo-ai/google/gemini-2.5-pro
   plan: empo-ai/google/gemini-2.5-pro

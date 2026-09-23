@@ -15,40 +15,43 @@ retry:
   fallbackChains:
     default:
       - empo-ai/google/gemini-3.8-flash:medium
+      - empo-ai/google/gemini-3.7-flash:high
       - empo-ai/google/gemini-3.5-flash:high
-      - empo-ai/google/gemini-2.5-flash:high
     slow:
       - empo-ai/anthropic/claude-opus-5:medium
-      - empo-ai/anthropic/claude-opus-4-7:high
+      - empo-ai/anthropic/claude-opus-4-8:high
       - empo-ai/google/gemini-2.5-pro:high
     task:
       - empo-ai/google/gemini-3.8-flash:medium
+      - empo-ai/google/gemini-3.7-flash:high
       - empo-ai/google/gemini-3.5-flash:high
-      - empo-ai/google/gemini-2.5-flash:high
     smol:
       - empo-ai/google/gemini-3.5-flash-lite:low
+      - empo-ai/google/gemini-3.1-flash-lite:low
       - empo-ai/google/gemini-2.5-flash:low
     vision:
       - empo-ai/google/gemini-3.8-flash:medium
-      - empo-ai/google/gemini-3.5-flash:high
+      - empo-ai/google/gemini-3.7-flash:high
       - empo-ai/google/gemini-2.5-pro:high
     plan:
       - empo-ai/anthropic/claude-opus-5:low
-      - empo-ai/anthropic/claude-opus-4-7:medium
+      - empo-ai/anthropic/claude-opus-4-8:medium
       - empo-ai/google/gemini-2.5-pro:medium
     commit:
-      - empo-ai/google/gemini-3.5-flash:minimal
-      - empo-ai/google/gemini-2.5-flash:minimal
+      - empo-ai/google/gemini-3.5-flash-lite:minimal
+      - empo-ai/google/gemini-3.1-flash-lite:minimal
+      - empo-ai/google/gemini-2.5-flash-lite:minimal
     tiny:
-      - empo-ai/google/gemini-3.5-flash:minimal
-      - empo-ai/google/gemini-2.5-flash:minimal
+      - empo-ai/google/gemini-3.5-flash-lite:minimal
+      - empo-ai/google/gemini-3.1-flash-lite:minimal
+      - empo-ai/google/gemini-2.5-flash-lite:minimal
     designer:
       - empo-ai/google/gemini-3.8-flash:medium
-      - empo-ai/google/gemini-3.5-flash:high
+      - empo-ai/google/gemini-3.7-flash:high
       - empo-ai/google/gemini-2.5-pro:high
     advisor:
       - empo-ai/google/gemini-3.8-flash:medium
-      - empo-ai/google/gemini-3.5-flash:high
+      - empo-ai/google/gemini-3.7-flash:high
       - empo-ai/google/gemini-2.5-pro:high
 dev:
   autoqaConsent: granted

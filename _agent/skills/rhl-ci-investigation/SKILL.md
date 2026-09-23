@@ -57,6 +57,7 @@ Determine which category each failure falls into:
 | **Flaky Test** | Failure involves random data generation (faker, Math.random), timing issues, or "Matcher did not succeed in time". Passes on re-run. |
 | **Build/Compile Error** | TypeScript compilation errors, missing imports, webpack/vite build failures. |
 | **Infrastructure/Secret** | Missing env vars, Infisical injection failures, AWS credential errors, `Forbidden` API errors. |
+| **Cache Miss / Quota** | `actions/cache` misses despite matching keys (path version hash mismatch), "Unable to reserve cache", or LRU eviction due to exceeding 10 GiB limit. |
 | **Timeout/OOM** | Job killed by GitHub runner, "The operation was canceled", excessive memory usage. |
 
 ### 6. Trace Root Cause
@@ -105,11 +106,13 @@ For each failure:
 - Do NOT claim a fix without running the test locally.
 - This skill produces documentation only — no code changes, no ticket creation.
 
-## Key Tools
+## Key Tools & Helper Scripts
 - `gh run view <ID>` — run overview with job statuses.
 - `gh run view <ID> --log-failed` — failed step logs for all failed jobs.
 - `gh run view <ID> --log` — full logs (use sparingly, very large).
 - `gh api repos/EmpoHealth/core/actions/runs/<ID>/jobs` — structured job data.
+- `scripts/inspect_cache.py` — inspect repo cache quota (10 GiB limit), active entries by category/ref, and diagnose `actions/cache` key version conflicts (e.g. `scripts/inspect_cache.py --key node-modules`).
+- `scripts/validate_yaml.py` — validate workflow YAML syntax and basic GitHub Actions schema (e.g. `scripts/validate_yaml.py .github/workflows/`).
 - Local `grep`/`read` — trace source files in the worktree.
 
 ## Common RHL CI Patterns
@@ -117,6 +120,11 @@ For each failure:
 - **Backend tests:** Jest in `workspaces/backend-api`. Run with `yarn test`.
 - **E2E tests:** Jest with `test:e2e` script, Docker-based. Run with `yarn test:e2e`.
 - **Secrets:** Infisical CLI injects env vars at runtime. Missing secret = check Infisical project ID and identity.
+- **Dependency & Cache Management:**
+  - `actions/cache` scopes keys by runner OS, workspace prefix, and lockfile hash (`${{ runner.os }}-<workspace>-node-modules-${{ hashFiles('yarn.lock') }}`).
+  - Each workspace must namespace its cache keys because GitHub Actions computes a hidden `version` hash from the cached `path` list. Sharing identical keys across different path sets results in silent cache misses.
+  - Push workflows to `main` should seed the primary cache so PR branches get immediate hits.
+  - Quota is 10 GiB per repo; exceeding it triggers aggressive LRU eviction.
 - **Ephemeral environments:** PR-triggered deployments to `*.staging.empohealth.com`. Webhook management via `manage-linear-ephemeral-webhook.ts`.
 - **Flaky test sources:** `faker.phone.number()`, `faker.helpers.arrayElement()`, `faker.date.*` — any faker call without a fixed seed can produce non-deterministic failures.
 - **Workflow coverage:** The skill handles any workflow the user provides via GitHub URL — frontend, backend, E2E, deploy, or custom workflows.
