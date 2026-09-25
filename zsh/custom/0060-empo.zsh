@@ -359,6 +359,12 @@ frontend_start() {
   yarn start
 }
 
+mock_service_start() {
+  kill_by_port 3001
+  zms
+  yarn start
+}
+
 # 2026-06-09 start app and server local_playwright
 local_start_app_and_server() {
   local_playwright
@@ -366,6 +372,7 @@ local_start_app_and_server() {
   local_e2e
   cmux-tab --name "FE Server" --command "frontend_start"
   cmux-tab --name "BE Server" --command "backend_start"
+  cmux-tab --name "MS Server" --command "mock_service_start "
   cmux-tab --name "ngrok 3000" --command "ngrok_start"
 }
 
