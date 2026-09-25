@@ -1,11 +1,76 @@
 #!/usr/bin/env bun
 import { Database } from "bun:sqlite";
-import { refreshTokens } from "/Users/joe/Projects/empo_health/empo-worktrees/pi-extension-empo-ai-providers/workspaces/oh-my-pi-extention-empo-ai-provider/authorization.ts";
 import os from "node:os";
 import path from "node:path";
 
 const ISSUER_URI = "https://ai.empohealth.com";
 const dbPath = path.join(os.homedir(), ".omp/agent/agent.db");
+
+/**
+ * Self-contained token refresher for Cloudflare Access OAuth.
+ * Removes dependencies on ephemeral repo worktree paths.
+ */
+async function refreshTokens(
+  issuerUri: string,
+  { client, refresh }: { client: { client_id: string }; refresh: string }
+) {
+  let tokenEndpoint = "https://empohealth.cloudflareaccess.com/cdn-cgi/access/oauth/token";
+  try {
+    const discRes = await fetch(`${issuerUri}/.well-known/oauth-authorization-server`);
+    if (discRes.ok) {
+      const meta = (await discRes.json()) as { token_endpoint?: string };
+      if (meta.token_endpoint) {
+        tokenEndpoint = meta.token_endpoint;
+      }
+    }
+  } catch {
+    // fallback to default tokenEndpoint
+  }
+
+  const body = new URLSearchParams({
+    grant_type: "refresh_token",
+    client_id: client.client_id,
+    refresh_token: refresh,
+  });
+
+  const res = await fetch(tokenEndpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    },
+    body: body.toString(),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    let errJson: any;
+    try {
+      errJson = JSON.parse(errorText);
+    } catch {}
+    const errType = errJson?.error || `HTTP ${res.status}`;
+    const errDesc = errJson?.error_description
+      ? `: ${errJson.error_description}`
+      : ` (${errorText.slice(0, 200)})`;
+    throw new Error(
+      `empo-ai: refresh token rejected (${errType}${errDesc}). Re-login with /login empo-ai.`
+    );
+  }
+
+  const data = (await res.json()) as {
+    access_token: string;
+    refresh_token?: string;
+    expires_in?: number;
+  };
+
+  return {
+    access: data.access_token,
+    refresh: data.refresh_token || refresh,
+    expires: Date.now() + (data.expires_in || 3600) * 1000,
+    accountId: client.client_id,
+  };
+}
 
 async function main() {
   const db = new Database(dbPath);
