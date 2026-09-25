@@ -203,4 +203,5 @@ mkdir -p {{ worktree_path }}/workspaces/backend-api {{ worktree_path }}/workspac
 [ -f "{{ repo_path }}/../env/vscode/tasks.json" ] && ln -sf {{ repo_path }}/../env/vscode/tasks.json {{ worktree_path }}/.vscode/
 true
 """,
+    "git sparse-checkout set .github .yarn workspaces/common workspaces/backend-api workspaces/frontend-app workspaces/helper-scripts workspaces/qa workspaces/mock-services graphify-out",
 ]
