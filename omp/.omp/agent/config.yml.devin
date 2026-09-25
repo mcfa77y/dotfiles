@@ -2,7 +2,7 @@ setupVersion: 1
 modelRoles:
   default: devin/glm-5-3-1m:high
   smol: devin/glm-5-3-flash-1m:low
-  slow: devin/claude-opus-5:high
+  slow: devin/claude-opus-5-5:high
   vision: devin/gemini-3-8-flash:medium
   plan: devin/gpt-6-astra:low
   designer: devin/claude-sonnet-5:medium
@@ -18,9 +18,9 @@ retry:
       - devin/glm-5-2-1m:high
       - devin/swe-2:medium
     slow:
-      - devin/claude-sonnet-5:high
+      - devin/claude-opus-5-5:medium
+      - devin/claude-opus-5:high
       - devin/claude-opus-4-8:high
-      - devin/gpt-6-astra:medium
     task:
       - devin/glm-5-3-1m:low
       - devin/glm-5-2-1m:high
