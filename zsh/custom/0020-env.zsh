@@ -10,6 +10,8 @@ export PROJECTS_DIR="$HOME/Projects"
 export JS_DIR="$PROJECTS_DIR/js_for_fun"
 export PY_DIR="$PROJECTS_DIR/python_for_fun"
 export EDITOR='nvim'
+export VISUAL="nvim"
+
 # export AI_HARNESS='agy'
 export AI_HARNESS='omp-empo'
 
@@ -35,3 +37,4 @@ export EMPO_AI_BASE_URL='http://127.0.0.1:8787/v1'
 export HEADROOM_ROLLOUT_CHANNEL='beta'
 export HEADROOM_OUTPUT_SHAPER=1
 export HEADROOM_OUTPUT_HOLDOUT=0.1
+export HEADROOM_MODE=token

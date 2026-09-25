@@ -56,15 +56,21 @@ pyenv() {
   eval "$(pyenv virtualenv-init - zsh)"
   pyenv "$@"
 }
-python() { pyenv >/dev/null; python "$@" }
-pip() { pyenv >/dev/null; pip "$@" }
+python() {
+  pyenv >/dev/null
+  python "$@"
+}
+pip() {
+  pyenv >/dev/null
+  pip "$@"
+}
 
 export PATH="$HOME/.local/bin:$PATH"
 
 # --- Node/NVM/Yarn ---
 # Synchronous NVM loader wrappers to prevent race conditions on shell startup/immediate command executions
 _is_nvm_loaded() {
-  (( $+functions[nvm] )) && [[ "$(whence -f nvm 2>/dev/null)" != *"unfunction nvm"* ]]
+  (($+functions[nvm])) && [[ "$(whence -f nvm 2>/dev/null)" != *"unfunction nvm"* ]]
 }
 
 if ! _is_nvm_loaded; then
@@ -82,12 +88,12 @@ if ! _is_nvm_loaded; then
     fi
 
     # If NVM is loaded but the command is still not in path, force load default version
-    if ! (( $+commands[$cmd] )) && _is_nvm_loaded; then
+    if ! (($+commands[$cmd])) && _is_nvm_loaded; then
       nvm use default &>/dev/null
     fi
 
     # Clean up wrappers once NVM is fully active and node is in path
-    if (( $+commands[node] )) && _is_nvm_loaded; then
+    if (($+commands[node])) && _is_nvm_loaded; then
       unfunction node npm npx yarn 2>/dev/null
     fi
   }
@@ -134,14 +140,3 @@ if ! _is_nvm_loaded; then
     nvm "$@"
   }
 fi
-
-# yarn aliases
-alias yvscode='yarn plugin import typescript; yarn plugin import interactive-tools; yarn dlx @yarnpkg/sdks vscode'
-alias yl='yarn lint'
-alias yfl='yarn format; yarn lint'
-
-alias ytw='yarn test --watch'
-
-alias yversion='echo "node $(node -v)\nyarn $(yarn -v)"'
-
-alias ynx='yarn nx'
