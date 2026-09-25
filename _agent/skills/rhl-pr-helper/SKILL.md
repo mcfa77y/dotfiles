@@ -124,6 +124,12 @@ node ~/.gemini/config/skills/rhl-pr-helper/scripts/fetch_pr_checks.js https://gi
 node ~/.gemini/config/skills/rhl-pr-helper/scripts/fetch_pr_checks.js <owner/repo> <PR_NUMBER> --format json
 ```
 
+### 6. `reopen_pr.js`
+Bounces a PR (close followed immediately by reopen) to force GitHub Actions to re-run CI workflows without pushing empty commits.
+```bash
+node ~/.gemini/config/skills/rhl-pr-helper/scripts/reopen_pr.js <PR_NUMBER>
+```
+
 ---
 
 ## Standard Template
