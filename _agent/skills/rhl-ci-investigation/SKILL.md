@@ -124,6 +124,7 @@ For each failure:
 
 ## Key Tools & Helper Scripts
 - `scripts/fetch_failed_logs.py` — robust log fetcher and error parser that works even while workflow runs are in progress, isolates logs per failed job, and optionally downloads `qa-pr-report-*` artifacts.
+- `scripts/parse_vitest_results.js` — decompresses and extracts failed test suites and error stacks from Vitest report metadata (`html.meta.json.gz`).
 - `gh run view <ID>` — run overview with job statuses.
 - `gh run view <ID> --log-failed` — failed step logs for all failed jobs.
 - `gh run view <ID> --log` — full logs (use sparingly, very large).
