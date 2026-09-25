@@ -70,7 +70,8 @@ wtjs-cli() {
 
 # 2026-02-13
 # change directory to a worktree
-alias wts='zrhl; wt switch; cdev'
+alias wtsd='zrhl; wt switch; cdev'
+alias wts='zrhl; wt switch '
 
 # 2026-08-19 worktrees list
 alias wtl='wt list'
@@ -108,7 +109,7 @@ function sync-stack() {
       echo "fzf is required for interactive mode"
       return 1
     }
-    base=$(git for-each-ref --format='%(if)%(symref)%(then)%(else)%(refname:lstrip=3)%(end)' refs/remotes/origin | sed '/^$/d' | fzf --prompt='Base branch: ') || return 1
+    base=$(wt list --format json | jq -r '.items[].branch' | sort | fzf --prompt='Base branch: ') || return 1
     [ -n "$base" ] || return 1
   else
     base="${1#origin/}"
@@ -130,10 +131,6 @@ function sync-stack() {
     fi
     return 1
   fi
-}
-
-function sync-4119() {
-  sync-stack rhl-4119-scaffold-workspacesmock-services-nestjs-package-docker-setup
 }
 
 # 2026-04-02 Git rebase with stash pop
