@@ -33,7 +33,23 @@ Identify:
 - All failing jobs (not just the first one).
 
 ### 3. Handle Multi-Job Failures
-If multiple jobs failed (✗), investigate each one:
+If multiple jobs failed (✗), investigate each one.
+
+> [!TIP]
+> **Preferred Method:** Use `scripts/fetch_failed_logs.py`.
+> Unlike `gh run view --log-failed` (which fails with `"run is still in progress"` if any matrix or teardown jobs are still active), `fetch_failed_logs.py` queries `gh api` per job and works immediately even on in-progress runs, separates logs by job into clean files, and parses Playwright assertion errors automatically:
+> ```bash
+> # Fetch and parse all failed jobs for a run:
+> python3 /Users/joe/.gemini/config/skills/rhl-ci-investigation/scripts/fetch_failed_logs.py --run-id <RUN_ID>
+>
+> # Target a single job or URL:
+> python3 /Users/joe/.gemini/config/skills/rhl-ci-investigation/scripts/fetch_failed_logs.py --run-id "<URL>"
+>
+> # Also download qa-pr-report artifacts (with error-context.md page snapshots):
+> python3 /Users/joe/.gemini/config/skills/rhl-ci-investigation/scripts/fetch_failed_logs.py --run-id <RUN_ID> --download-artifacts
+> ```
+
+**Alternative CLI fallback (completed runs only):**
 ```bash
 gh run view <RUN_ID> --log-failed --repo EmpoHealth/core
 ```
@@ -107,6 +123,7 @@ For each failure:
 - This skill produces documentation only — no code changes, no ticket creation.
 
 ## Key Tools & Helper Scripts
+- `scripts/fetch_failed_logs.py` — robust log fetcher and error parser that works even while workflow runs are in progress, isolates logs per failed job, and optionally downloads `qa-pr-report-*` artifacts.
 - `gh run view <ID>` — run overview with job statuses.
 - `gh run view <ID> --log-failed` — failed step logs for all failed jobs.
 - `gh run view <ID> --log` — full logs (use sparingly, very large).
