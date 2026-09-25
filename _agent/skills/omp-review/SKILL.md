@@ -32,8 +32,16 @@ If the target scope is ambiguous or not specified by the user, inspect the git s
 ## 2. Gather Changes & Code Context
 
 1. Run `git diff` or `git status` to identify all modified, added, or deleted files.
-2. Review relevant surrounding context and imports in the touched files using `read` or `grep`.
+2. Review relevant surrounding context and imports in the touched files using `read` or `rg`.
 3. Check repository guidelines (e.g. `AGENTS.md`, `.commitlintrc.json`, lint/test rules) to ensure project conventions are evaluated.
+
+### Analysis & Investigation Scripts
+
+When conducting deep analysis or investigations during a PR review that require custom scripting (e.g., AST parsing, complex graph traversal, CI log inspection, or schema verification):
+
+- **Persist to Temporary Files**: Always write scripts to a temporary file on disk (such as `<appDataDir>/brain/<conversation-id>/scratch/` or `/tmp/`) rather than executing complex inline shell commands.
+- **Reusability & Parameterization**: Structure and parameterize scripts so they can be re-run, tweaked, or reused across review iterations.
+- **Skill Promotion**: If an investigation script proves generally useful or addresses a recurring pattern, evaluate promoting it to an existing skill's `scripts/` directory or using it as the foundation for a new specialized skill.
 
 ### Graphify Architectural & Impact Analysis
 When `graphify-out/graph.json` exists in the repository root, run Graphify before dispatching reviewers to map blast radius and architectural risk:
