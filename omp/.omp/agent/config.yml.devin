@@ -2,12 +2,12 @@ setupVersion: 1
 modelRoles:
   default: devin/glm-5-3-1m:high
   smol: devin/glm-5-3-flash-1m:low
-  slow: devin/claude-opus-5-5:high
+  slow: devin/claude-opus-5-5-fast:high
   vision: devin/gemini-3-8-flash:medium
-  plan: devin/gpt-6-astra:low
+  plan: devin/gpt-6-astra-fast:low
   designer: devin/claude-sonnet-5:medium
   commit: devin/glm-5-3-flash-1m:low
-  tiny: devin/swe-2:medium
+  tiny: devin/swe-1-7-lightning:medium
   task: devin/glm-5-3-1m:high
   advisor: devin/glm-5-3-1m:high
 defaultThinkingLevel: auto
@@ -18,9 +18,9 @@ retry:
       - devin/glm-5-2-1m:high
       - devin/swe-2:medium
     slow:
-      - devin/claude-opus-5-5:medium
+      - devin/claude-opus-5-5-fast:medium
+      - devin/claude-opus-5-5:high
       - devin/claude-opus-5:high
-      - devin/claude-opus-4-8:high
     task:
       - devin/glm-5-3-1m:low
       - devin/glm-5-2-1m:high
@@ -34,17 +34,17 @@ retry:
       - devin/gemini-3-7-flash:medium
       - devin/gemini-3-6-flash:medium
     plan:
-      - devin/gpt-6-astra:medium
+      - devin/gpt-6-astra-fast:medium
+      - devin/gpt-6-astra:low
       - devin/gpt-5-6-luna:medium
-      - devin/glm-5-3-1m:high
     designer:
       - devin/claude-sonnet-5:low
       - devin/claude-sonnet-4-6-1m:high
-      - devin/gpt-6-astra:medium
+      - devin/gpt-6-astra-fast:medium
     commit:
+      - devin/swe-1-7-lightning:medium
       - devin/swe-2:medium
       - devin/glm-5-3-flash-1m:low
-      - devin/glm-5-2-1m:high
     tiny:
       - devin/swe-1-7-lightning:medium
       - devin/swe-1-7:medium
