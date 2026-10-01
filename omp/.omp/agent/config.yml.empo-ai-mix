@@ -1,0 +1,86 @@
+setupVersion: 2
+modelRoles:
+  default: empo-ai/anthropic/claude-sonnet-5:medium
+  task: empo-ai/google/gemini-3.8-flash:high
+  slow: empo-ai/anthropic/claude-opus-5-5:high
+  plan: empo-ai/anthropic/claude-sonnet-5:high
+  vision: empo-ai/google/gemini-3.8-flash:high
+  designer: empo-ai/anthropic/claude-sonnet-5:high
+  advisor: empo-ai/anthropic/claude-sonnet-5:high
+  smol: empo-ai/google/gemini-3.7-flash:low
+  commit: empo-ai/google/gemini-3.5-flash-lite:minimal
+  tiny: empo-ai/anthropic/claude-haiku-4-5:minimal
+defaultThinkingLevel: auto
+retry:
+  fallbackChains:
+    default:
+      - empo-ai/anthropic/claude-sonnet-5:low
+      - empo-ai/google/gemini-3.8-flash:high
+      - empo-ai/google/gemini-3.7-flash:high
+    slow:
+      - empo-ai/anthropic/claude-opus-5-5:medium
+      - empo-ai/anthropic/claude-opus-5:high
+      - empo-ai/google/gemini-3.1-pro-preview:high
+    task:
+      - empo-ai/google/gemini-3.8-flash:medium
+      - empo-ai/anthropic/claude-sonnet-5:medium
+      - empo-ai/google/gemini-3.7-flash:high
+    smol:
+      - empo-ai/google/gemini-3.7-flash:minimal
+      - empo-ai/anthropic/claude-haiku-4-5:low
+      - empo-ai/google/gemini-3.5-flash-lite:low
+    vision:
+      - empo-ai/google/gemini-3.8-flash:medium
+      - empo-ai/anthropic/claude-sonnet-5:medium
+      - empo-ai/google/gemini-3.7-flash:high
+    plan:
+      - empo-ai/anthropic/claude-sonnet-5:medium
+      - empo-ai/google/gemini-3.1-pro-preview:medium
+      - empo-ai/anthropic/claude-opus-5-5:medium
+    commit:
+      - empo-ai/google/gemini-3.5-flash-lite:low
+      - empo-ai/anthropic/claude-haiku-4-5:minimal
+      - empo-ai/google/gemini-3.1-flash-lite:minimal
+    tiny:
+      - empo-ai/anthropic/claude-haiku-4-5:low
+      - empo-ai/google/gemini-3.5-flash-lite:minimal
+      - empo-ai/google/gemini-3.1-flash-lite:minimal
+    designer:
+      - empo-ai/anthropic/claude-sonnet-5:medium
+      - empo-ai/google/gemini-3.8-flash:high
+      - empo-ai/anthropic/claude-sonnet-5:low
+    advisor:
+      - empo-ai/anthropic/claude-sonnet-5:medium
+      - empo-ai/anthropic/claude-opus-5-5:medium
+      - empo-ai/google/gemini-3.8-flash:high
+dev:
+  autoqaConsent: granted
+symbolPreset: nerd
+prewalk:
+  enabled: true
+autolearn:
+  enabled: true
+github:
+  enabled: true
+composer:
+  shape: field
+spelling:
+  autocomplete: false
+startup:
+  setupWizard: false
+marketplace:
+  autoUpdate: auto
+memory:
+  backend: mnemopi
+mnemopi:
+  scoping: global
+astGrep:
+  enabled: true
+theme:
+  dark: dark-synthwave
+advisor:
+  enabled: false
+  syncBacklog: "1"
+providers:
+  webSearchOrder:
+    []
