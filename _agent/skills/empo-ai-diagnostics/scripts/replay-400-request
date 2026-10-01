@@ -93,7 +93,7 @@ def replay(log_path: str, override_url: str = None):
 def main():
     parser = argparse.ArgumentParser(description="Replay captured HTTP 400 requests from ~/.omp/logs/http-400-requests/")
     parser.add_argument("--file", help="Path to specific HTTP request log JSON file")
-    parser.add_argument("--url", help="Override destination URL (e.g. http://127.0.0.1:8787/v1/chat/completions)")
+    parser.add_argument("--url", help="Override destination URL (e.g. http://127.0.0.1:8765/v1/chat/completions)")
     args = parser.parse_args()
 
     target_file = args.file

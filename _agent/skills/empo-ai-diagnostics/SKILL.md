@@ -108,7 +108,7 @@ Quickly checks your remaining daily budget against the Cloudflare AI Gateway $40
 | `invalid_grant: Grant not found` or `Refresh token has expired` | OAuth token expired and refresh token was revoked by Cloudflare Access | Run `/login empo-ai` in your `omp` session or run `refresh-token`. |
 | `Error: 400 Request body is not valid JSON` | Cloudflare Access returned an HTML 401/403 error page which the JSON parser rejected | Check auth status with `diagnose-empo-ai`; re-login with `/login empo-ai`. |
 | `Cloudflare Error 1010 (Access denied)` | Blocked by Cloudflare WAF due to missing/flagged `User-Agent` header | Ensure requests include a valid standard browser / curl User-Agent. |
-| `502 Bad Gateway` on `127.0.0.1:8787` | Headroom proxy received an upstream error from `ai.empohealth.com` | Run `diagnose-empo-ai` to check if the upstream token or route is failing. |
+| `502 Bad Gateway` on `127.0.0.1:8765` (or Headroom proxy port) | Headroom proxy received an upstream error from `ai.empohealth.com` | Run `diagnose-empo-ai` to check if the upstream token or route is failing. |
 
 ## Auth Storage Architecture
 

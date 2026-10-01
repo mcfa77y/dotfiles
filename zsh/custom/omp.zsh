@@ -4,7 +4,7 @@ export OMP_CONFIG_DIR="$HOME/.omp/agent"
 
 _omp_launch() {
   if command -v headroom >/dev/null 2>&1; then
-    headroom wrap omp -- "$@"
+    headroom wrap omp -p "${HEADROOM_PORT:-8765}" -- "$@"
   else
     command omp "$@"
   fi

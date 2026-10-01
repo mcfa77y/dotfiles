@@ -26,7 +26,9 @@ DEFAULT_USER_AGENT = (
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 )
 DIRECT_URL = "https://ai.empohealth.com/v1/chat/completions"
-HEADROOM_URL = "http://127.0.0.1:8787/v1/chat/completions"
+HEADROOM_PORT = os.environ.get("HEADROOM_PORT", "8765")
+HEADROOM_BASE_URL = os.environ.get("EMPO_AI_BASE_URL", f"http://127.0.0.1:{HEADROOM_PORT}/v1")
+HEADROOM_URL = f"{HEADROOM_BASE_URL.rstrip('/')}/chat/completions"
 
 
 def get_latest_failed_log() -> Optional[str]:
@@ -194,7 +196,7 @@ def main():
         if args.target in ("both", "direct"):
             results["direct"] = send_request(DIRECT_URL, body, token, "Direct Gateway (ai.empohealth.com)")
         if args.target in ("both", "headroom"):
-            results["headroom"] = send_request(HEADROOM_URL, body, token, "Headroom Proxy (127.0.0.1:8787)")
+            results["headroom"] = send_request(HEADROOM_URL, body, token, f"Headroom Proxy ({HEADROOM_URL})")
 
     # 5. Summary & Verdict
     print("\n" + "=" * 65)

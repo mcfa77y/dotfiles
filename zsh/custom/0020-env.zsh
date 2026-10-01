@@ -32,13 +32,16 @@ OMZ_CUSTOM_DIR="$HOME/dotfiles/zsh/custom"
 # --- Headroom AI Context Compression ---
 export OPENAI_TARGET_API_URL='https://ai.empohealth.com/v1'
 export HEADROOM_HOST='127.0.0.1'
-export HEADROOM_PORT=8787
-export EMPO_AI_BASE_URL='http://127.0.0.1:8787/v1'
+export HEADROOM_PORT=8765
+export EMPO_AI_BASE_URL='http://127.0.0.1:8765/v1'
 # Beta output shaper: trims model output ceremony (preambles, restated code)
 export HEADROOM_ROLLOUT_CHANNEL='beta'
 export HEADROOM_OUTPUT_SHAPER=1
 export HEADROOM_OUTPUT_HOLDOUT=0.1
 export HEADROOM_MODE=token
+
+# --- llmfit ---
+export LLMFIT_DASHBOARD_PORT=8790
 
 # Super File
 export XDG_CONFIG_HOME="$HOME/.config"

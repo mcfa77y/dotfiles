@@ -19,7 +19,8 @@ import urllib.request
 from typing import Dict, List, Optional, Tuple
 
 DIRECT_BASE_URL = "https://ai.empohealth.com/v1"
-HEADROOM_BASE_URL = "http://127.0.0.1:8787/v1"
+HEADROOM_PORT = os.environ.get("HEADROOM_PORT", "8765")
+HEADROOM_BASE_URL = os.environ.get("EMPO_AI_BASE_URL", f"http://127.0.0.1:{HEADROOM_PORT}/v1")
 DEFAULT_USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
