@@ -10,3 +10,5 @@ herdr/.plugins.lock
 
 zsh/.zcompdump
 *.lock
+__pycache__/
+*.pyc

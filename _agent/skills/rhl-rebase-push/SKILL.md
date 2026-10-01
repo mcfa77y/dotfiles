@@ -26,9 +26,12 @@ Rebases the current working branch onto the latest `origin/main` and force-pushe
      git rebase origin/main
      ```
    - **Conflict Handling**: If conflicts occur during rebase:
-     - Do not force through invalid merges.
-     - Report failing files and conflict details to the user.
-     - Provide choices to resolve conflicts or abort via `git rebase --abort`.
+     - **Yarn Lockfile Conflicts**: If `yarn.lock` files are conflicted (monorepo root or isolated sub-workspaces), use the automated helper:
+       ```bash
+       ~/.gemini/config/skills/rhl-rebase-push/scripts/resolve-yarn-lock-conflicts.sh --continue
+       ```
+       This shelves unrelated unstaged edits (preventing git rebase aborts), runs `yarn install` to let Yarn Berry auto-resolve lockfile markers, verifies with `yarn install --immutable`, stages the lockfile(s), and advances the rebase.
+     - **Other Code Conflicts**: Do not force through invalid merges. Report failing files and conflict details to the user. Provide choices to resolve conflicts or abort via `git rebase --abort`.
 
 4. **Force-Push with Lease**:
    - Check repo rules (e.g. `GEMINI.md`): push with `--no-verify` if changes are strictly infrastructure (`*.tf`, `*.yml`) or git workflow updates.

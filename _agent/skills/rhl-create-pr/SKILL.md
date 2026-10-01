@@ -9,7 +9,7 @@ description: Creates a GitHub Pull Request describing changes on the current bra
 2. **Identify Base**: Base branch is `origin/main`.
 3. **Analyze Changes**: `git diff --name-only origin/main...HEAD`
 4. **Reviewers**:
-   - Baseline: `pm-pp`, `simon57b`, `singhmadhurima123`
+   - Baseline: `pm-pp`, `simon57b`, `singhmadhurima123`, `jofay-empo`
    - If `*.tf`, `*.yml`, or `*.yaml` files changed, add `edahlseng`
 5. **Generate Content & Adhere to PR Lint Rules**:
    - Read `git log origin/main..HEAD --oneline`

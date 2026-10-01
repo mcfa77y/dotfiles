@@ -12,6 +12,21 @@ Use this workflow to publish code review findings and inline diff comments direc
 - Active GitHub authentication via `gh auth status` or GitHub MCP tools.
 - PR number / URL and review report (e.g., from `rhl-review-pr` output in `docs/` or session findings).
 
+## Locating Exact Diff Lines via Helper Script
+
+To find the exact line numbers inside PR diff hunks and ensure comments target valid reviewable lines, use `scripts/find-diff-line.ts`:
+
+```bash
+# Search for a pattern or keyword in a changed file
+bun run scripts/find-diff-line.ts <PR_NUMBER_OR_URL> -f <FILENAME> -p "<PATTERN>"
+
+# Search deletions on LEFT side
+bun run scripts/find-diff-line.ts <PR_NUMBER> -f <FILENAME> -p "<PATTERN>" -s LEFT
+
+# Output machine-readable JSON for automated review payload construction
+bun run scripts/find-diff-line.ts <PR_NUMBER> -f <FILENAME> -p "<PATTERN>" --json
+```
+
 ## Recommended: Automated Submission via Helper Script
 
 The skill includes a dedicated helper script `scripts/post-review.py` that:
