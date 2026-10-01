@@ -104,19 +104,20 @@ alias git-fix-unable-to-rmdir='git sparse-checkout set .github/.yarn workspaces/
 # 2026-08-27
 function sync-stack() {
   local base stashed=0
+  CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
   if [ -z "$1" ]; then
     command -v fzf >/dev/null || {
       echo "fzf is required for interactive mode"
       return 1
     }
-    base=$(wt list --format json | jq -r '.items[].branch' | sort | fzf --prompt='Base branch: ') || return 1
+    base=$(wt list --format json | jq -r '.items[].branch' | sort | fzf --prompt="Base $CURRENT_BRANCH: ") || return 1
     [ -n "$base" ] || return 1
   else
     base="${1#origin/}"
   fi
   if ! git diff-index --quiet HEAD -- 2>/dev/null; then
     echo "Stashing uncommitted changes..."
-    git stash push -m "sync-stack auto-stash" || return 1
+    git stash push -m "sync-stack auto-stash: $CURRENT_BRANCH" || return 1
     stashed=1
   fi
   if git fetch origin "$base" && git rebase "origin/$base" && git push --force-with-lease; then

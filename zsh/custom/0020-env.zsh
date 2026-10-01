@@ -17,6 +17,7 @@ export AI_HARNESS='omp-empo'
 
 # Google Antigravity
 export GOOGLE_CLOUD_PROJECT_ID='empo-health-antigravity'
+export GOOGLE_GEMINI_BASE_URL="https://ai.empohealth.com"
 
 # --- Lazygit ---
 LAZY_GIT_CONFIG_DIR="$HOME/.config/lazygit"
@@ -38,3 +39,6 @@ export HEADROOM_ROLLOUT_CHANNEL='beta'
 export HEADROOM_OUTPUT_SHAPER=1
 export HEADROOM_OUTPUT_HOLDOUT=0.1
 export HEADROOM_MODE=token
+
+# Super File
+export XDG_CONFIG_HOME="$HOME/.config"
