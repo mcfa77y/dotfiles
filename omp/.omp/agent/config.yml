@@ -65,7 +65,7 @@ github:
 composer:
   shape: field
 spelling:
-  autocomplete: false
+  autocomplete: "off"
 startup:
   setupWizard: false
 marketplace:
