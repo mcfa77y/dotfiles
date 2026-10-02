@@ -16,7 +16,7 @@ All pull requests in Empo Health are squash merged into `main` by Mergify. The m
 
 ## PR Formatting Rules
 
-The CI check `Lint PR title and description body` enforces the following rules (defined in `scripts/lint-pull-request.js`):
+The CI check `Lint PR title and description body` enforces these rules (defined in `scripts/lint-pull-request.js`):
 
 1. **Title Length**:
    - Must be **72 characters or fewer**.
@@ -41,98 +41,96 @@ The CI check `Lint PR title and description body` enforces the following rules (
      Reviews and Merging
      -------------------
      ```
-   - No ATX style headings (`#` or `##`) are permitted for top-level sections.
+   - No ATX style headings (`#` or `##`) are permitted for top-level sections (use `###` level 3 subsections inside `Detailed Description`).
 4. **Section Spacing**:
    - Every section except `Reviews and Merging` must start and end with a blank line.
-5. **Relevant Linear Tickets Format**:
-   - Content must strictly match:
-     `This change contributes to [TICKET-ID](, [TICKET-ID])*.`
-     e.g., `This change contributes to RHL-4280.` or `This change contributes to RHL-1234, FP-5678.`
-6. **Reviews and Merging Section**:
-   - Must be left **completely empty** (no text, no comments). Mergify automatically populates this upon merge.
+5. **Linear Tickets Format**:
+   - Must match: `This change contributes to [TICKET-ID](, [TICKET-ID])*.`
+   - e.g., `This change contributes to RHL-4280.` or `This change contributes to RHL-1234, FP-5678.`
+6. **Reviews and Merging**:
+   - Must be left empty (auto-populated by Mergify upon squash-merge).
 
 ---
 
-## Script Architecture & Language Policy
+## Script Architecture & CLI Standards
 
-All automation scripts in this skill must adhere to the following architecture rules:
+All helper tools in this skill follow modern CLI and Bun runtime standards:
 
-1. **Language: Plain Node.js JavaScript (`.js`)**:
-   - All scripts must be written in standard Node.js ES Modules (`.js`).
-   - Do **NOT** use TypeScript (`.ts`) or require compilation / transpilation steps (`tsc`, `tsx`, `ts-node`). Plain JavaScript ensures instant execution, zero npm dependencies, and portable execution across any repo worktree without relying on local project `node_modules` or global tooling.
-
-2. **Mandatory JSDoc Annotations**:
-   - All functions, exports, parameters, return values, and data structures must have comprehensive JSDoc comments (`/** ... */`).
-   - Use `@typedef` and `@property` for data schemas (e.g. `ValidationResult`, `PullRequestData`, `MarkdownSection`).
-   - Use `@param` and `@returns` for all functions to provide complete IDE type safety and autocomplete without runtime friction.
-
-3. **Standard Library & CLI Dependencies Only**:
-   - Rely solely on Node.js built-in modules (`node:child_process`, `node:fs`, `node:stream/consumers`, native `fetch`) and the GitHub CLI (`gh`).
+1. **Runtime & Language**:
+   - TypeScript executed directly via [Bun](https://bun.sh/) (`bun run <script>.ts`).
+   - Built-in test suite powered by `bun test` in `*.spec.ts`.
+2. **CLI Experience**:
+   - Robust argument parsing, flag handling, validation, and rich examples using `commander`.
+   - Comprehensive `--help` documentation on all commands.
+3. **Bun Standard Libraries**:
+   - Standard shell execution via `Bun.$`.
+   - Native file I/O via `Bun.file()` and `Bun.write()`.
+   - Standard stream consumption via `Bun.stdin.text()`.
 
 ---
 
 ## Bundled Scripts
 
-The skill provides modular Node.js automation scripts under `./scripts/` (with optional shell shims):
+The skill provides modular TypeScript CLI tools under `./scripts/`:
 
-### 1. `lint_pr.js`
-Validates any piped commit message or PR markdown file. Exports `validateCommitMessage` and `parseIntoSections` for other scripts.
+### 1. `lint_pr.ts`
+Validates any piped commit message or PR markdown file.
 ```bash
-node ~/.gemini/config/skills/rhl-pr-helper/scripts/lint_pr.js < message.txt
+bun run ~/.gemini/config/skills/rhl-pr-helper/scripts/lint_pr.ts message.txt
+# or via stdin
+git log -1 --pretty=%B | bun run ~/.gemini/config/skills/rhl-pr-helper/scripts/lint_pr.ts
 ```
 
-### 2. `check_pr.js` (or `check_pr.sh`)
-Fetches a live PR from GitHub via `gh`, verifies title length diagnostics (<= 72 chars), inspects for trailing whitespace/newlines in `Reviews and Merging`, and executes the exact GitHub Actions CI lint pipeline (`printf '%s\n\n%s\n'`).
+### 2. `check_pr.ts`
+Fetches a live PR from GitHub via `gh`, verifies title character diagnostics (<= 72 chars), inspects for trailing whitespace/newlines in `Reviews and Merging`, and executes the exact GitHub Actions CI lint pipeline.
 ```bash
-node ~/.gemini/config/skills/rhl-pr-helper/scripts/check_pr.js <PR_NUMBER>
-# or
-~/.gemini/config/skills/rhl-pr-helper/scripts/check_pr.sh <PR_NUMBER>
+bun run ~/.gemini/config/skills/rhl-pr-helper/scripts/check_pr.ts <PR_NUMBER_OR_URL>
 ```
 
-### 3. `update_pr.js` (or `update_pr.sh`)
-Validates a local message file, applies it cleanly to GitHub via `gh pr edit` (trimming trailing whitespace to avoid CI failures), and re-validates the PR remotely.
+### 3. `update_pr.ts`
+Validates a local message file, applies it cleanly to GitHub via `gh pr edit` (trimming trailing whitespace to prevent CI errors), and re-validates the PR remotely.
 ```bash
-node ~/.gemini/config/skills/rhl-pr-helper/scripts/update_pr.js <PR_NUMBER> <path_to_message.txt>
-# or
-~/.gemini/config/skills/rhl-pr-helper/scripts/update_pr.sh <PR_NUMBER> <path_to_message.txt>
+bun run ~/.gemini/config/skills/rhl-pr-helper/scripts/update_pr.ts <PR_NUMBER_OR_URL> <path_to_message.txt>
 ```
 
-### 4. `format_pr.js`
-Formats, scaffolds, or repairs PR messages into strict Empo Health format (Setext level-2 headers, canonical sections, normalized Linear ticket lines, and empty `Reviews and Merging`). Can directly inspect, repair, and apply to a remote GitHub PR via `--pr <id> [--apply]`.
+### 4. `format_pr.ts`
+Formats, scaffolds, or normalizes any PR title/body into strict Empo Health format. Can format local files, convert level 1/2 headings to level 3, or fetch and directly update a remote GitHub PR via `--pr [--apply]`.
 ```bash
-# Format local markdown file or draft
-node ~/.gemini/config/skills/rhl-pr-helper/scripts/format_pr.js <path_to_message.md>
+# Format a local markdown file and print to stdout
+bun run ~/.gemini/config/skills/rhl-pr-helper/scripts/format_pr.ts <path_to_message.md>
 
-# Inspect remote PR, format, and display
-node ~/.gemini/config/skills/rhl-pr-helper/scripts/format_pr.js --pr <PR_NUMBER>
+# Fetch remote PR, format, and preview
+bun run ~/.gemini/config/skills/rhl-pr-helper/scripts/format_pr.ts --pr <PR_NUMBER>
 
 # Format and automatically update remote PR on GitHub
-node ~/.gemini/config/skills/rhl-pr-helper/scripts/format_pr.js --pr <PR_NUMBER> --apply
+bun run ~/.gemini/config/skills/rhl-pr-helper/scripts/format_pr.ts --pr <PR_NUMBER> --apply
 
-# Format from explicit title and body
-node ~/.gemini/config/skills/rhl-pr-helper/scripts/format_pr.js --title "feat: my change" --body "..."
+# Format with explicit title and body
+bun run ~/.gemini/config/skills/rhl-pr-helper/scripts/format_pr.ts --title "feat: my change" --body "..."
 ```
 
-### 5. `fetch_pr_checks.js`
-Queries live GitHub PR status, base/head branch stack hierarchy, mergeability (`MERGEABLE` vs `CONFLICTING`), merge state status (`CLEAN`, `BLOCKED`, `DIRTY`), and CI check runs / status rollups via GraphQL.
+### 5. `fetch_pr_checks.ts`
+Queries live GitHub PR status, commit SHA, merge state, and all CI check runs and commit status rollups via GraphQL.
 ```bash
-# Inside a git repository
-node ~/.gemini/config/skills/rhl-pr-helper/scripts/fetch_pr_checks.js <PR_NUMBER>
+# Inside git repository
+bun run ~/.gemini/config/skills/rhl-pr-helper/scripts/fetch_pr_checks.ts <PR_NUMBER>
 
-# Or with full URL or repo path
-node ~/.gemini/config/skills/rhl-pr-helper/scripts/fetch_pr_checks.js https://github.com/<owner>/<repo>/pull/<PR_NUMBER>
-node ~/.gemini/config/skills/rhl-pr-helper/scripts/fetch_pr_checks.js <owner/repo> <PR_NUMBER> --format json
+# With full URL or repo path
+bun run ~/.gemini/config/skills/rhl-pr-helper/scripts/fetch_pr_checks.ts https://github.com/<owner>/<repo>/pull/<PR_NUMBER>
+
+# Output machine-readable JSON
+bun run ~/.gemini/config/skills/rhl-pr-helper/scripts/fetch_pr_checks.ts <PR_NUMBER> --format json
 ```
 
-### 6. `reopen_pr.js`
+### 6. `reopen_pr.ts`
 Bounces a PR (close followed immediately by reopen) to force GitHub Actions to re-run CI workflows without pushing empty commits.
 ```bash
-node ~/.gemini/config/skills/rhl-pr-helper/scripts/reopen_pr.js <PR_NUMBER>
+bun run ~/.gemini/config/skills/rhl-pr-helper/scripts/reopen_pr.ts <PR_NUMBER_OR_URL>
 ```
 
 ---
 
-## Standard Template
+## Standard PR Template
 
 ```markdown
 <type>: <subject <= 72 chars> (TICKET-ID)
