@@ -89,3 +89,7 @@ statusLine:
   sessionAccent: true
   compactThinkingLevel: false
   showHookStatus: true
+features:
+  unexpectedStopDetection: none
+todo:
+  reminders: false
