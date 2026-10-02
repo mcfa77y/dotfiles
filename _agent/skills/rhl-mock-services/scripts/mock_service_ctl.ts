@@ -15,7 +15,10 @@ export interface HealthCheckResult {
   url: string;
 }
 
-export async function checkMockHealth(port: number = 3001, timeoutMs: number = 5000): Promise<HealthCheckResult> {
+export async function checkMockHealth(
+  port: number = 3001,
+  timeoutMs: number = 5000,
+): Promise<HealthCheckResult> {
   const url = `http://localhost:${port}/health`;
   try {
     const controller = new AbortController();

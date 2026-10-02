@@ -17,17 +17,21 @@ Evaluate ad-hoc commands, throwaway scripts, multi-step terminal pipelines, or e
 
 ## Modernization & Promotion Standards
 
-### Language & Runtime Preference
+### Language, Tooling & Quality Standards
 
 Always standardize on:
 1. **TypeScript with Bun**: First choice for all automation and skill scripts.
    - Runtime: `bun run <script>.ts` with shebang `#!/usr/bin/env bun`.
-   - CLI Engine: `commander` (install globally via `bun add -g commander` or locally in skill package).
+   - CLI Engine: `commander` (installed globally or via workspace `package.json`).
    - Standard APIs: Prefer native Bun APIs (`Bun.file`, `Bun.write`, `Bun.$`, `bun:sqlite`) over Node.js equivalents.
    - Testing: `bun test` with `*.spec.ts` unit/integration test suites.
-2. **Python**: Second choice only when TypeScript/Bun is unsuitable (e.g., ML models, heavy scientific Python libraries).
-3. **Shell**: Last resort, only for trivial 1–2 line commands with zero logic or dependencies.
-
+2. **Linter & Formatter Tooling**:
+   - **Biome**: Primary code formatter and fast linter (`bun run format`, `bun run lint:biome`).
+   - **Oxlint**: Deep AST static code analysis (`bun run lint:oxlint`).
+   - **SonarQube / SonarCloud**: Static analysis and quality gate runner via `sonar-project.properties` (`bun run sonar`).
+   - **Pre-commit Automation**: `.githooks/pre-commit` automatically runs `bun run check` on staged skills changes.
+3. **Python**: Second choice only when TypeScript/Bun is unsuitable (e.g., ML models, heavy scientific Python libraries).
+4. **Shell**: Last resort, only for trivial 1–2 line commands with zero logic or dependencies.
 ---
 
 ## Promotion & Refactoring Protocols

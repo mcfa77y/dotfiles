@@ -70,7 +70,10 @@ export function sanitizeDetailedDescription(rawBody: string): string {
   // Remove existing "Relevant Linear Tickets" and "Reviews and Merging" sections
   let cleaned = rawBody
     // Setext style removal
-    .replace(/(?:^|\n)Relevant Linear Tickets\n[=-]+[\s\S]*?(?=\n(?:Detailed Description|Reviews and Merging|$))/gi, '')
+    .replace(
+      /(?:^|\n)Relevant Linear Tickets\n[=-]+[\s\S]*?(?=\n(?:Detailed Description|Reviews and Merging|$))/gi,
+      '',
+    )
     .replace(/(?:^|\n)Reviews and Merging\n[=-]+[\s\S]*/gi, '')
     .replace(/(?:^|\n)Detailed Description\n[=-]+\n*/gi, '')
     // ATX style removal
@@ -159,7 +162,10 @@ export async function runCli(): Promise<void> {
     .description('Format, scaffold, or update PR markdown to meet Empo Health CI standards.')
     .argument('[file]', 'Path to local markdown / commit file to format')
     .option('-p, --pr <target>', 'Fetch PR title and body from GitHub by number or URL')
-    .option('-a, --apply', 'Apply formatted title and body directly to GitHub PR (requires --pr or PR target)')
+    .option(
+      '-a, --apply',
+      'Apply formatted title and body directly to GitHub PR (requires --pr or PR target)',
+    )
     .option('-t, --title <title>', 'Explicit PR title')
     .option('-b, --body <body>', 'Explicit PR body')
     .option('-k, --ticket <tickets...>', 'Explicit Linear ticket ID(s) (e.g. RHL-4460)')
@@ -207,7 +213,7 @@ Examples:
   if (fileArg && !title && !body && !prTarget) {
     // Check if positional argument is a PR number/URL
     try {
-      const parsed = parsePrTarget(fileArg);
+      parsePrTarget(fileArg);
       prTarget = fileArg;
     } catch {
       // It's a file
@@ -217,7 +223,9 @@ Examples:
         title = lines[0] || '';
         body = lines.slice(1).join('\n');
       } catch (err: unknown) {
-        console.error(`Error: Cannot read file '${fileArg}': ${err instanceof Error ? err.message : String(err)}`);
+        console.error(
+          `Error: Cannot read file '${fileArg}': ${err instanceof Error ? err.message : String(err)}`,
+        );
         process.exit(1);
       }
     }
@@ -236,7 +244,9 @@ Examples:
   }
 
   if (!title && !body) {
-    console.error('Error: No input provided. Supply a file, --pr <id>, --title/--body, or pipe via stdin.');
+    console.error(
+      'Error: No input provided. Supply a file, --pr <id>, --title/--body, or pipe via stdin.',
+    );
     process.exit(1);
   }
 

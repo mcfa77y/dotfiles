@@ -48,11 +48,7 @@
           }
         ]
       },
-      "tags": [
-        "pr-format",
-        "setext",
-        "tickets"
-      ],
+      "tags": ["pr-format", "setext", "tickets"],
       "source_sessions": [],
       "split": "train",
       "origin": "synthetic",
@@ -97,10 +93,7 @@
           }
         ]
       },
-      "tags": [
-        "pr-format",
-        "multi-ticket"
-      ],
+      "tags": ["pr-format", "multi-ticket"],
       "source_sessions": [],
       "split": "train",
       "origin": "synthetic",
@@ -145,10 +138,7 @@
           }
         ]
       },
-      "tags": [
-        "pr-format",
-        "held-out-validation"
-      ],
+      "tags": ["pr-format", "held-out-validation"],
       "source_sessions": [],
       "split": "val",
       "origin": "synthetic",
@@ -193,11 +183,7 @@
           }
         ]
       },
-      "tags": [
-        "pr-format",
-        "title-length",
-        "held-out-validation"
-      ],
+      "tags": ["pr-format", "title-length", "held-out-validation"],
       "source_sessions": [],
       "split": "val",
       "origin": "synthetic",

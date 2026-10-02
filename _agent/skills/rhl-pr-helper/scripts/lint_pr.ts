@@ -48,7 +48,8 @@ export function parseIntoSections(content: string): MarkdownSection[] {
     const style = match[1] !== undefined ? 'setext' : 'atx';
     const header = style === 'setext' ? match[1] : match[4];
     const headerUnderline = style === 'setext' ? match[2] : '';
-    const level = style === 'setext' ? (match[2]?.startsWith('=') ? 1 : 2) : (match[3]?.length ?? 2);
+    const level =
+      style === 'setext' ? (match[2]?.startsWith('=') ? 1 : 2) : (match[3]?.length ?? 2);
     const sectionContent = match[5];
 
     sections.push({
@@ -88,10 +89,16 @@ export function validateCommitMessage(commitMessage: string): ValidationResult {
     {},
   );
 
-  const expectedSections = ['Detailed Description', 'Relevant Linear Tickets', 'Reviews and Merging'];
+  const expectedSections = [
+    'Detailed Description',
+    'Relevant Linear Tickets',
+    'Reviews and Merging',
+  ];
   const actualSections = sections.map((x) => x.header);
   if (JSON.stringify(actualSections) !== JSON.stringify(expectedSections)) {
-    const missingSections = Array.from(new Set(expectedSections).difference(new Set(actualSections)));
+    const missingSections = Array.from(
+      new Set(expectedSections).difference(new Set(actualSections)),
+    );
     const extraSections = Array.from(new Set(actualSections).difference(new Set(expectedSections)));
 
     const messages = [
@@ -112,7 +119,9 @@ export function validateCommitMessage(commitMessage: string): ValidationResult {
 
   const atxHeaders = sections.filter((x) => x.style === 'atx').map((x) => x.header);
   if (atxHeaders.length > 0) {
-    errors.push(`All section headings must use setext style, not ATX style\nFailing sections: ${atxHeaders.join(', ')}`);
+    errors.push(
+      `All section headings must use setext style, not ATX style\nFailing sections: ${atxHeaders.join(', ')}`,
+    );
   }
 
   const headersWithIncorrectUnderlineLength = sections
@@ -147,7 +156,9 @@ export function validateCommitMessage(commitMessage: string): ValidationResult {
   }
 
   if (sectionsByHeader['Reviews and Merging']?.content !== '') {
-    errors.push('The "Reviews and Merging" section must be left empty, to be filled in automatically upon merge.');
+    errors.push(
+      'The "Reviews and Merging" section must be left empty, to be filled in automatically upon merge.',
+    );
   }
 
   return {
@@ -163,7 +174,9 @@ export function validateCommitMessage(commitMessage: string): ValidationResult {
 export async function runCli(): Promise<void> {
   const program = new Command()
     .name('lint_pr')
-    .description('Validate a commit message or PR markdown against Empo Health formatting standards.')
+    .description(
+      'Validate a commit message or PR markdown against Empo Health formatting standards.',
+    )
     .argument('[file]', 'Path to commit message / markdown file (reads stdin if omitted)')
     .option('-s, --string <text>', 'Validate a raw string passed directly via CLI')
     .addHelpText(
@@ -189,7 +202,9 @@ Examples:
     try {
       content = await Bun.file(fileArg).text();
     } catch (err: unknown) {
-      console.error(`Error: Cannot read file '${fileArg}': ${err instanceof Error ? err.message : String(err)}`);
+      console.error(
+        `Error: Cannot read file '${fileArg}': ${err instanceof Error ? err.message : String(err)}`,
+      );
       process.exit(1);
     }
   } else if (!process.stdin.isTTY) {

@@ -63,7 +63,8 @@ export function extractFailuresFromTasks(
   tasks: VitestTask[],
   ancestors: string[] = [],
 ): Array<{ ancestors: string[]; name: string; message: string; stack?: string }> {
-  const failures: Array<{ ancestors: string[]; name: string; message: string; stack?: string }> = [];
+  const failures: Array<{ ancestors: string[]; name: string; message: string; stack?: string }> =
+    [];
 
   for (const task of tasks) {
     const currentAncestors = task.name ? [...ancestors, task.name] : ancestors;
@@ -166,7 +167,10 @@ Examples:
       console.log();
     }
   } catch (err: unknown) {
-    console.error('Failed to parse Vitest report:', err instanceof Error ? err.message : String(err));
+    console.error(
+      'Failed to parse Vitest report:',
+      err instanceof Error ? err.message : String(err),
+    );
     process.exit(1);
   }
 }

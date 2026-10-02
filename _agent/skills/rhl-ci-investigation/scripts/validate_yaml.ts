@@ -25,7 +25,8 @@ export async function validateWorkflowYaml(filePath: string): Promise<Validation
     }
 
     const dict = data as Record<string, any>;
-    const hasOn = 'on' in dict || true in dict;
+    const hasOn =
+      'on' in dict || 'true' in dict || (dict as Record<string, unknown>)['on'] !== undefined;
     if (!hasOn) {
       return { file: filePath, valid: false, error: "Missing required 'on' trigger specification" };
     }
@@ -37,7 +38,11 @@ export async function validateWorkflowYaml(filePath: string): Promise<Validation
     const jobCount = Object.keys(dict.jobs).length;
     return { file: filePath, valid: true, jobCount };
   } catch (err: unknown) {
-    return { file: filePath, valid: false, error: err instanceof Error ? err.message : String(err) };
+    return {
+      file: filePath,
+      valid: false,
+      error: err instanceof Error ? err.message : String(err),
+    };
   }
 }
 

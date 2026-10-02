@@ -18,7 +18,9 @@ export interface ResolveOptions {
 
 export async function findConflictedLockfiles(targetDir: string): Promise<string[]> {
   try {
-    const raw = (await $`git diff --name-only --diff-filter=U`.cwd(targetDir).quiet().text()).trim();
+    const raw = (
+      await $`git diff --name-only --diff-filter=U`.cwd(targetDir).quiet().text()
+    ).trim();
     if (!raw) return [];
     return raw
       .split('\n')

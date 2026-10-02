@@ -8,11 +8,21 @@
     "commander": "^15.0.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
     "@types/bun": "latest",
+    "oxlint": "^1.86.0",
+    "sonarqube-scanner": "^5.0.1",
     "typescript": "^7.0.2"
   },
   "scripts": {
     "test": "bun test",
-    "typecheck": "bun x tsc --noEmit"
+    "typecheck": "bun x tsc --noEmit",
+    "lint": "bun run lint:oxlint && bun run lint:biome",
+    "lint:oxlint": "bun x oxlint",
+    "lint:biome": "bun x biome lint .",
+    "format": "bun x biome format --write .",
+    "format:check": "bun x biome format .",
+    "check": "bun run format:check && bun run lint && bun run typecheck && bun run test",
+    "sonar": "bun x sonar-scanner"
   }
 }

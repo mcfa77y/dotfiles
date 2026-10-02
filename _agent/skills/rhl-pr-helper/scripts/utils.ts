@@ -79,7 +79,9 @@ export function parsePrTarget(input: string | number): ParsedPrTarget {
  */
 export async function resolveCurrentRepo(): Promise<string | null> {
   try {
-    const output = (await $`gh repo view --json nameWithOwner -q .nameWithOwner`.quiet().text()).trim();
+    const output = (
+      await $`gh repo view --json nameWithOwner -q .nameWithOwner`.quiet().text()
+    ).trim();
     if (output && output.includes('/')) return output;
   } catch {
     // fallback to git remote
@@ -111,7 +113,9 @@ export async function fetchRemotePr<T = BasePrData>(
   try {
     let output: string;
     if (parsed.repo) {
-      output = await $`gh pr view ${parsed.prNumber} --repo ${parsed.repo} --json ${fieldsArg}`.quiet().text();
+      output = await $`gh pr view ${parsed.prNumber} --repo ${parsed.repo} --json ${fieldsArg}`
+        .quiet()
+        .text();
     } else {
       output = await $`gh pr view ${parsed.prNumber} --json ${fieldsArg}`.quiet().text();
     }

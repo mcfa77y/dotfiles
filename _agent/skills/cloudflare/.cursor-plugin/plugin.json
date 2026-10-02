@@ -7,6 +7,17 @@
     "email": "support@cloudflare.com",
     "url": "https://workers.cloudflare.com"
   },
-  "keywords": ["cloudflare", "workers", "durable-objects", "agents", "mcp", "wrangler", "serverless", "compute", "storage", "applications"],
+  "keywords": [
+    "cloudflare",
+    "workers",
+    "durable-objects",
+    "agents",
+    "mcp",
+    "wrangler",
+    "serverless",
+    "compute",
+    "storage",
+    "applications"
+  ],
   "logo": "logo.svg"
 }

@@ -43,7 +43,9 @@ export async function fetchCaches(repo: string, key?: string, ref?: string): Pro
     if (Array.isArray(data)) return data;
     return (data.actions_caches as CacheEntry[]) || [];
   } catch (err: unknown) {
-    throw new Error(`Failed to query GitHub cache API: ${err instanceof Error ? err.message : String(err)}`);
+    throw new Error(
+      `Failed to query GitHub cache API: ${err instanceof Error ? err.message : String(err)}`,
+    );
   }
 }
 
@@ -89,10 +91,14 @@ Examples:
 
     console.log(`\n=== GitHub Actions Cache: ${opts.repo} ===`);
     console.log(`Total Entries: ${caches.length}`);
-    console.log(`Total Usage:   ${formatBytes(totalBytes)} / ${formatBytes(GITHUB_CACHE_QUOTA_BYTES)} (${quotaPct.toFixed(1)}%)`);
+    console.log(
+      `Total Usage:   ${formatBytes(totalBytes)} / ${formatBytes(GITHUB_CACHE_QUOTA_BYTES)} (${quotaPct.toFixed(1)}%)`,
+    );
 
     if (quotaPct >= 90) {
-      console.log('⚠️  Warning: Cache usage is near or exceeding 90% of the 10 GiB repository quota.');
+      console.log(
+        '⚠️  Warning: Cache usage is near or exceeding 90% of the 10 GiB repository quota.',
+      );
     }
 
     const byRef: Record<string, { count: number; bytes: number }> = {};
@@ -106,13 +112,17 @@ Examples:
     console.log('\nUsage by Branch / Ref:');
     const sortedRefs = Object.entries(byRef).sort((a, b) => b[1].bytes - a[1].bytes);
     for (const [r, stat] of sortedRefs) {
-      console.log(`  • ${r.padEnd(35)} ${stat.count.toString().padStart(3)} entries | ${formatBytes(stat.bytes)}`);
+      console.log(
+        `  • ${r.padEnd(35)} ${stat.count.toString().padStart(3)} entries | ${formatBytes(stat.bytes)}`,
+      );
     }
 
     if (opts.details && caches.length > 0) {
       console.log('\nDetailed Cache Entries:');
       for (const c of caches) {
-        console.log(`  [ID: ${c.id}] ${formatBytes(c.size_in_bytes).padEnd(10)} | ${c.ref.padEnd(30)} | ${c.key}`);
+        console.log(
+          `  [ID: ${c.id}] ${formatBytes(c.size_in_bytes).padEnd(10)} | ${c.ref.padEnd(30)} | ${c.key}`,
+        );
       }
     }
     console.log();

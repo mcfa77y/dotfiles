@@ -26,7 +26,9 @@ export function parseSbomJson(rawJson: string): Record<string, any> {
   try {
     return JSON.parse(rawJson);
   } catch (err: unknown) {
-    throw new Error(`Failed to parse SBOM JSON: ${err instanceof Error ? err.message : String(err)}`);
+    throw new Error(
+      `Failed to parse SBOM JSON: ${err instanceof Error ? err.message : String(err)}`,
+    );
   }
 }
 
@@ -73,11 +75,12 @@ Examples:
     console.log(`✓ Pass 1 completed in ${((Date.now() - start1) / 1000).toFixed(1)}s.\n`);
 
     // Step 2: Cache hit build with new SHA
-    console.log(`[Step 2/3] Building image with updated SHA (COMMIT_SHA=${opts.sha2}) to check caching...`);
-    const start2 = Date.now();
-    const buildLog = (
-      await $`docker build --platform ${opts.platform} -f ${opts.dockerfile} --target ${opts.target} --build-arg COMMIT_SHA=${opts.sha2} -t ${image2} ${opts.context}`.text()
+    console.log(
+      `[Step 2/3] Building image with updated SHA (COMMIT_SHA=${opts.sha2}) to check caching...`,
     );
+    const start2 = Date.now();
+    const buildLog =
+      await $`docker build --platform ${opts.platform} -f ${opts.dockerfile} --target ${opts.target} --build-arg COMMIT_SHA=${opts.sha2} -t ${image2} ${opts.context}`.text();
     console.log(`✓ Pass 2 completed in ${((Date.now() - start2) / 1000).toFixed(1)}s.\n`);
 
     if (buildLog.includes('CACHED') || buildLog.includes('using cache')) {
@@ -86,7 +89,9 @@ Examples:
 
     // Step 3: Inspect /sbom-node.json
     console.log(`[Step 3/3] Inspecting /sbom-node.json in ${image2}...`);
-    const sbomOutput = (await $`docker run --rm --platform ${opts.platform} --entrypoint cat ${image2} /sbom-node.json`.text()).trim();
+    const sbomOutput = (
+      await $`docker run --rm --platform ${opts.platform} --entrypoint cat ${image2} /sbom-node.json`.text()
+    ).trim();
     const parsed = parseSbomJson(sbomOutput);
 
     console.log(`\nSBOM Metadata Summary:`);

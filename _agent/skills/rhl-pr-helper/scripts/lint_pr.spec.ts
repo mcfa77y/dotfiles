@@ -105,7 +105,8 @@ Reviews and Merging
     });
 
     it('fails when title exceeds 72 characters', () => {
-      const longTitle = 'feat: this title is deliberately made to be way way too long to pass the seventy-two character limit check';
+      const longTitle =
+        'feat: this title is deliberately made to be way way too long to pass the seventy-two character limit check';
       const msg = `${longTitle}
 
 Detailed Description

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Check if staged changes touch _agent/skills
+if git diff --cached --name-only | grep -q '^_agent/skills/'; then
+  echo "🔍 Running _agent/skills checks (Biome, Oxlint, Typecheck, Bun test)..."
+  (
+    cd "$(git rev-parse --show-toplevel)/_agent/skills"
+    bun run check
+  )
+  echo "✓ _agent/skills checks passed."
+fi

@@ -12,7 +12,8 @@ describe('rhl-ci-investigation', () => {
     });
 
     it('parses full GitHub Actions job URL', () => {
-      const url = 'https://github.com/EmpoHealth/core/actions/runs/35910923024/job/107357575748?pr=2754';
+      const url =
+        'https://github.com/EmpoHealth/core/actions/runs/35910923024/job/107357575748?pr=2754';
       const res = parseUrlOrId(url);
       expect(res.runId).toBe('35910923024');
       expect(res.jobId).toBe('107357575748');

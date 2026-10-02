@@ -32,7 +32,9 @@ export async function resolveApiKey(): Promise<string> {
   return 'a39305c0-4e82-4083-9e2c-01f00fe25a8f';
 }
 
-export async function triggerInboundSms(opts: TriggerOptions): Promise<{ status: number; body: unknown }> {
+export async function triggerInboundSms(
+  opts: TriggerOptions,
+): Promise<{ status: number; body: unknown }> {
   if (opts.direct) {
     // Post directly to backend webhook handler
     const url = `http://localhost:${opts.backendPort}/api/v1/communication/inbound-sms`;
@@ -97,11 +99,19 @@ export async function runCli(): Promise<void> {
     .description('Trigger inbound SMS through mock-services SQS queue or direct backend webhook.')
     .option('--from <phone>', 'Sender phone number', process.env.FROM_NUMBER || '+14155295117')
     .option('--to <phone>', 'Recipient phone number', process.env.TO_NUMBER || '+18884613835')
-    .option('--body <message>', 'SMS body text', process.env.MESSAGE_BODY || `Test SMS ${Date.now()}`)
+    .option(
+      '--body <message>',
+      'SMS body text',
+      process.env.MESSAGE_BODY || `Test SMS ${Date.now()}`,
+    )
     .option('--mock-port <port>', 'mock-services port', (val) => parseInt(val, 10), 3001)
     .option('--backend-port <port>', 'backend-api port', (val) => parseInt(val, 10), 3000)
     .option('--api-key <key>', 'Empo API key for backend', defaultApiKey)
-    .option('--direct', 'Post directly to backend webhook instead of mock-services SQS trigger', false)
+    .option(
+      '--direct',
+      'Post directly to backend webhook instead of mock-services SQS trigger',
+      false,
+    )
     .addHelpText(
       'after',
       `
@@ -119,7 +129,9 @@ Examples:
   console.log(`  From: ${opts.from}`);
   console.log(`  To:   ${opts.to}`);
   console.log(`  Body: "${opts.body}"`);
-  console.log(`  Mode: ${opts.direct ? `Direct Webhook -> port ${opts.backendPort}` : `Mock SQS Trigger -> port ${opts.mockPort}`}\n`);
+  console.log(
+    `  Mode: ${opts.direct ? `Direct Webhook -> port ${opts.backendPort}` : `Mock SQS Trigger -> port ${opts.mockPort}`}\n`,
+  );
 
   try {
     const result = await triggerInboundSms(opts);

@@ -56,7 +56,10 @@ export async function runCli(): Promise<void> {
     .name('update_pr')
     .description('Validate a message file and update a GitHub PR remotely via gh CLI.')
     .argument('<pr_target>', 'PR number (e.g. 2864), repo#number, or full PR URL')
-    .argument('[message_file]', 'Path to file containing full formatted commit/PR message (reads stdin if omitted)')
+    .argument(
+      '[message_file]',
+      'Path to file containing full formatted commit/PR message (reads stdin if omitted)',
+    )
     .option('-s, --string <text>', 'Pass full message string directly via CLI')
     .addHelpText(
       'after',
@@ -84,7 +87,9 @@ Examples:
     try {
       content = await Bun.file(fileArg).text();
     } catch (err: unknown) {
-      console.error(`Error reading file '${fileArg}': ${err instanceof Error ? err.message : String(err)}`);
+      console.error(
+        `Error reading file '${fileArg}': ${err instanceof Error ? err.message : String(err)}`,
+      );
       process.exit(1);
     }
   } else if (!process.stdin.isTTY) {

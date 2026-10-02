@@ -89,12 +89,17 @@ query GetPRDetails($owner: String!, $repo: String!, $prNumber: Int!) {
 }
 `;
 
-export async function fetchPrChecks(prTarget: string | number, explicitRepo?: string): Promise<PrChecksResult> {
+export async function fetchPrChecks(
+  prTarget: string | number,
+  explicitRepo?: string,
+): Promise<PrChecksResult> {
   const parsed = parsePrTarget(prTarget);
   const repoString = parsed.repo || explicitRepo || (await resolveCurrentRepo());
 
   if (!repoString || !repoString.includes('/')) {
-    throw new Error('Unable to determine repository (owner/repo). Specify with --repo or pass full PR URL.');
+    throw new Error(
+      'Unable to determine repository (owner/repo). Specify with --repo or pass full PR URL.',
+    );
   }
 
   const [owner, repo] = repoString.split('/', 2);
@@ -103,7 +108,9 @@ export async function fetchPrChecks(prTarget: string | number, explicitRepo?: st
   let rawOutput = '';
   try {
     rawOutput = (
-      await $`gh api graphql -F owner=${owner} -F repo=${repo} -F prNumber=${prNumber} -f query=${PR_DETAILS_QUERY}`.quiet().text()
+      await $`gh api graphql -F owner=${owner} -F repo=${repo} -F prNumber=${prNumber} -f query=${PR_DETAILS_QUERY}`
+        .quiet()
+        .text()
     ).trim();
   } catch (err: unknown) {
     throw new Error(
@@ -131,7 +138,9 @@ export async function fetchPrChecks(prTarget: string | number, explicitRepo?: st
         status: node.status,
         conclusion: node.conclusion,
         workflow: node.checkSuite?.workflowRun?.workflow?.name,
-        runId: node.checkSuite?.workflowRun?.databaseId ? String(node.checkSuite.workflowRun.databaseId) : undefined,
+        runId: node.checkSuite?.workflowRun?.databaseId
+          ? String(node.checkSuite.workflowRun.databaseId)
+          : undefined,
         url: node.url,
       });
     } else if (node.__typename === 'StatusContext') {
@@ -150,7 +159,11 @@ export async function fetchPrChecks(prTarget: string | number, explicitRepo?: st
 
   for (const run of checkRuns) {
     if (run.conclusion === 'SUCCESS') successfulChecks++;
-    else if (run.conclusion === 'FAILURE' || run.conclusion === 'TIMED_OUT' || run.conclusion === 'CANCELLED')
+    else if (
+      run.conclusion === 'FAILURE' ||
+      run.conclusion === 'TIMED_OUT' ||
+      run.conclusion === 'CANCELLED'
+    )
       failedChecks++;
     else pendingChecks++;
   }

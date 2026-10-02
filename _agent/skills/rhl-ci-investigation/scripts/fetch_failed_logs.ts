@@ -18,7 +18,7 @@ export interface ParsedTarget {
 }
 
 export function parseUrlOrId(inputStr: string): ParsedTarget {
-  let target = inputStr.trim();
+  const target = inputStr.trim();
   let repo = DEFAULT_REPO;
   let runId: string | null = null;
   let jobId: string | null = null;
@@ -63,7 +63,8 @@ export interface PlaywrightError {
 
 export function extractPlaywrightErrors(logText: string): PlaywrightError[] {
   const errors: PlaywrightError[] = [];
-  const testBlockRegex = /(\d+\)\s+\[[^\]]+\]\s+›\s+([^:]+):(\d+):(\d+)\s+›\s+([^\n]+))([\s\S]*?)(?=\n\s*\d+\)\s+\[|\n\s*Slow test|\n\s*\d+\s+failed|$)/g;
+  const testBlockRegex =
+    /(\d+\)\s+\[[^\]]+\]\s+›\s+([^:]+):(\d+):(\d+)\s+›\s+([^\n]+))([\s\S]*?)(?=\n\s*\d+\)\s+\[|\n\s*Slow test|\n\s*\d+\s+failed|$)/g;
 
   for (const match of logText.matchAll(testBlockRegex)) {
     const file = match[2] ? `${match[2]}:${match[3]}` : '';
@@ -89,7 +90,9 @@ export async function fetchJobLog(repo: string, jobId: string): Promise<string> 
   try {
     return await $`gh api repos/${repo}/actions/jobs/${jobId}/logs`.quiet().text();
   } catch (err: unknown) {
-    throw new Error(`Failed to fetch logs for job ${jobId}: ${err instanceof Error ? err.message : String(err)}`);
+    throw new Error(
+      `Failed to fetch logs for job ${jobId}: ${err instanceof Error ? err.message : String(err)}`,
+    );
   }
 }
 
@@ -163,7 +166,9 @@ Examples:
   }
 
   console.log(`Fetching jobs for run ${targetRunId} (${targetRepo})...`);
-  const jobsOutput = await $`gh api repos/${targetRepo}/actions/runs/${targetRunId}/jobs --paginate`.quiet().text();
+  const jobsOutput = await $`gh api repos/${targetRepo}/actions/runs/${targetRunId}/jobs --paginate`
+    .quiet()
+    .text();
   const jobsData = JSON.parse(jobsOutput);
   const jobs: any[] = Array.isArray(jobsData) ? jobsData : jobsData.jobs || [];
 
@@ -191,7 +196,9 @@ Examples:
         }
       }
     } catch (err: unknown) {
-      console.error(`  ✗ Error retrieving job log: ${err instanceof Error ? err.message : String(err)}`);
+      console.error(
+        `  ✗ Error retrieving job log: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
 
@@ -201,7 +208,9 @@ Examples:
       await $`gh run download ${targetRunId} --repo ${targetRepo} --dir ${outDir}/artifacts`.quiet();
       console.log(`Artifacts downloaded to ${outDir}/artifacts`);
     } catch (err: unknown) {
-      console.error(`Failed to download artifacts: ${err instanceof Error ? err.message : String(err)}`);
+      console.error(
+        `Failed to download artifacts: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
 }

@@ -10,7 +10,9 @@ import { Command } from 'commander';
 import { validateCommitMessage } from './lint_pr.ts';
 import { fetchRemotePr, parsePrTarget, printLintErrors } from './utils.ts';
 
-export async function checkPullRequest(prTarget: string | number): Promise<{ valid: boolean; errors: string[] }> {
+export async function checkPullRequest(
+  prTarget: string | number,
+): Promise<{ valid: boolean; errors: string[] }> {
   const parsed = parsePrTarget(prTarget);
   const targetLabel = parsed.repo ? `${parsed.repo}#${parsed.prNumber}` : `#${parsed.prNumber}`;
 
@@ -18,7 +20,10 @@ export async function checkPullRequest(prTarget: string | number): Promise<{ val
   const prData = await fetchRemotePr(prTarget, ['number', 'title', 'body', 'url']);
 
   console.log(`PR Title (${prData.title.length}/72 chars): ${prData.title}`);
-  console.log('Validating PR PR #%d format (simulating GitHub Actions CI pipeline)...', prData.number);
+  console.log(
+    'Validating PR PR #%d format (simulating GitHub Actions CI pipeline)...',
+    prData.number,
+  );
 
   const fullMessage = `${prData.title}\n\n${prData.body || ''}`;
   const validation = validateCommitMessage(fullMessage);
@@ -36,7 +41,10 @@ export async function runCli(): Promise<void> {
   const program = new Command()
     .name('check_pr')
     .description('Fetch and validate a GitHub PR against Empo Health CI formatting standards.')
-    .argument('<pr_target>', 'PR number (e.g. 2864), repo#number (EmpoHealth/core#2864), or full GitHub PR URL')
+    .argument(
+      '<pr_target>',
+      'PR number (e.g. 2864), repo#number (EmpoHealth/core#2864), or full GitHub PR URL',
+    )
     .addHelpText(
       'after',
       `

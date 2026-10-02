@@ -38,7 +38,9 @@ export async function bouncePullRequest(prTarget: string | number): Promise<void
 export async function runCli(): Promise<void> {
   const program = new Command()
     .name('reopen_pr')
-    .description('Close and immediately reopen a GitHub PR to trigger CI workflow runs without empty commits.')
+    .description(
+      'Close and immediately reopen a GitHub PR to trigger CI workflow runs without empty commits.',
+    )
     .argument('<pr_target>', 'PR number (e.g. 2864), repo#number, or full PR URL')
     .addHelpText(
       'after',

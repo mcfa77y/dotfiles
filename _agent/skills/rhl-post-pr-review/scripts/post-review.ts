@@ -56,12 +56,16 @@ export function parsePrTarget(target: string | number): { repo: string | null; p
   if (!Number.isNaN(num)) {
     return { repo: null, prNumber: num };
   }
-  throw new Error(`Could not parse PR number from '${target}'. Expected PR number or GitHub pull URL.`);
+  throw new Error(
+    `Could not parse PR number from '${target}'. Expected PR number or GitHub pull URL.`,
+  );
 }
 
 export async function detectRepo(): Promise<string> {
   try {
-    const out = (await $`gh repo view --json nameWithOwner -q .nameWithOwner`.quiet().text()).trim();
+    const out = (
+      await $`gh repo view --json nameWithOwner -q .nameWithOwner`.quiet().text()
+    ).trim();
     if (out && out.includes('/')) return out;
   } catch {
     // fallback
@@ -69,13 +73,19 @@ export async function detectRepo(): Promise<string> {
   throw new Error('Could not detect repository. Provide --repo <owner>/<repo> explicitly.');
 }
 
-export async function getPrMetadata(repo: string, pr: number): Promise<{ headRefOid: string; url: string }> {
+export async function getPrMetadata(
+  repo: string,
+  pr: number,
+): Promise<{ headRefOid: string; url: string }> {
   const out = await $`gh pr view ${pr} --repo ${repo} --json headRefOid,url`.quiet().text();
   const data = JSON.parse(out);
   return { headRefOid: data.headRefOid, url: data.url };
 }
 
-export async function getDiffValidLines(repo: string, pr: number): Promise<Record<string, Set<number>>> {
+export async function getDiffValidLines(
+  repo: string,
+  pr: number,
+): Promise<Record<string, Set<number>>> {
   const out = await $`gh api /repos/${repo}/pulls/${pr}/files --paginate`.quiet().text();
   const files = JSON.parse(out) as Array<{ filename: string; patch?: string }>;
 
@@ -182,7 +192,10 @@ export async function postReview(options: PostReviewOptions) {
   await Bun.write(tempPath, JSON.stringify(payload));
 
   try {
-    const res = await $`gh api --method POST /repos/${repo}/pulls/${prNumber}/reviews --input ${tempPath}`.quiet().text();
+    const res =
+      await $`gh api --method POST /repos/${repo}/pulls/${prNumber}/reviews --input ${tempPath}`
+        .quiet()
+        .text();
     const result = JSON.parse(res);
     return {
       dryRun: false,
@@ -205,7 +218,10 @@ export async function runCli(): Promise<void> {
   const program = new Command()
     .name('post-review')
     .description('Post a unified GitHub PR review with inline comments and diff hunk validation.')
-    .argument('[pr_target]', 'Pull request number or GitHub PR URL (e.g. 2864 or https://github.com/...)')
+    .argument(
+      '[pr_target]',
+      'Pull request number or GitHub PR URL (e.g. 2864 or https://github.com/...)',
+    )
     .option('-r, --repo <owner/repo>', 'Repository (auto-detected if omitted)')
     .option('-p, --pr <target>', 'Pull request number or URL')
     .option('-e, --event <event>', 'Review action: APPROVE, REQUEST_CHANGES, or COMMENT', 'COMMENT')
@@ -280,7 +296,10 @@ Examples:
     inlineComments = inputData.comments;
   }
 
-  const event = (inputData?.event || opts.event || 'COMMENT') as 'APPROVE' | 'REQUEST_CHANGES' | 'COMMENT';
+  const event = (inputData?.event || opts.event || 'COMMENT') as
+    | 'APPROVE'
+    | 'REQUEST_CHANGES'
+    | 'COMMENT';
   const body = opts.body || inputData?.body || '';
 
   try {
@@ -295,10 +314,12 @@ Examples:
       dryRun: opts.dryRun,
     });
 
-    if (result.dryRun) {
+    if (result.dryRun && result.payload) {
       console.log('✓ Dry Run Succeeded! Target PR:', result.url);
       console.log(`Commit: ${result.payload.commit_id} | Event: ${result.payload.event}`);
-      console.log(`Inline comments: ${result.verifiedCommentsCount} valid, ${result.fallbackCommentsCount} fallback`);
+      console.log(
+        `Inline comments: ${result.verifiedCommentsCount} valid, ${result.fallbackCommentsCount} fallback`,
+      );
       console.log('\nPayload:');
       console.log(JSON.stringify(result.payload, null, 2));
     } else {
