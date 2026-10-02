@@ -1,72 +1,61 @@
 ---
 name: promote-script
-description: WHEN harvesting ad-hoc commands or scripts from recent turns; WHEN promoting throwaway automation into reusable scripts or skills.
+description: WHEN harvesting ad-hoc commands or scripts from recent turns; WHEN promoting throwaway automation into reusable scripts or skills; WHEN refactoring legacy shell, python, or CommonJS scripts into modern TypeScript (Bun + Commander) tools with automated tests.
 ---
 
-# Script & Tool Promoter
+# Script & Tool Promoter / Modernizer
 
-Evaluate ad-hoc commands, throwaway scripts, and multi-step terminal pipelines from recent conversation turns, then parameterize and promote them into reusable, well-tested scripts within repository workspaces or agent skills.
+Evaluate ad-hoc commands, throwaway scripts, multi-step terminal pipelines, or existing legacy scripts (Bash, Python, CommonJS), then parameterize, refactor, and promote them into reusable, well-tested TypeScript tools within repository workspaces or agent skills.
 
 ## When to Use
 
-1. **On-Demand**: When the user requests evaluating, harvesting, or promoting scripts used in recent work.
-2. **Proactive**: When an ad-hoc script or complex terminal pipeline was created/executed during a task and exhibits clear multi-turn, multi-developer, or CI utility.
+1. **On-Demand Harvesting**: When the user requests evaluating, harvesting, or promoting scripts used during recent tasks.
+2. **Legacy Script Modernization**: When refactoring or upgrading legacy Python (`.py`), shell (`.sh`), or CommonJS (`.cjs`, `.js`) scripts in skills or packages to modern TypeScript.
+3. **Proactive Promotion**: When an ad-hoc script or complex terminal pipeline created during a task exhibits clear multi-turn, multi-developer, or CI utility.
 
 ---
 
-## Promotion Workflow
+## Modernization & Promotion Standards
 
-```
-[Harvest Candidate] ──> [Evaluate & Tier] ──> [Parameterize & Harden] ──> [Target Placement] ──> [Verify & Document]
-```
+### Language & Runtime Preference
 
-### Step 1: Harvest Candidate
-Inspect the recent conversation transcript or modified files for:
-- One-off scripts (e.g., node, ts-node, bash, python).
-- Multi-command shell pipelines chained across turns (e.g., Infisical secret fetching + db queries + API cleanup).
-- Data migration, resource cleanup, or environment sync logic.
+Always standardize on:
+1. **TypeScript with Bun**: First choice for all automation and skill scripts.
+   - Runtime: `bun run <script>.ts` with shebang `#!/usr/bin/env bun`.
+   - CLI Engine: `commander` (install globally via `bun add -g commander` or locally in skill package).
+   - Standard APIs: Prefer native Bun APIs (`Bun.file`, `Bun.write`, `Bun.$`, `bun:sqlite`) over Node.js equivalents.
+   - Testing: `bun test` with `*.spec.ts` unit/integration test suites.
+2. **Python**: Second choice only when TypeScript/Bun is unsuitable (e.g., ML models, heavy scientific Python libraries).
+3. **Shell**: Last resort, only for trivial 1–2 line commands with zero logic or dependencies.
 
-### Step 2: Evaluate & Select Tier
-Assess candidate against the tiered promotion criteria:
+---
 
-| Tier | When to Choose | Requirements |
-|---|---|---|
-| **Tier 1: Lightweight Automation** | Agent-specific tasks, developer diagnostics, local helpers | Self-contained, positional args or env vars, clear usage docstring, zero unnecessary dependencies. |
-| **Tier 2: Production Tooling & CI** | Shared team use, CI workflows, destructive/cleanup operations | CLI parser (`commander`), `--dry-run` flag, environment guards (protected tag/branch rejection), error handling, and unit test suite (`*.spec.ts`). |
+## Promotion & Refactoring Protocols
 
+### Workflow A: Modernizing Existing Skill / Workspace Scripts
 
-### Language Preference
-When promoting scripts, prefer the following language order:
+When refactoring a skill's scripts directory:
+1. **Audit & Inventory**: Identify all scripts (`.py`, `.sh`, `.cjs`, `.js`) in the target skill directory (`<skill>/scripts/`).
+2. **Initialize Workspace**: Ensure `package.json`, `tsconfig.json`, and `.gitignore` exist with `@types/bun` and `commander`.
+3. **Refactor to TypeScript**:
+   - Write clean, type-safe `<script>.ts` implementing `commander` CLI with descriptive options, arguments, and `--help` examples.
+   - Use `Bun.$` for subprocess execution, `Bun.file()` for file I/O, `fetch` for HTTP queries.
+   - Set executable permissions: `chmod +x scripts/<script>.ts`.
+4. **Add Unit Tests**: Write `<script>.spec.ts` exercising parameter parsing, data extraction, formatters, and edge cases. Verify with `bun test`.
+5. **Clean Legacy Code**: Delete superseded `.py`, `.sh`, `.cjs`, and `.js` files to eliminate maintenance drift.
+6. **Update SKILL.md**: Update the skill's documentation to reflect the new `bun run scripts/<script>.ts` commands, flag names, and capabilities.
+7. **Atomic Git Commit**: Commit the refactored skill with descriptive conventional commit:
+   ```bash
+   git commit -m "feat(skills): refactor <skill-name> scripts to TypeScript with Bun and Commander"
+   ```
 
-1. **TypeScript (with Bun)**: First choice for all new scripts. Use `bun` runtime, `bun test` for testing, and `commander` for CLI parsing. Leverage Bun's built-in APIs (SQLite, Redis, WebSocket, file I/O) instead of Node.js equivalents.
-2. **Python**: Second choice when TypeScript/Bun is not suitable (e.g., data science, ML workflows, or existing Python ecosystem dependencies).
-3. **Shell**: Last resort, only for trivial one-liners or when no runtime dependencies are needed. Prefer TypeScript for anything beyond simple command chaining.
+### Workflow B: Harvesting Ad-Hoc Scripts from Conversation
 
-**Rationale**: TypeScript with Bun provides type safety, fast execution, and built-in tooling, reducing long-term maintenance burden. Python offers strong ecosystem support for specialized domains. Shell scripts are fragile and hard to test; reserve for truly simple cases.
-### Step 3: Parameterize & Harden
-Refactor hardcoded values into configurable options (following language preference above):
-1. **TypeScript (Bun)**: Use `commander` for CLI parsing, `bun test` for unit tests, and Bun's built-in APIs (e.g., `bun:sqlite`, `Bun.file`) instead of Node.js equivalents.
-2. **Python**: Use `argparse` or `click` for CLI parsing, `pytest` for unit tests.
-3. **Shell**: Use `getopts` or positional args; avoid complex parsing in shell.
-
-Common hardening requirements (apply to all languages):
-1. **Inputs**: Replace hardcoded IDs, PR numbers, URLs, and tags with CLI flags/arguments.
-2. **Destructive Actions**: Add `--dry-run` flag so users can preview affected resources before mutations.
-3. **Safety Guards**: Guard against running on production, staging, or default environments unless explicitly overridden.
-4. **Environment Fallbacks**: Prefer CLI flags with fallbacks to environment variables (e.g. `--api-key` falling back to `LINEAR_API_KEY`).
-5. **No Blind Any**: Use typed interfaces or explicit type narrowing in TypeScript; avoid unchecked casts.
-
-### Step 4: Determine Target Placement
-Choose placement based on target consumers:
-
-- **Repository Workspace** (`workspaces/<package>/scripts/` or `scripts/`):
-  - Target: Team developers, CI workflows, or build/deploy pipelines.
-  - Also register npm/yarn script shortcut in `package.json` if common.
-- **Skill Bundle** (`~/.omp/agent/managed-skills/<skill-name>/scripts/` or inline in `SKILL.md`):
-  - Target: Agent-specific automations, harnesses, code review helpers, or diagnostic routines.
-  - Update or create the corresponding skill using `manage_skill`.
-
-### Step 5: Verify & Document
-1. Run automated tests (or author unit test spec for Tier 2 scripts).
-2. Execute a smoke run with `--dry-run` or `--help` to confirm CLI interface.
-3. Document invocation commands, options, and prerequisite secrets in the target skill's `SKILL.md` or repository `README.md`.
+1. **Inspect Transcript**: Review executed one-off scripts, piped bash commands, or multi-step database/API operations.
+2. **Tier Selection**:
+   - **Tier 1 (Lightweight / Local helper)**: Self-contained, positional args/flags, docstrings.
+   - **Tier 2 (Production / CI / Destructive Tooling)**: `commander` CLI, `--dry-run` flag, environment guards, unit tests (`*.spec.ts`).
+3. **Target Placement**:
+   - Monorepo package: `workspaces/<package>/scripts/` or `scripts/`.
+   - Skill bundle: `~/.omp/agent/skills/<skill-name>/scripts/` or `dotfiles/_agent/skills/<skill-name>/scripts/`.
+4. **Verify & Document**: Run `bun test`, test with `--help` and `--dry-run`, and document in the target `SKILL.md` or `README.md`.
