@@ -51,21 +51,24 @@ describeIfCreds('deploy-to-clean-account speed', () => {
 });
 
 describe('deploy artifacts present', () => {
+	const fs = require('node:fs');
+	const path = require('node:path');
+	const workerDir = path.resolve(import.meta.dir, '..');
+	const wranglerPath = path.join(workerDir, 'wrangler.toml');
+	const htmlPath = path.join(workerDir, 'public/post-deploy.html');
+
 	it('wrangler.toml has the expected name', () => {
-		const fs = require('node:fs');
-		const text = fs.readFileSync('wrangler.toml', 'utf-8');
+		const text = fs.readFileSync(wranglerPath, 'utf-8');
 		expect(text).toMatch(/^name\s*=\s*"turnstile-siteverify"/m);
 	});
 
 	it('wrangler.toml configures the post-deploy assets directory', () => {
-		const fs = require('node:fs');
-		const text = fs.readFileSync('wrangler.toml', 'utf-8');
+		const text = fs.readFileSync(wranglerPath, 'utf-8');
 		expect(text).toMatch(/\[assets\]/);
 		expect(text).toMatch(/directory\s*=\s*"\.\/public"/);
 	});
 
 	it('public/post-deploy.html exists', () => {
-		const fs = require('node:fs');
-		expect(fs.existsSync('public/post-deploy.html')).toBe(true);
+		expect(fs.existsSync(htmlPath)).toBe(true);
 	});
 });

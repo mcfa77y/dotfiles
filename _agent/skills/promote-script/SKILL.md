@@ -36,19 +36,18 @@ Always standardize on:
 
 When refactoring a skill's scripts directory:
 1. **Audit & Inventory**: Identify all scripts (`.py`, `.sh`, `.cjs`, `.js`) in the target skill directory (`<skill>/scripts/`).
-2. **Initialize Workspace**: Ensure `package.json`, `tsconfig.json`, and `.gitignore` exist with `@types/bun` and `commander`.
+2. **Workspace Registration**: All skills participate in the root `_agent/skills/package.json` Bun workspace (`"workspaces": ["*"]`). New shared dependencies belong at `_agent/skills/package.json`.
 3. **Refactor to TypeScript**:
    - Write clean, type-safe `<script>.ts` implementing `commander` CLI with descriptive options, arguments, and `--help` examples.
    - Use `Bun.$` for subprocess execution, `Bun.file()` for file I/O, `fetch` for HTTP queries.
    - Set executable permissions: `chmod +x scripts/<script>.ts`.
-4. **Add Unit Tests**: Write `<script>.spec.ts` exercising parameter parsing, data extraction, formatters, and edge cases. Verify with `bun test`.
+4. **Add Unit Tests**: Write `<script>.spec.ts` exercising parameter parsing, data extraction, formatters, and edge cases. Verify locally or from root via `bun test`.
 5. **Clean Legacy Code**: Delete superseded `.py`, `.sh`, `.cjs`, and `.js` files to eliminate maintenance drift.
 6. **Update SKILL.md**: Update the skill's documentation to reflect the new `bun run scripts/<script>.ts` commands, flag names, and capabilities.
 7. **Atomic Git Commit**: Commit the refactored skill with descriptive conventional commit:
    ```bash
    git commit -m "feat(skills): refactor <skill-name> scripts to TypeScript with Bun and Commander"
    ```
-
 ### Workflow B: Harvesting Ad-Hoc Scripts from Conversation
 
 1. **Inspect Transcript**: Review executed one-off scripts, piped bash commands, or multi-step database/API operations.
