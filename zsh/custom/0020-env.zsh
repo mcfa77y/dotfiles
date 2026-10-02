@@ -45,8 +45,12 @@ export LLMFIT_DASHBOARD_PORT=8790
 
 # Super File
 export XDG_CONFIG_HOME="$HOME/.config"
+export SUPERFILE_CONFIG_DIR="$HOME/.config/superfile"
 
 # --- SonarQube ---
 export SONAR_HOST_URL="http://localhost:9000"
 export SONAR_TOKEN="sqa_714777f3b0fbf76f5b08d290a82c0431bbc36a5f"
 export SONAR_ADMIN_PASSWORD="Admin12345678!"
+export SONAR_JDBC_URL="jdbc:postgresql://sonarqube-db:5432/sonar"
+export SONAR_JDBC_USERNAME="sonar"
+export SONAR_JDBC_PASSWORD="sonar"
