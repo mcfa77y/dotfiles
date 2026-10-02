@@ -128,6 +128,19 @@ Bounces a PR (close followed immediately by reopen) to force GitHub Actions to r
 bun run ~/.gemini/config/skills/rhl-pr-helper/scripts/reopen_pr.ts <PR_NUMBER_OR_URL>
 ```
 
+### 7. `create_pr.ts`
+Validates title and body formatting against Empo Health standards, auto-detects infrastructure changes to assign reviewers, and creates a draft or ready PR via `gh pr create`.
+```bash
+# Create a draft PR using a prepared message file
+bun run ~/.gemini/config/skills/rhl-pr-helper/scripts/create_pr.ts <path_to_message.txt>
+
+# Create ready-for-review (non-draft) PR
+bun run ~/.gemini/config/skills/rhl-pr-helper/scripts/create_pr.ts --no-draft <path_to_message.txt>
+
+# Pipe via stdin
+cat <path_to_message.txt> | bun run ~/.gemini/config/skills/rhl-pr-helper/scripts/create_pr.ts
+```
+
 ---
 
 ## Standard PR Template
