@@ -36,32 +36,34 @@ Identify:
 If multiple jobs failed (✗), investigate each one.
 
 > [!TIP]
-> **Preferred Method:** Use `scripts/fetch_failed_logs.py`.
-> Unlike `gh run view --log-failed` (which fails with `"run is still in progress"` if any matrix or teardown jobs are still active), `fetch_failed_logs.py` queries `gh api` per job and works immediately even on in-progress runs, separates logs by job into clean files, and parses Playwright assertion errors automatically:
+> **Preferred Method:** Use `scripts/fetch_failed_logs.ts`.
+> Unlike `gh run view --log-failed` (which fails with `"run is still in progress"` if any matrix or teardown jobs are still active), `fetch_failed_logs.ts` queries `gh api` per job and works immediately even on in-progress runs, separates logs by job into clean files, and parses Playwright assertion errors automatically:
 > ```bash
 > # Fetch and parse all failed jobs for a run:
-> python3 /Users/joe/.gemini/config/skills/rhl-ci-investigation/scripts/fetch_failed_logs.py --run-id <RUN_ID>
+> bun run scripts/fetch_failed_logs.ts --run-id <RUN_ID>
 >
 > # Target a single job or URL:
-> python3 /Users/joe/.gemini/config/skills/rhl-ci-investigation/scripts/fetch_failed_logs.py --run-id "<URL>"
+> bun run scripts/fetch_failed_logs.ts --run-id "<URL>"
 >
 > # Also download qa-pr-report artifacts (with error-context.md page snapshots):
-> python3 /Users/joe/.gemini/config/skills/rhl-ci-investigation/scripts/fetch_failed_logs.py --run-id <RUN_ID> --download-artifacts
+> bun run scripts/fetch_failed_logs.ts --run-id <RUN_ID> --download-artifacts
 > ```
 
 **Alternative CLI fallback (completed runs only):**
 ```bash
 gh run view <RUN_ID> --log-failed --repo EmpoHealth/core
 ```
-The `--log-failed` flag returns logs for all failed jobs, prefixed by job name. Parse the output to separate failures by job. For each failed job:
-- Identify the failing step.
-- Extract error messages, stack traces, and assertion details.
-- Classify the failure independently.
 
-### 4. Fetch Additional Job Details (if needed)
-For structured job data or when `--log-failed` output is truncated:
+### 4. Additional Diagnostic Tools
 ```bash
-gh api repos/EmpoHealth/core/actions/runs/<RUN_ID>/jobs
+# Decompress and parse Vitest HTML metadata report:
+bun run scripts/parse_vitest_results.ts
+
+# Inspect cache quotas, collisions, and sizes:
+bun run scripts/inspect_cache.ts --details
+
+# Validate workflow YAML syntax:
+bun run scripts/validate_yaml.ts .github/workflows/
 ```
 
 ### 5. Classify Each Failure
@@ -76,73 +78,5 @@ Determine which category each failure falls into:
 | **Cache Miss / Quota** | `actions/cache` misses despite matching keys (path version hash mismatch), "Unable to reserve cache", or LRU eviction due to exceeding 10 GiB limit. |
 | **Timeout/OOM** | Job killed by GitHub runner, "The operation was canceled", excessive memory usage. |
 
-### 6. Trace Root Cause
-- Read the failing test file and its helpers/imports in the local worktree.
-- Trace mock data generation (faker usage, random seeds).
-- Compare the test's expected-value computation path vs the actual component's rendering path.
-- Check if the failure is reproducible by running the test locally.
-- Grep for all call sites of any helper function involved in the failure.
-- For each failed job, trace independently — different jobs may have different root causes.
-
-### 7. Write Investigation Report
-Write to `docs/investigation-<RUN_ID>.md` (e.g., `docs/investigation-31422240846.md`).
-
-This skill only documents findings — it does not auto-fix or create tickets.
-
-#### Report Structure
-
-```markdown
-# GitHub Action Pipeline Failure Investigation
-
-## Pipeline Overview
-- Repository, PR, workflow, run ID, run URL.
-- List all jobs with pass/fail status.
-
-## Failure Details
-For each failed job:
-- Job name, job ID, failing step name.
-- Summary (X passed, Y failed out of N total).
-- Failed test case (file, line, test title, browser env).
-- Failure log excerpt (expected vs actual, stack trace).
-
-## Root Cause Analysis
-For each failure:
-- Nature (deterministic vs flaky).
-- Chain of events (step-by-step trace from data generation to assertion).
-- Why it manifests (which specific condition triggers the mismatch).
-
-## Recommended Remediation
-- 2-3 concrete options ranked by safety/simplicity.
-- Verification steps.
-```
-
-### 8. Verify Findings
-- Read the actual source files referenced in the logs to confirm line numbers and logic.
-- Grep for duplicate call sites or shared helpers that may need the same fix.
-- Do NOT claim a fix without running the test locally.
-- This skill produces documentation only — no code changes, no ticket creation.
-
-## Key Tools & Helper Scripts
-- `scripts/fetch_failed_logs.py` — robust log fetcher and error parser that works even while workflow runs are in progress, isolates logs per failed job, and optionally downloads `qa-pr-report-*` artifacts.
-- `scripts/parse_vitest_results.js` — decompresses and extracts failed test suites and error stacks from Vitest report metadata (`html.meta.json.gz`).
-- `gh run view <ID>` — run overview with job statuses.
-- `gh run view <ID> --log-failed` — failed step logs for all failed jobs.
-- `gh run view <ID> --log` — full logs (use sparingly, very large).
-- `gh api repos/EmpoHealth/core/actions/runs/<ID>/jobs` — structured job data.
-- `scripts/inspect_cache.py` — inspect repo cache quota (10 GiB limit), active entries by category/ref, and diagnose `actions/cache` key version conflicts (e.g. `scripts/inspect_cache.py --key node-modules`).
-- `scripts/validate_yaml.py` — validate workflow YAML syntax and basic GitHub Actions schema (e.g. `scripts/validate_yaml.py .github/workflows/`).
-- Local `grep`/`read` — trace source files in the worktree.
-
-## Common RHL CI Patterns
-- **Frontend tests:** Vitest + Playwright browser mode in `workspaces/frontend-app`. Run with `yarn test`.
-- **Backend tests:** Jest in `workspaces/backend-api`. Run with `yarn test`.
-- **E2E tests:** Jest with `test:e2e` script, Docker-based. Run with `yarn test:e2e`.
-- **Secrets:** Infisical CLI injects env vars at runtime. Missing secret = check Infisical project ID and identity.
-- **Dependency & Cache Management:**
-  - `actions/cache` scopes keys by runner OS, workspace prefix, and lockfile hash (`${{ runner.os }}-<workspace>-node-modules-${{ hashFiles('yarn.lock') }}`).
-  - Each workspace must namespace its cache keys because GitHub Actions computes a hidden `version` hash from the cached `path` list. Sharing identical keys across different path sets results in silent cache misses.
-  - Push workflows to `main` should seed the primary cache so PR branches get immediate hits.
-  - Quota is 10 GiB per repo; exceeding it triggers aggressive LRU eviction.
-- **Ephemeral environments:** PR-triggered deployments to `*.staging.empohealth.com`. Webhook management via `manage-linear-ephemeral-webhook.ts`.
-- **Flaky test sources:** `faker.phone.number()`, `faker.helpers.arrayElement()`, `faker.date.*` — any faker call without a fixed seed can produce non-deterministic failures.
-- **Workflow coverage:** The skill handles any workflow the user provides via GitHub URL — frontend, backend, E2E, deploy, or custom workflows.
+### 6. Produce Investigation Report
+Save the final report in `docs/investigation-<RUN_ID>.md`.
