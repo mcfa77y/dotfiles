@@ -54,7 +54,9 @@ describeIfCreds('deploy-to-clean-account speed', () => {
 
   it('cleans up the test Worker', () => {
     // Idempotent — if the dry-run never produced a real Worker, this is a no-op.
-    execSync(`npx wrangler delete --name ${workerName} 2>&1 || true`, { stdio: 'ignore' });
+    expect(() => {
+      execSync(`npx wrangler delete --name ${workerName} 2>&1 || true`, { stdio: 'ignore' });
+    }).not.toThrow();
   });
 });
 

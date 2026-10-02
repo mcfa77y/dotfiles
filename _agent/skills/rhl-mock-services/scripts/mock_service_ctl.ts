@@ -62,8 +62,8 @@ export async function runCli(): Promise<void> {
   program
     .command('health')
     .description('Check health endpoint of local mock-services')
-    .option('-p, --port <number>', 'Mock services port', (v) => parseInt(v, 10), 3001)
-    .option('-t, --timeout <number>', 'Timeout in ms', (v) => parseInt(v, 10), 5000)
+    .option('-p, --port <number>', 'Mock services port', (v) => Number.parseInt(v, 10), 3001)
+    .option('-t, --timeout <number>', 'Timeout in ms', (v) => Number.parseInt(v, 10), 5000)
     .action(async (opts: { port: number; timeout: number }) => {
       const res = await checkMockHealth(opts.port, opts.timeout);
       if (res.healthy) {
@@ -94,7 +94,7 @@ export async function runCli(): Promise<void> {
   program
     .command('start')
     .description('Start mock-services in development mode')
-    .option('-p, --port <number>', 'Mock services port', (v) => parseInt(v, 10), 3001)
+    .option('-p, --port <number>', 'Mock services port', (v) => Number.parseInt(v, 10), 3001)
     .action(async (opts: { port: number }) => {
       const repoRoot = await findRepoRoot();
       const mockDir = `${repoRoot}/workspaces/mock-services`;
@@ -131,8 +131,10 @@ export async function runCli(): Promise<void> {
 }
 
 if (import.meta.main) {
-  runCli().catch((err: unknown) => {
+  try {
+    await runCli();
+  } catch (err: unknown) {
     console.error('Fatal error:', err instanceof Error ? err.message : String(err));
     process.exit(1);
-  });
+  }
 }

@@ -33,14 +33,14 @@ export interface ValidationResult {
 export function parseIntoSections(content: string): MarkdownSection[] {
   const sections: MarkdownSection[] = [];
 
-  const startOfLineBoundary = `(?<=^|\\n)`;
+  const startOfLineBoundary = String.raw`(?<=^|\n)`;
   const setextUnderlinePattern = '===+|---+';
-  const setextHeaderPattern = `([^\\n]+)\\n(${setextUnderlinePattern})`;
+  const setextHeaderPattern = String.raw`([^\n]+)\n(${setextUnderlinePattern})`;
   const atxPrefixPattern = '#{1,2}';
-  const atxHeaderPattern = `(${atxPrefixPattern})[ \\t]+([^\\n]+?)(?:[ \\t]+#+)?[ \\t]*`;
+  const atxHeaderPattern = String.raw`(${atxPrefixPattern})[ \t]+([^\n]+?)(?:[ \t]+#+)?[ \t]*`;
   const headerPattern = `${startOfLineBoundary}(?:${setextHeaderPattern}|${atxHeaderPattern})`;
   const nextHeaderDelimiterPattern = headerPattern.replaceAll(/\((?!\?)/g, '(?:');
-  const sectionContentPattern = `(?:\\n(.*?)(?=(?:\\n?${nextHeaderDelimiterPattern})|$)|$)`;
+  const sectionContentPattern = String.raw`(?:\n(.*?)(?=(?:\n?${nextHeaderDelimiterPattern})|$)|$)`;
 
   const sectionRegex = new RegExp(`${headerPattern}${sectionContentPattern}`, 'gs');
 
@@ -48,8 +48,12 @@ export function parseIntoSections(content: string): MarkdownSection[] {
     const style = match[1] !== undefined ? 'setext' : 'atx';
     const header = style === 'setext' ? match[1] : match[4];
     const headerUnderline = style === 'setext' ? match[2] : '';
-    const level =
-      style === 'setext' ? (match[2]?.startsWith('=') ? 1 : 2) : (match[3]?.length ?? 2);
+    let level: number;
+    if (style === 'setext') {
+      level = match[2]?.startsWith('=') ? 1 : 2;
+    } else {
+      level = match[3]?.length ?? 2;
+    }
     const sectionContent = match[5];
 
     sections.push({
@@ -84,11 +88,25 @@ export function validateCommitMessage(commitMessage: string): ValidationResult {
   }
 
   const sections = parseIntoSections(body).filter((x) => x.level <= 2);
-  const sectionsByHeader = sections.reduce<Record<string, MarkdownSection>>(
-    (acc, x) => ({ ...acc, [x.header]: x }),
-    {},
-  );
+  const sectionsByHeader: Record<string, MarkdownSection> = {};
+  for (const x of sections) {
+    sectionsByHeader[x.header] = x;
+  }
 
+  errors.push(...validateSectionStructure(sections), ...validateSectionContents(sectionsByHeader));
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    title,
+    body,
+    sections,
+    sectionsByHeader,
+  };
+}
+
+function validateSectionStructure(sections: MarkdownSection[]): string[] {
+  const errors: string[] = [];
   const expectedSections = [
     'Detailed Description',
     'Relevant Linear Tickets',
@@ -135,7 +153,7 @@ export function validateCommitMessage(commitMessage: string): ValidationResult {
 
   const sectionsNotSurroundedByBlankLines = sections
     .filter((x) => x.header !== 'Reviews and Merging')
-    .filter((x) => x.content.slice(0, 1) !== '\n' || x.content.slice(-1) !== '\n')
+    .filter((x) => !x.content.startsWith('\n') || !x.content.endsWith('\n'))
     .map((x) => x.header);
   if (sectionsNotSurroundedByBlankLines.length > 0) {
     errors.push(
@@ -143,10 +161,15 @@ export function validateCommitMessage(commitMessage: string): ValidationResult {
     );
   }
 
+  return errors;
+}
+
+function validateSectionContents(sectionsByHeader: Record<string, MarkdownSection>): string[] {
+  const errors: string[] = [];
   const relevantLinearTicketsContent =
     sectionsByHeader['Relevant Linear Tickets']?.content.replaceAll(/^\n|\n$/g, '') || '';
   if (
-    !/^This change contributes to [A-Z][A-Z0-9]*-[0-9]+(?:, [A-Z][A-Z0-9]*-[0-9]+)*\.$/.test(
+    !/^This change contributes to [A-Z][A-Z0-9]*-\d+(?:, [A-Z][A-Z0-9]*-\d+)*\.$/.test(
       relevantLinearTicketsContent,
     )
   ) {
@@ -161,14 +184,7 @@ export function validateCommitMessage(commitMessage: string): ValidationResult {
     );
   }
 
-  return {
-    valid: errors.length === 0,
-    errors,
-    title,
-    body,
-    sections,
-    sectionsByHeader,
-  };
+  return errors;
 }
 
 export async function runCli(): Promise<void> {
@@ -224,8 +240,10 @@ Examples:
 }
 
 if (import.meta.main) {
-  runCli().catch((err: unknown) => {
+  try {
+    await runCli();
+  } catch (err: unknown) {
     console.error('Fatal error:', err instanceof Error ? err.message : String(err));
     process.exit(1);
-  });
+  }
 }

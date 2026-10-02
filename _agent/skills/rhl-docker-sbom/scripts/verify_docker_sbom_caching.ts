@@ -22,7 +22,17 @@ export interface VerifyDockerOptions {
   cleanup?: boolean;
 }
 
-export function parseSbomJson(rawJson: string): Record<string, any> {
+export interface SbomData {
+  name?: string;
+  packageName?: string;
+  version?: string;
+  commitSha?: string;
+  commit?: string;
+  gitCommit?: string;
+  [key: string]: unknown;
+}
+
+export function parseSbomJson(rawJson: string): SbomData {
   try {
     return JSON.parse(rawJson);
   } catch (err: unknown) {
@@ -116,8 +126,10 @@ Examples:
 }
 
 if (import.meta.main) {
-  runCli().catch((err: unknown) => {
+  try {
+    await runCli();
+  } catch (err: unknown) {
     console.error('Fatal error:', err instanceof Error ? err.message : String(err));
     process.exit(1);
-  });
+  }
 }

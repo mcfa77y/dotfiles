@@ -33,7 +33,9 @@ export async function fetchCaches(repo: string, key?: string, ref?: string): Pro
   if (key) queryParams.set('key', key);
   if (ref) queryParams.set('ref', ref);
 
-  const endpoint = `/repos/${repo}/actions/caches${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+  const queryString = queryParams.toString();
+  const querySuffix = queryString ? `?${queryString}` : '';
+  const endpoint = `/repos/${repo}/actions/caches${querySuffix}`;
 
   try {
     const rawOutput = (await $`gh api ${endpoint} --paginate`.quiet().text()).trim();
@@ -133,8 +135,10 @@ Examples:
 }
 
 if (import.meta.main) {
-  runCli().catch((err: unknown) => {
+  try {
+    await runCli();
+  } catch (err: unknown) {
     console.error('Fatal error:', err instanceof Error ? err.message : String(err));
     process.exit(1);
-  });
+  }
 }

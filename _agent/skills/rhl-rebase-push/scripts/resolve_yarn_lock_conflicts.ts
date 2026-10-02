@@ -31,6 +31,65 @@ export async function findConflictedLockfiles(targetDir: string): Promise<string
   }
 }
 
+function showDryRunSteps(autoContinue?: boolean): void {
+  console.log('\n[Dry-run] Would execute:');
+  console.log('  1. yarn install (resolves conflict markers)');
+  console.log('  2. git add <lockfiles>');
+  if (autoContinue) {
+    console.log('  3. git rebase --continue');
+  }
+}
+
+async function stashWipEdits(cwd: string): Promise<boolean> {
+  const status = (await $`git status --porcelain`.cwd(cwd).quiet().text()).trim();
+  const hasUnstagedNonLock = status
+    .split('\n')
+    .some((l) => !l.includes('yarn.lock') && (l.startsWith(' M') || l.startsWith('??')));
+
+  if (!hasUnstagedNonLock) {
+    return false;
+  }
+
+  console.log('\nShelving unrelated working directory edits...');
+  try {
+    await $`git stash push -u -m "resolve-yarn-lock-conflicts-autostash"`.cwd(cwd);
+    return true;
+  } catch (err: unknown) {
+    console.warn('Warning: Could not stash working directory edits:', err);
+    return false;
+  }
+}
+
+async function restoreWipEdits(cwd: string): Promise<void> {
+  console.log('\nRestoring shelved working directory edits...');
+  try {
+    await $`git stash pop`.cwd(cwd);
+  } catch (err: unknown) {
+    console.warn('Warning: Could not pop git stash automatically:', err);
+  }
+}
+
+async function applyConflictResolution(
+  cwd: string,
+  conflicted: string[],
+  autoContinue?: boolean,
+): Promise<void> {
+  console.log('\nRunning yarn install to resolve lockfile conflict markers...');
+  await $`yarn install`.cwd(cwd);
+
+  console.log('Staging resolved yarn.lock files...');
+  for (const f of conflicted) {
+    await $`git add ${f}`.cwd(cwd);
+  }
+  console.log('✓ Successfully staged resolved yarn.lock files.');
+
+  if (autoContinue) {
+    console.log('\nAdvancing git rebase (--continue)...');
+    await $`git rebase --continue`.cwd(cwd);
+    console.log('✓ Git rebase continued successfully.');
+  }
+}
+
 export async function resolveLockfiles(opts: ResolveOptions): Promise<void> {
   const cwd = opts.targetDir || process.cwd();
 
@@ -49,60 +108,22 @@ export async function resolveLockfiles(opts: ResolveOptions): Promise<void> {
   }
 
   if (opts.dryRun) {
-    console.log('\n[Dry-run] Would execute:');
-    console.log('  1. yarn install (resolves conflict markers)');
-    console.log('  2. git add <lockfiles>');
-    if (opts.autoContinue) {
-      console.log('  3. git rebase --continue');
-    }
+    showDryRunSteps(opts.autoContinue);
     return;
   }
 
-  // Check if we need to stash WIP modifications
-  let stashed = false;
-  if (opts.stashWip) {
-    const status = (await $`git status --porcelain`.cwd(cwd).quiet().text()).trim();
-    const hasUnstagedNonLock = status
-      .split('\n')
-      .some((l) => !l.includes('yarn.lock') && (l.startsWith(' M') || l.startsWith('??')));
-
-    if (hasUnstagedNonLock) {
-      console.log('\nShelving unrelated working directory edits...');
-      try {
-        await $`git stash push -u -m "resolve-yarn-lock-conflicts-autostash"`.cwd(cwd);
-        stashed = true;
-      } catch (err: unknown) {
-        console.warn('Warning: Could not stash working directory edits:', err);
-      }
-    }
-  }
+  const stashed = opts.stashWip ? await stashWipEdits(cwd) : false;
 
   try {
-    console.log('\nRunning yarn install to resolve lockfile conflict markers...');
-    await $`yarn install`.cwd(cwd);
-
-    console.log('Staging resolved yarn.lock files...');
-    for (const f of conflicted) {
-      await $`git add ${f}`.cwd(cwd);
-    }
-    console.log('✓ Successfully staged resolved yarn.lock files.');
-
-    if (opts.autoContinue) {
-      console.log('\nAdvancing git rebase (--continue)...');
-      await $`git rebase --continue`.cwd(cwd);
-      console.log('✓ Git rebase continued successfully.');
-    }
+    await applyConflictResolution(cwd, conflicted, opts.autoContinue);
   } finally {
     if (stashed) {
-      console.log('\nRestoring shelved working directory edits...');
-      try {
-        await $`git stash pop`.cwd(cwd);
-      } catch (err: unknown) {
-        console.warn('Warning: Could not pop git stash automatically:', err);
-      }
+      await restoreWipEdits(cwd);
     }
   }
 }
+
+export const resolveYarnLockConflicts = resolveLockfiles;
 
 export async function runCli(): Promise<void> {
   const program = new Command()
@@ -141,8 +162,10 @@ Examples:
 }
 
 if (import.meta.main) {
-  runCli().catch((err: unknown) => {
+  try {
+    await runCli();
+  } catch (err: unknown) {
     console.error('Fatal error:', err instanceof Error ? err.message : String(err));
     process.exit(1);
-  });
+  }
 }

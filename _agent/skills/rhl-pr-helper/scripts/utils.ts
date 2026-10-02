@@ -16,16 +16,23 @@ export interface BasePrData {
   headRefName?: string;
 }
 
+function formatStderr(stderr: unknown): string {
+  if (typeof stderr === 'string') return stderr.trim();
+  if (stderr instanceof Uint8Array) return new TextDecoder().decode(stderr).trim();
+  if (stderr instanceof Error) return stderr.message.trim();
+  return JSON.stringify(stderr).trim();
+}
+
 function getErrorMessage(err: unknown): string {
   if (err && typeof err === 'object') {
-    if ('stderr' in err && err.stderr) {
-      return String(err.stderr).trim();
+    if ('stderr' in err && err.stderr != null) {
+      return formatStderr(err.stderr);
     }
     if ('message' in err && typeof err.message === 'string') {
       return err.message;
     }
   }
-  return String(err);
+  return err instanceof Error ? err.message : String(err);
 }
 
 /**
@@ -47,17 +54,17 @@ export function parsePrTarget(input: string | number): ParsedPrTarget {
     throw new Error('Missing PR number or URL.');
   }
 
-  const urlMatch = clean.match(/github\.com\/([^/]+(?:\/[^/]+)?)\/pull\/(\d+)/i);
+  const urlMatch = /github\.com\/([^/]+(?:\/[^/]+)?)\/pull\/(\d+)/i.exec(clean);
   if (urlMatch) {
     return {
       repo: urlMatch[1] || null,
-      prNumber: parseInt(urlMatch[2]!, 10),
+      prNumber: Number.parseInt(urlMatch[2]!, 10),
     };
   }
 
   if (clean.includes('#')) {
     const [repoPart, numPart] = clean.split('#', 2);
-    const prNum = parseInt(numPart!.trim(), 10);
+    const prNum = Number.parseInt(numPart!.trim(), 10);
     if (!Number.isNaN(prNum)) {
       return {
         repo: repoPart!.trim() || null,
@@ -66,7 +73,7 @@ export function parsePrTarget(input: string | number): ParsedPrTarget {
     }
   }
 
-  const num = parseInt(clean.replace(/^#/, ''), 10);
+  const num = Number.parseInt(clean.replace(/^#/, ''), 10);
   if (!Number.isNaN(num)) {
     return { repo: null, prNumber: num };
   }
@@ -82,14 +89,14 @@ export async function resolveCurrentRepo(): Promise<string | null> {
     const output = (
       await $`gh repo view --json nameWithOwner -q .nameWithOwner`.quiet().text()
     ).trim();
-    if (output && output.includes('/')) return output;
+    if (output?.includes('/')) return output;
   } catch {
     // fallback to git remote
   }
 
   try {
     const remoteUrl = (await $`git remote get-url origin`.quiet().text()).trim();
-    const match = remoteUrl.match(/github\.com[:/]([^/]+)\/([^/.]+)(?:\.git)?$/);
+    const match = /github\.com[:/]([^/]+)\/([^/.]+)(?:\.git)?$/.exec(remoteUrl);
     if (match) {
       return `${match[1]}/${match[2]}`;
     }
@@ -135,23 +142,17 @@ export async function applyRemotePr(
   const parsed = parsePrTarget(prTarget);
 
   try {
+    const args = ['gh', 'pr', 'edit', String(parsed.prNumber)];
     if (parsed.repo) {
-      if (updates.title !== undefined && updates.body !== undefined) {
-        await $`gh pr edit ${parsed.prNumber} --repo ${parsed.repo} --title ${updates.title} --body ${updates.body}`;
-      } else if (updates.title !== undefined) {
-        await $`gh pr edit ${parsed.prNumber} --repo ${parsed.repo} --title ${updates.title}`;
-      } else if (updates.body !== undefined) {
-        await $`gh pr edit ${parsed.prNumber} --repo ${parsed.repo} --body ${updates.body}`;
-      }
-    } else {
-      if (updates.title !== undefined && updates.body !== undefined) {
-        await $`gh pr edit ${parsed.prNumber} --title ${updates.title} --body ${updates.body}`;
-      } else if (updates.title !== undefined) {
-        await $`gh pr edit ${parsed.prNumber} --title ${updates.title}`;
-      } else if (updates.body !== undefined) {
-        await $`gh pr edit ${parsed.prNumber} --body ${updates.body}`;
-      }
+      args.push('--repo', parsed.repo);
     }
+    if (updates.title !== undefined) {
+      args.push('--title', updates.title);
+    }
+    if (updates.body !== undefined) {
+      args.push('--body', updates.body);
+    }
+    await $`${args}`;
   } catch (err: unknown) {
     throw new Error(`Failed to update PR #${prTarget}: ${getErrorMessage(err)}`);
   }

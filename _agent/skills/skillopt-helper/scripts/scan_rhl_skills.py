@@ -25,15 +25,12 @@ def parse_skill(skill_md_path: str) -> dict:
         content = f.read()
 
     frontmatter = {}
-    body = content
     match = re.match(r"^---\n(.*?)\n---\n(.*)$", content, re.DOTALL)
     if match:
         try:
             frontmatter = yaml.safe_load(match.group(1)) or {}
         except Exception:
             frontmatter = {}
-        body = match.group(2)
-
     return {
         "path": skill_md_path,
         "name": frontmatter.get("name", os.path.basename(os.path.dirname(skill_md_path))),

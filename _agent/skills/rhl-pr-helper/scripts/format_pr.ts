@@ -54,7 +54,7 @@ export function extractTicketIds(input: string): string[] {
  * canonical headers to avoid duplicate sections.
  */
 export function sanitizeDetailedDescription(rawBody: string): string {
-  if (!rawBody || !rawBody.trim()) {
+  if (!rawBody?.trim()) {
     return [
       '### Problem',
       '[Description of the problem]',
@@ -71,7 +71,7 @@ export function sanitizeDetailedDescription(rawBody: string): string {
   let cleaned = rawBody
     // Setext style removal
     .replace(
-      /(?:^|\n)Relevant Linear Tickets\n[=-]+[\s\S]*?(?=\n(?:Detailed Description|Reviews and Merging|$))/gi,
+      /(?:^|\n)Relevant Linear Tickets\n[=-]+(?:\n(?!(?:Detailed Description|Reviews and Merging)\n[=-]+)[^\n]*)*\n?/gi,
       '',
     )
     .replace(/(?:^|\n)Reviews and Merging\n[=-]+[\s\S]*/gi, '')
@@ -99,8 +99,9 @@ export function formatPullRequest(options: FormatOptions): FormatResult {
   let title = (options.title || '').trim();
 
   // Strip trailing period from title
-  title = title.replace(/\.+$/, '');
-
+  while (title.endsWith('.')) {
+    title = title.slice(0, -1);
+  }
   // Discover ticket IDs from explicit options, title, and body
   const detectedTickets = [
     ...(options.tickets || []),
@@ -205,18 +206,45 @@ Examples:
     dryRun?: boolean;
   }>();
 
+  const input = await resolveCliInput(fileArg, opts);
+  if (!input.title && !input.body) {
+    console.error(
+      'Error: No input provided. Supply a file, --pr <id>, --title/--body, or pipe via stdin.',
+    );
+    process.exit(1);
+  }
+
+  const result = formatPullRequest({
+    title: input.title,
+    body: input.body,
+    tickets: opts.ticket || [],
+  });
+
+  if (!result.valid) {
+    console.error('⚠️  Warning: Formatted message produced validation warnings:');
+    for (const err of result.errors) {
+      console.error(`  ✗ ${err}`);
+    }
+    console.error();
+  }
+
+  await emitCliResult(result, input.prTarget, opts);
+  process.exit(result.valid ? 0 : 1);
+}
+
+async function resolveCliInput(
+  fileArg: string | undefined,
+  opts: { pr?: string; title?: string; body?: string },
+): Promise<{ title: string; body: string; prTarget: string | null }> {
   let title = opts.title || '';
   let body = opts.body || '';
   let prTarget = opts.pr || null;
-  const tickets: string[] = opts.ticket || [];
 
   if (fileArg && !title && !body && !prTarget) {
-    // Check if positional argument is a PR number/URL
     try {
       parsePrTarget(fileArg);
       prTarget = fileArg;
     } catch {
-      // It's a file
       try {
         const fileContent = await Bun.file(fileArg).text();
         const lines = fileContent.split(/\r?\n/);
@@ -243,27 +271,14 @@ Examples:
     body = lines.slice(1).join('\n');
   }
 
-  if (!title && !body) {
-    console.error(
-      'Error: No input provided. Supply a file, --pr <id>, --title/--body, or pipe via stdin.',
-    );
-    process.exit(1);
-  }
+  return { title, body, prTarget };
+}
 
-  const result = formatPullRequest({
-    title,
-    body,
-    tickets,
-  });
-
-  if (!result.valid) {
-    console.error('⚠️  Warning: Formatted message produced validation warnings:');
-    for (const err of result.errors) {
-      console.error(`  ✗ ${err}`);
-    }
-    console.error();
-  }
-
+async function emitCliResult(
+  result: FormatResult,
+  prTarget: string | null,
+  opts: { apply?: boolean; dryRun?: boolean; output?: string },
+): Promise<void> {
   if (prTarget && opts.apply && !opts.dryRun) {
     if (!result.valid) {
       console.error('Cannot apply formatted message to PR due to validation errors.');
@@ -278,13 +293,13 @@ Examples:
   } else {
     process.stdout.write(result.formatted);
   }
-
-  process.exit(result.valid ? 0 : 1);
 }
 
 if (import.meta.main) {
-  runCli().catch((err: unknown) => {
+  try {
+    await runCli();
+  } catch (err: unknown) {
     console.error('Fatal error:', err instanceof Error ? err.message : String(err));
     process.exit(1);
-  });
+  }
 }

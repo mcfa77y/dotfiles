@@ -36,13 +36,12 @@ export function parsePatch(patch: string): DiffHunkLine[] {
   let currentRight = 0;
 
   for (const rawLine of patch.split('\n')) {
-    const match = rawLine.match(hunkHeaderRegex);
+    const match = hunkHeaderRegex.exec(rawLine);
     if (match) {
-      currentLeft = parseInt(match[1], 10);
-      currentRight = parseInt(match[3], 10);
+      currentLeft = Number.parseInt(match[1], 10);
+      currentRight = Number.parseInt(match[3], 10);
       continue;
     }
-
     if (rawLine.startsWith('+')) {
       lines.push({
         rightLine: currentRight,
@@ -113,19 +112,19 @@ export function searchHunkLines(
  */
 export function parsePrTarget(target: string): { repo: string | null; prNumber: number } {
   const cleaned = target.trim();
-  const urlMatch = cleaned.match(/github\.com\/([^/]+\/[^/]+)\/pull\/(\d+)/);
+  const urlMatch = /github\.com\/([^/]+\/[^/]+)\/pull\/(\d+)/.exec(cleaned);
   if (urlMatch) {
-    return { repo: urlMatch[1], prNumber: parseInt(urlMatch[2], 10) };
+    return { repo: urlMatch[1], prNumber: Number.parseInt(urlMatch[2], 10) };
   }
 
   if (/^\d+$/.test(cleaned)) {
-    return { repo: null, prNumber: parseInt(cleaned, 10) };
+    return { repo: null, prNumber: Number.parseInt(cleaned, 10) };
   }
 
   if (cleaned.includes('#')) {
     const [repoPart, numPart] = cleaned.split('#', 2);
     if (/^\d+$/.test(numPart.trim())) {
-      return { repo: repoPart.trim() || null, prNumber: parseInt(numPart.trim(), 10) };
+      return { repo: repoPart.trim() || null, prNumber: Number.parseInt(numPart.trim(), 10) };
     }
   }
 
@@ -186,6 +185,12 @@ Options:
 `);
 }
 
+const PREFIX_BY_DIFF_TYPE: Record<DiffMatch['type'], string> = {
+  added: '+',
+  deleted: '-',
+  context: ' ',
+};
+
 export async function runCli(args: string[] = process.argv.slice(2)): Promise<void> {
   const { values, positionals } = parseArgs({
     args,
@@ -236,14 +241,16 @@ export async function runCli(args: string[] = process.argv.slice(2)): Promise<vo
 
   console.log(`Found ${allMatches.length} matching line(s) in PR #${prNumber} (${repo}):\n`);
   for (const m of allMatches) {
-    const prefix = m.type === 'added' ? '+' : m.type === 'deleted' ? '-' : ' ';
+    const prefix = PREFIX_BY_DIFF_TYPE[m.type] ?? ' ';
     console.log(`${m.file}:${m.line} [${m.side}] ${prefix} ${m.text.trim()}`);
   }
 }
 
 if (import.meta.main) {
-  runCli().catch((err) => {
-    console.error(`Error: ${err.message}`);
+  try {
+    await runCli();
+  } catch (err: unknown) {
+    console.error('Fatal error:', err instanceof Error ? err.message : String(err));
     process.exit(1);
-  });
+  }
 }

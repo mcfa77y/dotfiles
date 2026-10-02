@@ -6,6 +6,9 @@
  * Works even while the workflow run is still in progress.
  */
 
+import { mkdirSync, mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { $ } from 'bun';
 import { Command } from 'commander';
 
@@ -61,27 +64,78 @@ export interface PlaywrightError {
   snippet?: string;
 }
 
+function parsePlaywrightHeader(trimmed: string): { file: string; test: string } | null {
+  const parenIdx = trimmed.indexOf(') [');
+  const closeBracketIdx = trimmed.indexOf('] › ');
+  if (parenIdx <= 0 || closeBracketIdx <= parenIdx) return null;
+
+  const rest = trimmed.slice(closeBracketIdx + 4);
+  const chevronIdx = rest.indexOf(' › ');
+  if (chevronIdx <= 0) return null;
+
+  const fileLoc = rest.slice(0, chevronIdx).trim();
+  const testName = rest.slice(chevronIdx + 3).trim();
+  const colon1 = fileLoc.lastIndexOf(':');
+  const colon2 = colon1 > 0 ? fileLoc.lastIndexOf(':', colon1 - 1) : -1;
+  const file = colon2 > 0 ? fileLoc.slice(0, colon1) : fileLoc;
+  return { file, test: testName };
+}
+
+function extractExpectedReceived(trimmed: string, err: PlaywrightError) {
+  if (trimmed.startsWith('Expected:') || trimmed.startsWith('Expected string:')) {
+    if (!err.expected) {
+      const colonIdx = trimmed.indexOf(':');
+      err.expected = trimmed.slice(colonIdx + 1).trim();
+    }
+  } else if (trimmed.startsWith('Expected ') && !err.expected) {
+    err.expected = trimmed.slice('Expected '.length).trim();
+  }
+
+  if (trimmed.startsWith('Received:') || trimmed.startsWith('Received string:')) {
+    if (!err.received) {
+      const colonIdx = trimmed.indexOf(':');
+      err.received = trimmed.slice(colonIdx + 1).trim();
+    }
+  } else if (trimmed.startsWith('Received ') && !err.received) {
+    err.received = trimmed.slice('Received '.length).trim();
+  }
+}
+
 export function extractPlaywrightErrors(logText: string): PlaywrightError[] {
   const errors: PlaywrightError[] = [];
-  const testBlockRegex =
-    /(\d+\)\s+\[[^\]]+\]\s+›\s+([^:]+):(\d+):(\d+)\s+›\s+([^\n]+))([\s\S]*?)(?=\n\s*\d+\)\s+\[|\n\s*Slow test|\n\s*\d+\s+failed|$)/g;
+  const lines = logText.split('\n');
 
-  for (const match of logText.matchAll(testBlockRegex)) {
-    const file = match[2] ? `${match[2]}:${match[3]}` : '';
-    const test = match[5]?.trim() || '';
-    const body = match[6] || '';
+  let currentError: PlaywrightError | null = null;
+  const bodyLines: string[] = [];
 
-    const expectedMatch = body.match(/Expected(?:\s+string)?:?\s*(.+)/);
-    const receivedMatch = body.match(/Received(?:\s+string)?:?\s*(.+)/);
-
-    errors.push({
-      file,
-      test,
-      error: body.trim(),
-      expected: expectedMatch?.[1]?.trim(),
-      received: receivedMatch?.[1]?.trim(),
-    });
+  function flushCurrent() {
+    if (currentError) {
+      currentError.error = bodyLines.join('\n').trim();
+      for (const line of bodyLines) {
+        extractExpectedReceived(line.trim(), currentError);
+      }
+      errors.push(currentError);
+      bodyLines.length = 0;
+      currentError = null;
+    }
   }
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    const header = parsePlaywrightHeader(trimmed);
+    if (header) {
+      flushCurrent();
+      currentError = { file: header.file, test: header.test, error: '' };
+      continue;
+    }
+
+    if (trimmed.startsWith('Slow test') || trimmed.endsWith(' failed')) {
+      flushCurrent();
+    } else if (currentError) {
+      bodyLines.push(line);
+    }
+  }
+  flushCurrent();
 
   return errors;
 }
@@ -96,6 +150,94 @@ export async function fetchJobLog(repo: string, jobId: string): Promise<string> 
   }
 }
 
+export function displayPlaywrightErrors(errors: PlaywrightError[], prefix = ''): void {
+  for (const err of errors) {
+    if (prefix) {
+      console.log(`${prefix}${err.file}: ${err.test}`);
+    } else {
+      console.log(`\n• File: ${err.file}`);
+      console.log(`  Test: ${err.test}`);
+      if (err.expected) console.log(`  Expected: ${err.expected}`);
+      if (err.received) console.log(`  Received: ${err.received}`);
+    }
+  }
+}
+
+export async function handleSingleJob(repo: string, jobId: string, outDir: string): Promise<void> {
+  console.log(`Fetching log for single job ${jobId} (${repo})...`);
+  const log = await fetchJobLog(repo, jobId);
+  const logFile = join(outDir, `job_${jobId}.log`);
+  await Bun.write(logFile, log);
+  console.log(`Saved log to ${logFile}`);
+
+  const errors = extractPlaywrightErrors(log);
+  if (errors.length > 0) {
+    console.log(`\nFound ${errors.length} Playwright test failure(s):`);
+    displayPlaywrightErrors(errors);
+  }
+}
+
+export interface WorkflowJob {
+  id: number | string;
+  name: string;
+  conclusion?: string;
+}
+
+export async function fetchFailedJobs(repo: string, runId: string): Promise<WorkflowJob[]> {
+  console.log(`Fetching jobs for run ${runId} (${repo})...`);
+  const jobsOutput = await $`gh api repos/${repo}/actions/runs/${runId}/jobs --paginate`
+    .quiet()
+    .text();
+  const jobsData = JSON.parse(jobsOutput);
+  const jobs: WorkflowJob[] = Array.isArray(jobsData) ? jobsData : jobsData.jobs || [];
+
+  const failedJobs = jobs.filter((j) => j.conclusion === 'failure');
+  console.log(`Total jobs: ${jobs.length} | Failed jobs: ${failedJobs.length}`);
+  return failedJobs;
+}
+
+export async function processFailedJob(
+  repo: string,
+  job: WorkflowJob,
+  outDir: string,
+): Promise<void> {
+  console.log(`\n--- [FAILED] ${job.name} (Job ID: ${job.id}) ---`);
+  try {
+    const log = await fetchJobLog(repo, String(job.id));
+    const safeName = job.name.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const logFile = join(outDir, `job_${job.id}_${safeName}.log`);
+    await Bun.write(logFile, log);
+    console.log(`Saved log: ${logFile}`);
+
+    const errors = extractPlaywrightErrors(log);
+    if (errors.length > 0) {
+      console.log(`  → Extracted ${errors.length} Playwright failure(s):`);
+      displayPlaywrightErrors(errors, '    • ');
+    }
+  } catch (err: unknown) {
+    console.error(
+      `  ✗ Error retrieving job log: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+}
+
+export async function downloadRunArtifacts(
+  repo: string,
+  runId: string,
+  outDir: string,
+): Promise<void> {
+  console.log(`\nDownloading artifacts for run ${runId}...`);
+  const artifactsDir = join(outDir, 'artifacts');
+  try {
+    await $`gh run download ${runId} --repo ${repo} --dir ${artifactsDir}`.quiet();
+    console.log(`Artifacts downloaded to ${artifactsDir}`);
+  } catch (err: unknown) {
+    console.error(
+      `Failed to download artifacts: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+}
+
 export async function runCli(): Promise<void> {
   const program = new Command()
     .name('fetch_failed_logs')
@@ -103,7 +245,7 @@ export async function runCli(): Promise<void> {
     .option('-r, --run-id <id_or_url>', 'GitHub Actions run ID or full run/job URL')
     .option('-j, --job-id <id>', 'Specific GitHub Actions job ID')
     .option('--repo <owner/repo>', 'GitHub repository', DEFAULT_REPO)
-    .option('-o, --out-dir <dir>', 'Directory to save log files', '/tmp/ci_logs')
+    .option('-o, --out-dir <dir>', 'Directory to save log files')
     .option('-d, --download-artifacts', 'Download and extract run artifacts (qa-pr-report)')
     .addHelpText(
       'after',
@@ -142,82 +284,34 @@ Examples:
     program.help();
   }
 
-  const outDir = opts.outDir || '/tmp/ci_logs';
-  await $`mkdir -p ${outDir}`.quiet();
+  const outDir = opts.outDir || mkdtempSync(join(tmpdir(), 'ci_logs-'));
+  mkdirSync(outDir, { recursive: true });
 
   if (targetJobId) {
-    console.log(`Fetching log for single job ${targetJobId} (${targetRepo})...`);
-    const log = await fetchJobLog(targetRepo, targetJobId);
-    const logFile = `${outDir}/job_${targetJobId}.log`;
-    await Bun.write(logFile, log);
-    console.log(`Saved log to ${logFile}`);
-
-    const errors = extractPlaywrightErrors(log);
-    if (errors.length > 0) {
-      console.log(`\nFound ${errors.length} Playwright test failure(s):`);
-      for (const err of errors) {
-        console.log(`\n• File: ${err.file}`);
-        console.log(`  Test: ${err.test}`);
-        if (err.expected) console.log(`  Expected: ${err.expected}`);
-        if (err.received) console.log(`  Received: ${err.received}`);
-      }
-    }
+    await handleSingleJob(targetRepo, targetJobId, outDir);
     return;
   }
 
-  console.log(`Fetching jobs for run ${targetRunId} (${targetRepo})...`);
-  const jobsOutput = await $`gh api repos/${targetRepo}/actions/runs/${targetRunId}/jobs --paginate`
-    .quiet()
-    .text();
-  const jobsData = JSON.parse(jobsOutput);
-  const jobs: any[] = Array.isArray(jobsData) ? jobsData : jobsData.jobs || [];
-
-  const failedJobs = jobs.filter((j) => j.conclusion === 'failure');
-  console.log(`Total jobs: ${jobs.length} | Failed jobs: ${failedJobs.length}`);
-
+  const failedJobs = await fetchFailedJobs(targetRepo, targetRunId!);
   if (failedJobs.length === 0) {
     console.log('No failed jobs found for this run.');
     return;
   }
 
   for (const job of failedJobs) {
-    console.log(`\n--- [FAILED] ${job.name} (Job ID: ${job.id}) ---`);
-    try {
-      const log = await fetchJobLog(targetRepo, String(job.id));
-      const logFile = `${outDir}/job_${job.id}_${job.name.replace(/[^a-zA-Z0-9_-]/g, '_')}.log`;
-      await Bun.write(logFile, log);
-      console.log(`Saved log: ${logFile}`);
-
-      const errors = extractPlaywrightErrors(log);
-      if (errors.length > 0) {
-        console.log(`  → Extracted ${errors.length} Playwright failure(s):`);
-        for (const err of errors) {
-          console.log(`    • ${err.file}: ${err.test}`);
-        }
-      }
-    } catch (err: unknown) {
-      console.error(
-        `  ✗ Error retrieving job log: ${err instanceof Error ? err.message : String(err)}`,
-      );
-    }
+    await processFailedJob(targetRepo, job, outDir);
   }
 
   if (opts.downloadArtifacts && targetRunId) {
-    console.log(`\nDownloading artifacts for run ${targetRunId}...`);
-    try {
-      await $`gh run download ${targetRunId} --repo ${targetRepo} --dir ${outDir}/artifacts`.quiet();
-      console.log(`Artifacts downloaded to ${outDir}/artifacts`);
-    } catch (err: unknown) {
-      console.error(
-        `Failed to download artifacts: ${err instanceof Error ? err.message : String(err)}`,
-      );
-    }
+    await downloadRunArtifacts(targetRepo, targetRunId, outDir);
   }
 }
 
 if (import.meta.main) {
-  runCli().catch((err: unknown) => {
+  try {
+    await runCli();
+  } catch (err: unknown) {
     console.error('Fatal error:', err instanceof Error ? err.message : String(err));
     process.exit(1);
-  });
+  }
 }

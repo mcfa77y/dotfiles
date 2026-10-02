@@ -96,7 +96,7 @@ export async function fetchPrChecks(
   const parsed = parsePrTarget(prTarget);
   const repoString = parsed.repo || explicitRepo || (await resolveCurrentRepo());
 
-  if (!repoString || !repoString.includes('/')) {
+  if (!repoString?.includes('/')) {
     throw new Error(
       'Unable to determine repository (owner/repo). Specify with --repo or pass full PR URL.',
     );
@@ -128,52 +128,11 @@ export async function fetchPrChecks(
   const commitNode = pr.commits?.nodes?.[0]?.commit;
   const rollupNodes = commitNode?.statusCheckRollup?.contexts?.nodes || [];
 
-  const checkRuns: CheckRun[] = [];
-  const statusContexts: StatusContext[] = [];
-
-  for (const node of rollupNodes) {
-    if (node.__typename === 'CheckRun') {
-      checkRuns.push({
-        name: node.name,
-        status: node.status,
-        conclusion: node.conclusion,
-        workflow: node.checkSuite?.workflowRun?.workflow?.name,
-        runId: node.checkSuite?.workflowRun?.databaseId
-          ? String(node.checkSuite.workflowRun.databaseId)
-          : undefined,
-        url: node.url,
-      });
-    } else if (node.__typename === 'StatusContext') {
-      statusContexts.push({
-        context: node.context,
-        state: node.state,
-        description: node.description,
-        targetUrl: node.targetUrl,
-      });
-    }
-  }
-
-  let successfulChecks = 0;
-  let failedChecks = 0;
-  let pendingChecks = 0;
-
-  for (const run of checkRuns) {
-    if (run.conclusion === 'SUCCESS') successfulChecks++;
-    else if (
-      run.conclusion === 'FAILURE' ||
-      run.conclusion === 'TIMED_OUT' ||
-      run.conclusion === 'CANCELLED'
-    )
-      failedChecks++;
-    else pendingChecks++;
-  }
-
-  for (const ctx of statusContexts) {
-    if (ctx.state === 'SUCCESS') successfulChecks++;
-    else if (ctx.state === 'FAILURE' || ctx.state === 'ERROR') failedChecks++;
-    else pendingChecks++;
-  }
-
+  const { checkRuns, statusContexts } = parseRollupNodes(rollupNodes);
+  const { successfulChecks, failedChecks, pendingChecks } = tallyCheckCounts(
+    checkRuns,
+    statusContexts,
+  );
   return {
     prNumber,
     repo: `${owner}/${repo}`,
@@ -200,22 +159,120 @@ export function printChecksReport(result: PrChecksResult): void {
   );
 
   if (result.checkRuns.length > 0) {
-    console.log(`Check Runs (${result.checkRuns.length}):`);
-    for (const run of result.checkRuns) {
-      const statusLabel = run.conclusion ? `[${run.conclusion}]` : `[${run.status}]`;
-      const wfLabel = run.workflow ? ` (${run.workflow})` : '';
-      const idLabel = run.runId ? ` [run:${run.runId}]` : '';
-      console.log(`  * ${statusLabel.padEnd(14)} ${run.name}${wfLabel}${idLabel}`);
-    }
+    printCheckRuns(result.checkRuns);
   }
 
   if (result.statusContexts.length > 0) {
-    console.log(`\nStatus Contexts (${result.statusContexts.length}):`);
-    for (const ctx of result.statusContexts) {
-      console.log(`  * [${ctx.state}]`.padEnd(14) + ` ${ctx.context}: ${ctx.description || ''}`);
-    }
+    printStatusContexts(result.statusContexts);
   }
   console.log();
+}
+
+interface RawCheckSuite {
+  workflowRun?: {
+    workflow?: { name?: string };
+    databaseId?: number;
+  };
+}
+
+interface RawRollupNode {
+  __typename?: string;
+  name?: string;
+  status?: string;
+  conclusion?: string | null;
+  url?: string;
+  checkSuite?: RawCheckSuite;
+  context?: string;
+  state?: string;
+  description?: string;
+  targetUrl?: string;
+}
+
+function parseRollupNodes(rollupNodes: unknown[]): {
+  checkRuns: CheckRun[];
+  statusContexts: StatusContext[];
+} {
+  const checkRuns: CheckRun[] = [];
+  const statusContexts: StatusContext[] = [];
+
+  for (const rawNode of rollupNodes) {
+    const node = (rawNode || {}) as RawRollupNode;
+    if (node.__typename === 'CheckRun') {
+      checkRuns.push({
+        name: node.name || '',
+        status: node.status || '',
+        conclusion: node.conclusion ?? null,
+        workflow: node.checkSuite?.workflowRun?.workflow?.name,
+        runId: node.checkSuite?.workflowRun?.databaseId
+          ? String(node.checkSuite.workflowRun.databaseId)
+          : undefined,
+        url: node.url,
+      });
+    } else if (node.__typename === 'StatusContext') {
+      statusContexts.push({
+        context: node.context || '',
+        state: node.state || '',
+        description: node.description,
+        targetUrl: node.targetUrl,
+      });
+    }
+  }
+
+  return { checkRuns, statusContexts };
+}
+
+function tallyCheckCounts(
+  checkRuns: CheckRun[],
+  statusContexts: StatusContext[],
+): { successfulChecks: number; failedChecks: number; pendingChecks: number } {
+  let successfulChecks = 0;
+  let failedChecks = 0;
+  let pendingChecks = 0;
+
+  for (const run of checkRuns) {
+    if (run.conclusion === 'SUCCESS') {
+      successfulChecks++;
+    } else if (
+      run.conclusion === 'FAILURE' ||
+      run.conclusion === 'TIMED_OUT' ||
+      run.conclusion === 'CANCELLED'
+    ) {
+      failedChecks++;
+    } else {
+      pendingChecks++;
+    }
+  }
+
+  for (const ctx of statusContexts) {
+    if (ctx.state === 'SUCCESS') {
+      successfulChecks++;
+    } else if (ctx.state === 'FAILURE' || ctx.state === 'ERROR') {
+      failedChecks++;
+    } else {
+      pendingChecks++;
+    }
+  }
+
+  return { successfulChecks, failedChecks, pendingChecks };
+}
+
+function printCheckRuns(checkRuns: CheckRun[]): void {
+  console.log(`Check Runs (${checkRuns.length}):`);
+  for (const run of checkRuns) {
+    const statusLabel = run.conclusion ? `[${run.conclusion}]` : `[${run.status}]`;
+    const wfLabel = run.workflow ? ` (${run.workflow})` : '';
+    const idLabel = run.runId ? ` [run:${run.runId}]` : '';
+    console.log(`  * ${statusLabel.padEnd(14)} ${run.name}${wfLabel}${idLabel}`);
+  }
+}
+
+function printStatusContexts(statusContexts: StatusContext[]): void {
+  console.log(`\nStatus Contexts (${statusContexts.length}):`);
+  for (const ctx of statusContexts) {
+    const stateLabel = `  * [${ctx.state}]`.padEnd(14);
+    const desc = ctx.description || '';
+    console.log(`${stateLabel} ${ctx.context}: ${desc}`);
+  }
 }
 
 export async function runCli(): Promise<void> {
@@ -261,8 +318,10 @@ Examples:
 }
 
 if (import.meta.main) {
-  runCli().catch((err: unknown) => {
+  try {
+    await runCli();
+  } catch (err: unknown) {
     console.error('Fatal error:', err instanceof Error ? err.message : String(err));
     process.exit(1);
-  });
+  }
 }

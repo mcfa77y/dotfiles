@@ -36,7 +36,7 @@ def install_cron():
         new_lines.insert(0, f"PATH={REQUIRED_PATH}")
 
     # Add the nightly SkillOpt job
-    new_lines.append(f"\n# Nightly SkillOpt consolidation across RHL agent skills (2:00 AM)")
+    new_lines.append("\n# Nightly SkillOpt consolidation across RHL agent skills (2:00 AM)")
     new_lines.append(CRON_JOB)
 
     new_crontab = "\n".join(new_lines).strip() + "\n"

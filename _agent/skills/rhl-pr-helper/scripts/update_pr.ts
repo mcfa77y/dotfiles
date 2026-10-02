@@ -18,7 +18,10 @@ export async function updatePullRequest(
   const targetLabel = parsed.repo ? `${parsed.repo}#${parsed.prNumber}` : `#${parsed.prNumber}`;
 
   // Clean trailing carriage returns / spaces while preserving structural newlines
-  const cleanedContent = content.replace(/[ \t]+$/gm, '');
+  const cleanedContent = content
+    .split(/\r?\n/)
+    .map((line) => line.trimEnd())
+    .join('\n');
 
   console.log(`Validating message for PR ${targetLabel}...`);
   const validation = validateCommitMessage(cleanedContent);
@@ -109,8 +112,10 @@ Examples:
 }
 
 if (import.meta.main) {
-  runCli().catch((err: unknown) => {
+  try {
+    await runCli();
+  } catch (err: unknown) {
     console.error('Fatal error:', err instanceof Error ? err.message : String(err));
     process.exit(1);
-  });
+  }
 }

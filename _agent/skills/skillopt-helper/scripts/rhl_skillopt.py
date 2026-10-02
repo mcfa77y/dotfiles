@@ -37,7 +37,13 @@ SKILLS_ROOT = "/Users/joe/dotfiles/_agent/skills"
 PROJECT_DIR = "/Users/joe/Projects/empo_health/remote-health-link"
 OMP_SESSIONS_DIR = os.path.expanduser("~/.omp/agent/sessions")
 AGY_BRAIN_DIR = os.path.expanduser("~/.gemini/antigravity-cli/brain")
+HELP_RHL_PROJECT = "RHL project directory"
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from omp_harvest import harvest_omp_sessions
+except ImportError:
+    from .omp_harvest import harvest_omp_sessions
 class OmpBackend(CliBackend):
     name = "omp"
 
@@ -57,7 +63,7 @@ class OmpBackend(CliBackend):
             timeout=self.timeout,
         )
         out = proc.stdout.strip()
-        lines = [line for line in out.splitlines() if not (line.startswith("Warning:") or line.startswith("Working..."))]
+        lines = [line for line in out.splitlines() if not line.startswith(("Warning:", "Working..."))]
         return "\n".join(lines).strip()
 
 class AgyBackend(CliBackend):
@@ -94,84 +100,70 @@ def patched_get_backend(name: str, **kwargs) -> Backend:
 backend_module.get_backend = patched_get_backend
 
 def harvest_omp_digests(project: str = "", limit: int = 40) -> list[SessionDigest]:
-    digests = []
-    files = sorted(glob.glob(os.path.join(OMP_SESSIONS_DIR, "**", "*.jsonl"), recursive=True), key=os.path.getmtime, reverse=True)
-    for path in files:
-        if os.path.basename(path).startswith("."):
+    return harvest_omp_sessions(OMP_SESSIONS_DIR, project=project, limit=limit)
+
+
+def _parse_agy_entry(entry: dict, user_prompts: list[str], assistant_finals: list[str], tools: list[str]) -> None:
+    stype = entry.get("type")
+    if stype == "USER_INPUT":
+        clean = re.sub(r"<[^>]+>", "", entry.get("content", "")).strip()
+        if clean:
+            user_prompts.append(clean)
+    elif stype == "PLANNER_RESPONSE":
+        content = entry.get("content", "")
+        if content:
+            assistant_finals.append(content.strip())
+        for call in entry.get("tool_calls", []):
+            tools.append(call.get("name", ""))
+
+
+def _process_agy_transcript_lines(f) -> tuple[str, str, list[str], list[str], list[str]]:
+    user_prompts: list[str] = []
+    assistant_finals: list[str] = []
+    tools: list[str] = []
+    started = ""
+    ended = ""
+
+    for line in f:
+        if not line.strip():
             continue
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                lines = [line.strip() for line in f if line.strip()]
-        except Exception:
-            continue
-        if not lines:
-            continue
-        records = []
-        for line in lines:
-            try:
-                records.append(json.loads(line))
-            except Exception:
-                continue
-        session_cwd = ""
-        started = ""
-        ended = ""
-        session_id = os.path.splitext(os.path.basename(path))[0]
-        for r in records[:3]:
-            if r.get("type") == "session":
-                session_cwd = r.get("cwd", "")
-                started = r.get("timestamp", "")
-                ended = started
-                break
-        if project and session_cwd and project not in session_cwd:
-            continue
-        user_prompts = []
-        assistant_finals = []
-        tools = []
-        for r in records:
-            ts = r.get("timestamp")
-            if ts:
-                ended = ts
-            rtype = r.get("type")
-            if rtype == "message":
-                msg = r.get("message", {})
-                role = msg.get("role")
-                content = msg.get("content")
-                if role == "user":
-                    if isinstance(content, str) and content.strip():
-                        user_prompts.append(content.strip())
-                    elif isinstance(content, list):
-                        for block in content:
-                            if isinstance(block, dict) and block.get("type") == "text":
-                                user_prompts.append(block.get("text", "").strip())
-                elif role == "assistant":
-                    if isinstance(content, str) and content.strip():
-                        assistant_finals.append(content.strip())
-                    elif isinstance(content, list):
-                        for block in content:
-                            if isinstance(block, dict) and block.get("type") == "text":
-                                assistant_finals.append(block.get("text", "").strip())
-                            elif isinstance(block, dict) and block.get("type") == "toolCall":
-                                tools.append(block.get("name", ""))
-        if not user_prompts:
-            continue
-        d = SessionDigest(
-            session_id=session_id,
-            project=session_cwd or project,
-            started_at=started,
-            ended_at=ended,
-            user_prompts=user_prompts,
-            assistant_finals=assistant_finals[-5:],
-            tools_used=list(dict.fromkeys(tools)),
-            files_touched=[],
-            feedback_signals=[],
-            n_user_turns=len(user_prompts),
-            n_assistant_turns=len(assistant_finals),
-            raw_path=path,
-        )
-        digests.append(d)
-        if len(digests) >= limit:
-            break
-    return digests
+        entry = json.loads(line)
+        created_at = entry.get("created_at", "")
+        if created_at:
+            if not started:
+                started = created_at
+            ended = created_at
+        _parse_agy_entry(entry, user_prompts, assistant_finals, tools)
+
+    return started, ended, user_prompts, assistant_finals, tools
+
+
+def _parse_agy_transcript(path: str, project: str) -> SessionDigest | None:
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            started, ended, user_prompts, assistant_finals, tools = _process_agy_transcript_lines(f)
+    except Exception:
+        return None
+
+    if not user_prompts:
+        return None
+
+    conv_id = path.split("/")[-4]
+    return SessionDigest(
+        session_id=conv_id,
+        project=project or "antigravity",
+        started_at=started,
+        ended_at=ended,
+        user_prompts=user_prompts,
+        assistant_finals=assistant_finals[-5:],
+        tools_used=list(dict.fromkeys(tools)),
+        files_touched=[],
+        feedback_signals=[],
+        n_user_turns=len(user_prompts),
+        n_assistant_turns=len(assistant_finals),
+        raw_path=path,
+    )
+
 
 def harvest_agy_digests(project: str = "", limit: int = 40) -> list[SessionDigest]:
     transcripts = sorted(
@@ -179,61 +171,16 @@ def harvest_agy_digests(project: str = "", limit: int = 40) -> list[SessionDiges
         key=os.path.getmtime,
         reverse=True,
     )
+
     digests = []
     for path in transcripts:
-        user_prompts = []
-        assistant_finals = []
-        tools = []
-        started = ""
-        ended = ""
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                for line in f:
-                    if not line.strip():
-                        continue
-                    entry = json.loads(line)
-                    created_at = entry.get("created_at", "")
-                    if created_at:
-                        if not started:
-                            started = created_at
-                        ended = created_at
-                    
-                    stype = entry.get("type")
-                    if stype == "USER_INPUT":
-                        content = entry.get("content", "")
-                        clean = re.sub(r"<[^>]+>", "", content).strip()
-                        if clean:
-                            user_prompts.append(clean)
-                    elif stype == "PLANNER_RESPONSE":
-                        content = entry.get("content", "")
-                        if content:
-                            assistant_finals.append(content.strip())
-                        for call in entry.get("tool_calls", []):
-                            tools.append(call.get("name", ""))
-        except Exception:
+        digest = _parse_agy_transcript(path, project)
+        if digest is None:
             continue
-
-        if not user_prompts:
-            continue
-
-        conv_id = path.split("/")[-4]
-        d = SessionDigest(
-            session_id=conv_id,
-            project=project or "antigravity",
-            started_at=started,
-            ended_at=ended,
-            user_prompts=user_prompts,
-            assistant_finals=assistant_finals[-5:],
-            tools_used=list(dict.fromkeys(tools)),
-            files_touched=[],
-            feedback_signals=[],
-            n_user_turns=len(user_prompts),
-            n_assistant_turns=len(assistant_finals),
-            raw_path=path,
-        )
-        digests.append(d)
+        digests.append(digest)
         if len(digests) >= limit:
             break
+
     return digests
 
 def get_rhl_skills() -> dict[str, str]:
@@ -374,19 +321,19 @@ def main():
         p.add_argument("--skill", default=None, help="Target specific rhl-* skill directory name")
         p.add_argument("--backend", default="agy", choices=["agy", "omp", "mock", "claude", "codex"], help="Execution backend (default: agy)")
         p.add_argument("--source", default="agy", choices=["agy", "omp", "pi", "claude", "codex"], help="Transcript source (default: agy)")
-        p.add_argument("--project", default=PROJECT_DIR, help="RHL project directory")
+        p.add_argument("--project", default=PROJECT_DIR, help=HELP_RHL_PROJECT)
         p.add_argument("--lookback-hours", type=int, default=0, help="Transcript lookback hours (0 = all history)")
         p.add_argument("--max-sessions", type=int, default=40, help="Max sessions to harvest")
         p.add_argument("--model", default=None, help="Model override")
         p.add_argument("--preferences", default=None, help="House rules / preferences for optimizer")
 
     p_status = subparsers.add_parser("status", help="Show current state and latest staged proposals.")
-    p_status.add_argument("--project", default=PROJECT_DIR, help="RHL project directory")
+    p_status.add_argument("--project", default=PROJECT_DIR, help=HELP_RHL_PROJECT)
 
     p_adopt = subparsers.add_parser("adopt", help="Adopt staged proposals.")
     p_adopt.add_argument("--skill", default=None, help="Adopt a specific staged skill proposal")
     p_adopt.add_argument("--all", action="store_true", help="Adopt all staged skill proposals")
-    p_adopt.add_argument("--project", default=PROJECT_DIR, help="RHL project directory")
+    p_adopt.add_argument("--project", default=PROJECT_DIR, help=HELP_RHL_PROJECT)
 
     args = parser.parse_args()
     handlers = {

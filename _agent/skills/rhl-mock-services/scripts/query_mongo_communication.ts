@@ -21,7 +21,7 @@ export async function resolveMongoUri(): Promise<string> {
     const file = Bun.file(p);
     if (await file.exists()) {
       const content = await file.text();
-      const match = content.match(/^MONGODB_URI=(.*)$/m);
+      const match = /^MONGODB_URI=(.*)$/m.exec(content);
       if (match?.[1]) {
         return match[1].trim().replace(/^['"]|['"]$/g, '');
       }
@@ -104,7 +104,7 @@ Examples:
       try {
         await client.connect();
         const db = client.db();
-        let query: any;
+        let query: Record<string, unknown>;
         try {
           query = { _id: new ObjectId(userId) };
         } catch {
@@ -121,7 +121,7 @@ Examples:
     .command('recent-history [limit]')
     .description('Fetch most recent communication history records')
     .action(async (limitStr?: string) => {
-      const limit = parseInt(limitStr || '5', 10);
+      const limit = Number.parseInt(limitStr || '5', 10);
       const opts = program.opts<{ uri: string }>();
       const client = new MongoClient(opts.uri);
       try {
@@ -163,13 +163,13 @@ Examples:
     .command('user-history <patientId> [limit]')
     .description('Fetch communication history for a specific patient')
     .action(async (patientId: string, limitStr?: string) => {
-      const limit = parseInt(limitStr || '10', 10);
+      const limit = Number.parseInt(limitStr || '10', 10);
       const opts = program.opts<{ uri: string }>();
       const client = new MongoClient(opts.uri);
       try {
         await client.connect();
         const db = client.db();
-        let pId: any;
+        let pId: ObjectId | string;
         try {
           pId = new ObjectId(patientId);
         } catch {
@@ -209,8 +209,10 @@ Examples:
 }
 
 if (import.meta.main) {
-  runCli().catch((err: unknown) => {
+  try {
+    await runCli();
+  } catch (err: unknown) {
     console.error('Fatal error:', err instanceof Error ? err.message : String(err));
     process.exit(1);
-  });
+  }
 }

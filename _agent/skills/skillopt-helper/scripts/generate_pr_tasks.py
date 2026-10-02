@@ -19,6 +19,10 @@ import sys
 DEFAULT_SKILL_PATH = "/Users/joe/.gemini/config/skills/rhl-pr-helper/SKILL.md"
 DEFAULT_OUTPUT_PATH = os.path.join(os.path.dirname(__file__), "pr_helper_eval_tasks.json")
 
+SECTION_DETAILED_DESCRIPTION = "Detailed Description\n--------------------"
+SECTION_RELEVANT_LINEAR_TICKETS = "Relevant Linear Tickets\n-----------------------"
+SECTION_REVIEWS_AND_MERGING = "Reviews and Merging\n-------------------"
+
 def build_pr_tasks(project_dir: str, skill_path: str) -> dict:
     tasks = [
         {
@@ -33,9 +37,9 @@ def build_pr_tasks(project_dir: str, skill_path: str) -> dict:
             "reference": "feat: add heart-rate telemetry streaming endpoint\n\nDetailed Description\n--------------------\n\nStreams real-time heart rate telemetry over WebSocket connection.\n\nRelevant Linear Tickets\n-----------------------\n\nThis change contributes to RHL-4100.\n\nReviews and Merging\n-------------------\n",
             "judge": {
                 "checks": [
-                    {"op": "contains", "arg": "Detailed Description\n--------------------"},
-                    {"op": "contains", "arg": "Relevant Linear Tickets\n-----------------------"},
-                    {"op": "contains", "arg": "Reviews and Merging\n-------------------"},
+                    {"op": "contains", "arg": SECTION_DETAILED_DESCRIPTION},
+                    {"op": "contains", "arg": SECTION_RELEVANT_LINEAR_TICKETS},
+                    {"op": "contains", "arg": SECTION_REVIEWS_AND_MERGING},
                     {"op": "contains", "arg": "This change contributes to RHL-4100."},
                     {"op": "regex", "arg": r"(?m)^feat: .+"},
                     {"op": "not_contains", "arg": "## Detailed Description"},
@@ -61,9 +65,9 @@ def build_pr_tasks(project_dir: str, skill_path: str) -> dict:
             "reference": "fix: retry OAuth token refresh on network drops\n\nDetailed Description\n--------------------\n\nAdds exponential backoff retry on transient token refresh failures.\n\nRelevant Linear Tickets\n-----------------------\n\nThis change contributes to RHL-5201, FP-1044.\n\nReviews and Merging\n-------------------\n",
             "judge": {
                 "checks": [
-                    {"op": "contains", "arg": "Detailed Description\n--------------------"},
-                    {"op": "contains", "arg": "Relevant Linear Tickets\n-----------------------"},
-                    {"op": "contains", "arg": "Reviews and Merging\n-------------------"},
+                    {"op": "contains", "arg": SECTION_DETAILED_DESCRIPTION},
+                    {"op": "contains", "arg": SECTION_RELEVANT_LINEAR_TICKETS},
+                    {"op": "contains", "arg": SECTION_REVIEWS_AND_MERGING},
                     {"op": "contains", "arg": "This change contributes to RHL-5201, FP-1044."},
                     {"op": "regex", "arg": r"(?m)^fix: .+"},
                     {"op": "not_contains", "arg": "## "},
@@ -88,9 +92,9 @@ def build_pr_tasks(project_dir: str, skill_path: str) -> dict:
             "reference": "chore: bump dependencies and update node types\n\nDetailed Description\n--------------------\n\nUpgrades typescript and @types/node across root and workspaces.\n\nRelevant Linear Tickets\n-----------------------\n\nThis change contributes to RHL-6300.\n\nReviews and Merging\n-------------------\n",
             "judge": {
                 "checks": [
-                    {"op": "contains", "arg": "Detailed Description\n--------------------"},
-                    {"op": "contains", "arg": "Relevant Linear Tickets\n-----------------------"},
-                    {"op": "contains", "arg": "Reviews and Merging\n-------------------"},
+                    {"op": "contains", "arg": SECTION_DETAILED_DESCRIPTION},
+                    {"op": "contains", "arg": SECTION_RELEVANT_LINEAR_TICKETS},
+                    {"op": "contains", "arg": SECTION_REVIEWS_AND_MERGING},
                     {"op": "contains", "arg": "This change contributes to RHL-6300."},
                     {"op": "regex", "arg": r"(?m)^chore: .+"},
                     {"op": "not_contains", "arg": "## "},
@@ -115,9 +119,9 @@ def build_pr_tasks(project_dir: str, skill_path: str) -> dict:
             "reference": "feat: add automatic failover detection for PostgreSQL cluster\n\nDetailed Description\n--------------------\n\nTriggers alert and failover sequence when replication lag exceeds threshold.\n\nRelevant Linear Tickets\n-----------------------\n\nThis change contributes to RHL-7711.\n\nReviews and Merging\n-------------------\n",
             "judge": {
                 "checks": [
-                    {"op": "contains", "arg": "Detailed Description\n--------------------"},
-                    {"op": "contains", "arg": "Relevant Linear Tickets\n-----------------------"},
-                    {"op": "contains", "arg": "Reviews and Merging\n-------------------"},
+                    {"op": "contains", "arg": SECTION_DETAILED_DESCRIPTION},
+                    {"op": "contains", "arg": SECTION_RELEVANT_LINEAR_TICKETS},
+                    {"op": "contains", "arg": SECTION_REVIEWS_AND_MERGING},
                     {"op": "contains", "arg": "This change contributes to RHL-7711."},
                     {"op": "regex", "arg": r"(?m)^(feat|fix|chore|refactor): [^\n.]{10,66}$"},
                     {"op": "not_contains", "arg": "## "},

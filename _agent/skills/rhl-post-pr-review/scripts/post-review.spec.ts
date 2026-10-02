@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { parsePrTarget } from './post-review.ts';
+import { extractValidPatchLines, parsePrTarget } from './post-review.ts';
 
 describe('post-review', () => {
   describe('parsePrTarget', () => {
@@ -29,6 +29,25 @@ describe('post-review', () => {
 
     it('throws on invalid target', () => {
       expect(() => parsePrTarget('invalid-target')).toThrow();
+    });
+  });
+
+  describe('extractValidPatchLines', () => {
+    it('correctly tracks valid right line numbers from diff hunk', () => {
+      const samplePatch = `@@ -10,3 +20,4 @@
+ context
+-deleted
++added
+ context 2`;
+      const validLines = extractValidPatchLines(samplePatch);
+      // context -> line 20
+      // deleted -> left line only
+      // added -> line 21
+      // context 2 -> line 22
+      expect(validLines.has(20)).toBe(true);
+      expect(validLines.has(21)).toBe(true);
+      expect(validLines.has(22)).toBe(true);
+      expect(validLines.has(23)).toBe(false);
     });
   });
 });

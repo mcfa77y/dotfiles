@@ -6,7 +6,7 @@
  */
 
 import { Command } from 'commander';
-import yaml from 'js-yaml';
+import * as yaml from 'js-yaml';
 
 export interface ValidationReport {
   file: string;
@@ -26,7 +26,7 @@ export async function validateWorkflowYaml(filePath: string): Promise<Validation
 
     const dict = data as Record<string, any>;
     const hasOn =
-      'on' in dict || 'true' in dict || (dict as Record<string, unknown>)['on'] !== undefined;
+      'on' in dict || 'true' in dict || (dict as Record<string, unknown>).on !== undefined;
     if (!hasOn) {
       return { file: filePath, valid: false, error: "Missing required 'on' trigger specification" };
     }
@@ -44,6 +44,36 @@ export async function validateWorkflowYaml(filePath: string): Promise<Validation
       error: err instanceof Error ? err.message : String(err),
     };
   }
+}
+export async function collectWorkflowFiles(paths: string[]): Promise<string[]> {
+  const targetFiles: string[] = [];
+  for (const p of paths) {
+    const file = Bun.file(p);
+    if (await file.exists()) {
+      targetFiles.push(p);
+    } else {
+      const globPattern = p.endsWith('/') ? `${p}*.{yml,yaml}` : `${p}/**/*.{yml,yaml}`;
+      const glob = new Bun.Glob(globPattern);
+      for await (const matched of glob.scan('.')) {
+        targetFiles.push(matched);
+      }
+    }
+  }
+  return targetFiles;
+}
+
+export async function validateWorkflowFileList(files: string[]): Promise<{ failureCount: number }> {
+  let failureCount = 0;
+  for (const file of files) {
+    const res = await validateWorkflowYaml(file);
+    if (res.valid) {
+      console.log(`✓ ${file} is valid (${res.jobCount} jobs defined)`);
+    } else {
+      console.error(`✗ ${file} validation error:\n    ${res.error}`);
+      failureCount++;
+    }
+  }
+  return { failureCount };
 }
 
 export async function runCli(): Promise<void> {
@@ -63,21 +93,7 @@ Examples:
   program.parse();
 
   const paths = program.args.length > 0 ? program.args : ['.github/workflows'];
-  const targetFiles: string[] = [];
-
-  for (const p of paths) {
-    const file = Bun.file(p);
-    if (await file.exists()) {
-      targetFiles.push(p);
-    } else {
-      // Check directory via glob
-      const globPattern = p.endsWith('/') ? `${p}*.{yml,yaml}` : `${p}/**/*.{yml,yaml}`;
-      const glob = new Bun.Glob(globPattern);
-      for await (const matched of glob.scan('.')) {
-        targetFiles.push(matched);
-      }
-    }
-  }
+  const targetFiles = await collectWorkflowFiles(paths);
 
   if (targetFiles.length === 0) {
     console.error('Error: No YAML workflow files found in specified paths.');
@@ -85,18 +101,7 @@ Examples:
   }
 
   console.log(`Validating ${targetFiles.length} workflow file(s)...\n`);
-  let failureCount = 0;
-
-  for (const file of targetFiles) {
-    const res = await validateWorkflowYaml(file);
-    if (res.valid) {
-      console.log(`✓ ${file} is valid (${res.jobCount} jobs defined)`);
-    } else {
-      console.error(`✗ ${file} validation error:\n    ${res.error}`);
-      failureCount++;
-    }
-  }
-
+  const { failureCount } = await validateWorkflowFileList(targetFiles);
   console.log();
   if (failureCount > 0) {
     console.error(`${failureCount} workflow file(s) failed validation.`);
@@ -107,8 +112,10 @@ Examples:
 }
 
 if (import.meta.main) {
-  runCli().catch((err: unknown) => {
+  try {
+    await runCli();
+  } catch (err: unknown) {
     console.error('Fatal error:', err instanceof Error ? err.message : String(err));
     process.exit(1);
-  });
+  }
 }

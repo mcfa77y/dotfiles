@@ -24,7 +24,7 @@ export async function resolveApiKey(): Promise<string> {
   const file = Bun.file(envTestPath);
   if (await file.exists()) {
     const content = await file.text();
-    const match = content.match(/^EMPO_API_KEY=(.*)$/m);
+    const match = /^EMPO_API_KEY=(.*)$/m.exec(content);
     if (match?.[1]) {
       return match[1].trim().replace(/^['"]|['"]$/g, '');
     }
@@ -104,8 +104,8 @@ export async function runCli(): Promise<void> {
       'SMS body text',
       process.env.MESSAGE_BODY || `Test SMS ${Date.now()}`,
     )
-    .option('--mock-port <port>', 'mock-services port', (val) => parseInt(val, 10), 3001)
-    .option('--backend-port <port>', 'backend-api port', (val) => parseInt(val, 10), 3000)
+    .option('--mock-port <port>', 'mock-services port', (val) => Number.parseInt(val, 10), 3001)
+    .option('--backend-port <port>', 'backend-api port', (val) => Number.parseInt(val, 10), 3000)
     .option('--api-key <key>', 'Empo API key for backend', defaultApiKey)
     .option(
       '--direct',
@@ -129,9 +129,10 @@ Examples:
   console.log(`  From: ${opts.from}`);
   console.log(`  To:   ${opts.to}`);
   console.log(`  Body: "${opts.body}"`);
-  console.log(
-    `  Mode: ${opts.direct ? `Direct Webhook -> port ${opts.backendPort}` : `Mock SQS Trigger -> port ${opts.mockPort}`}\n`,
-  );
+  const mode = opts.direct
+    ? `Direct Webhook -> port ${opts.backendPort}`
+    : `Mock SQS Trigger -> port ${opts.mockPort}`;
+  console.log(`  Mode: ${mode}\n`);
 
   try {
     const result = await triggerInboundSms(opts);
@@ -146,8 +147,10 @@ Examples:
 }
 
 if (import.meta.main) {
-  runCli().catch((err: unknown) => {
+  try {
+    await runCli();
+  } catch (err: unknown) {
     console.error('Fatal error:', err instanceof Error ? err.message : String(err));
     process.exit(1);
-  });
+  }
 }

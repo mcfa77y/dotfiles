@@ -13,11 +13,46 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import sys
 from skillopt_sleep.judges import score_rule_judge, validate_checks
-
 DEFAULT_TASKS_FILE = os.path.join(os.path.dirname(__file__), "pr_helper_eval_tasks.json")
+
+def test_single_task(task: dict) -> bool:
+    task_id = task["id"]
+    judge = task.get("judge", {})
+    ref = task.get("reference", "")
+
+    errors, warnings = validate_checks(judge)
+    if errors:
+        print(f"❌ [{task_id}] Judge syntax errors: {errors}")
+        return False
+    if warnings:
+        print(f"⚠️  [{task_id}] Warnings: {warnings}")
+
+    passed = True
+
+    # Golden Case
+    hard, soft, rationale = score_rule_judge(judge, ref)
+    is_golden_pass = math.isclose(hard, 1.0)
+    status = "✅ PASS" if is_golden_pass else "❌ FAIL"
+    if not is_golden_pass:
+        passed = False
+    print(f"{status} [{task_id}] Golden reference score: hard={hard:.2f}, soft={soft:.2f}")
+    if not is_golden_pass:
+        print(f"   Rationale: {rationale}")
+
+    # Negative Check
+    bad_output = ref.replace("Detailed Description\n--------------------", "## Detailed Description")
+    bad_hard, _, bad_rationale = score_rule_judge(judge, bad_output)
+    is_neg_caught = not math.isclose(bad_hard, 1.0)
+    neg_status = "✅ CORRECTLY CAUGHT" if is_neg_caught else "❌ MISSED FAILURE"
+    if not is_neg_caught:
+        passed = False
+    print(f"   Negative check (ATX header): {neg_status} -> {bad_rationale}\n")
+
+    return passed
 
 def main():
     parser = argparse.ArgumentParser(description="Test and verify benchmark judge rules.")
@@ -36,36 +71,9 @@ def main():
 
     passed_all = True
     for task in tasks:
-        task_id = task["id"]
-        judge = task.get("judge", {})
-        ref = task.get("reference", "")
-
-        errors, warnings = validate_checks(judge)
-        if errors:
-            print(f"❌ [{task_id}] Judge syntax errors: {errors}")
+        if not test_single_task(task):
             passed_all = False
-            continue
-        if warnings:
-            print(f"⚠️  [{task_id}] Warnings: {warnings}")
-
-        # Golden Case
-        hard, soft, rationale = score_rule_judge(judge, ref)
-        status = "✅ PASS" if hard == 1.0 else "❌ FAIL"
-        if hard < 1.0:
-            passed_all = False
-        print(f"{status} [{task_id}] Golden reference score: hard={hard:.2f}, soft={soft:.2f}")
-        if hard < 1.0:
-            print(f"   Rationale: {rationale}")
-
-        # Negative Check
-        bad_output = ref.replace("Detailed Description\n--------------------", "## Detailed Description")
-        bad_hard, bad_soft, bad_rationale = score_rule_judge(judge, bad_output)
-        neg_status = "✅ CORRECTLY CAUGHT" if bad_hard < 1.0 else "❌ MISSED FAILURE"
-        if bad_hard == 1.0:
-            passed_all = False
-        print(f"   Negative check (ATX header): {neg_status} -> {bad_rationale}\n")
 
     sys.exit(0 if passed_all else 1)
-
 if __name__ == "__main__":
     main()

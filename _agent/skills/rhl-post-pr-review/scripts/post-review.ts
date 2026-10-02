@@ -10,16 +10,19 @@
 import { $ } from 'bun';
 import { Command } from 'commander';
 
+export type ReviewEvent = 'APPROVE' | 'REQUEST_CHANGES' | 'COMMENT';
+export type CommentSide = 'RIGHT' | 'LEFT';
+
 export interface InlineComment {
   path: string;
   line: number;
   body: string;
-  side?: 'RIGHT' | 'LEFT';
+  side?: CommentSide;
 }
 
 export interface ReviewPayload {
   commit_id?: string;
-  event: 'APPROVE' | 'REQUEST_CHANGES' | 'COMMENT';
+  event: ReviewEvent;
   body: string;
   comments?: InlineComment[];
 }
@@ -27,7 +30,7 @@ export interface ReviewPayload {
 export interface PostReviewOptions {
   repo?: string;
   pr: string | number;
-  event?: 'APPROVE' | 'REQUEST_CHANGES' | 'COMMENT';
+  event?: ReviewEvent;
   body?: string;
   bodyFile?: string;
   comments?: InlineComment[];
@@ -36,23 +39,45 @@ export interface PostReviewOptions {
   dryRun?: boolean;
 }
 
+export interface ReviewResult {
+  dryRun: boolean;
+  repo: string;
+  prNumber: number;
+  url: string;
+  payload?: ReviewPayload;
+  reviewId?: number | string;
+  reviewUrl?: string;
+  commitId?: string;
+  verifiedCommentsCount: number;
+  fallbackCommentsCount: number;
+}
+
+interface CliInputPayload {
+  pr?: string | number;
+  repo?: string;
+  event?: ReviewEvent;
+  body?: string;
+  comments?: InlineComment[];
+  commit_id?: string;
+}
+
 export function parsePrTarget(target: string | number): { repo: string | null; prNumber: number } {
   if (typeof target === 'number') {
     return { repo: null, prNumber: target };
   }
   const clean = target.trim();
-  const urlMatch = clean.match(/github\.com\/([^/]+(?:\/[^/]+)?)\/pull\/(\d+)/i);
+  const urlMatch = /github\.com\/([^/]+(?:\/[^/]+)?)\/pull\/(\d+)/i.exec(clean);
   if (urlMatch) {
-    return { repo: urlMatch[1] || null, prNumber: parseInt(urlMatch[2]!, 10) };
+    return { repo: urlMatch[1] || null, prNumber: Number.parseInt(urlMatch[2]!, 10) };
   }
   if (clean.includes('#')) {
     const [repoPart, numPart] = clean.split('#', 2);
-    const prNum = parseInt(numPart!.trim(), 10);
+    const prNum = Number.parseInt(numPart!.trim(), 10);
     if (!Number.isNaN(prNum)) {
       return { repo: repoPart!.trim() || null, prNumber: prNum };
     }
   }
-  const num = parseInt(clean.replace(/^#/, ''), 10);
+  const num = Number.parseInt(clean.replace(/^#/, ''), 10);
   if (!Number.isNaN(num)) {
     return { repo: null, prNumber: num };
   }
@@ -66,7 +91,7 @@ export async function detectRepo(): Promise<string> {
     const out = (
       await $`gh repo view --json nameWithOwner -q .nameWithOwner`.quiet().text()
     ).trim();
-    if (out && out.includes('/')) return out;
+    if (out?.includes('/')) return out;
   } catch {
     // fallback
   }
@@ -82,6 +107,27 @@ export async function getPrMetadata(
   return { headRefOid: data.headRefOid, url: data.url };
 }
 
+export function extractValidPatchLines(patch: string): Set<number> {
+  const hunkHeaderRegex = /^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/;
+  const validLines = new Set<number>();
+  let currentRightLine = 0;
+
+  for (const rawLine of patch.split('\n')) {
+    const line = rawLine.trimEnd();
+    const hunkMatch = hunkHeaderRegex.exec(line);
+    if (hunkMatch) {
+      currentRightLine = Number.parseInt(hunkMatch[1]!, 10);
+      continue;
+    }
+    if (line.startsWith('+') || line.startsWith(' ')) {
+      validLines.add(currentRightLine);
+      currentRightLine += 1;
+    }
+  }
+
+  return validLines;
+}
+
 export async function getDiffValidLines(
   repo: string,
   pr: number,
@@ -91,64 +137,27 @@ export async function getDiffValidLines(
 
   const validLines: Record<string, Set<number>> = {};
   for (const file of files) {
-    const filename = file.filename;
-    const patch = file.patch;
-    if (!patch) continue;
-
-    validLines[filename] = new Set<number>();
-    let currentRightLine = 0;
-
-    for (const rawLine of patch.split('\n')) {
-      const line = rawLine.trimEnd();
-      const hunkMatch = line.match(/^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/);
-      if (hunkMatch) {
-        currentRightLine = parseInt(hunkMatch[1]!, 10);
-        continue;
-      }
-      if (line.startsWith('+')) {
-        validLines[filename].add(currentRightLine);
-        currentRightLine += 1;
-      } else if (line.startsWith(' ')) {
-        validLines[filename].add(currentRightLine);
-        currentRightLine += 1;
-      }
+    if (file.patch) {
+      validLines[file.filename] = extractValidPatchLines(file.patch);
     }
   }
 
   return validLines;
 }
 
-export async function postReview(options: PostReviewOptions) {
-  const parsed = parsePrTarget(options.pr);
-  const repo = options.repo || parsed.repo || (await detectRepo());
-  const prNumber = parsed.prNumber;
-
-  const { headRefOid, url } = await getPrMetadata(repo, prNumber);
-  const commitId = options.commitId || headRefOid;
-
-  let body = options.body || '';
-  if (options.bodyFile) {
-    body = await Bun.file(options.bodyFile).text();
-  }
-
-  let comments: InlineComment[] = options.comments || [];
-  if (options.commentsFile) {
-    comments = await Bun.file(options.commentsFile).json();
-  }
-
-  const validDiffLines = await getDiffValidLines(repo, prNumber);
+function partitionComments(
+  comments: InlineComment[],
+  validDiffLines: Record<string, Set<number>>,
+): { verifiedComments: InlineComment[]; fallbackComments: InlineComment[] } {
   const verifiedComments: InlineComment[] = [];
   const fallbackComments: InlineComment[] = [];
 
   for (const comment of comments) {
-    const filePath = comment.path;
-    const lineNum = comment.line;
-    const side = comment.side || 'RIGHT';
-
-    if (filePath in validDiffLines && validDiffLines[filePath]!.has(lineNum)) {
+    const side = comment.side ?? 'RIGHT';
+    if (validDiffLines[comment.path]?.has(comment.line)) {
       verifiedComments.push({
-        path: filePath,
-        line: lineNum,
+        path: comment.path,
+        line: comment.line,
         side,
         body: comment.body,
       });
@@ -157,14 +166,77 @@ export async function postReview(options: PostReviewOptions) {
     }
   }
 
-  if (fallbackComments.length > 0) {
-    const fallbackText = fallbackComments
-      .map((c) => `### Comment on \`${c.path}\` (line ${c.line})\n\n${c.body}`)
-      .join('\n\n---\n\n');
-    body = body
-      ? `${body}\n\n## Additional Review Comments (Unchanged or Out-of-Diff Context)\n\n${fallbackText}`
-      : `## Additional Review Comments\n\n${fallbackText}`;
+  return { verifiedComments, fallbackComments };
+}
+
+function buildReviewBodyWithFallbacks(baseBody: string, fallbackComments: InlineComment[]): string {
+  if (fallbackComments.length === 0) {
+    return baseBody;
   }
+
+  const fallbackText = fallbackComments
+    .map((c) => `### Comment on \`${c.path}\` (line ${c.line})\n\n${c.body}`)
+    .join('\n\n---\n\n');
+
+  if (!baseBody) {
+    return `## Additional Review Comments\n\n${fallbackText}`;
+  }
+
+  return `${baseBody}\n\n## Additional Review Comments (Unchanged or Out-of-Diff Context)\n\n${fallbackText}`;
+}
+
+async function resolveBodyAndComments(options: PostReviewOptions): Promise<{
+  body: string;
+  comments: InlineComment[];
+}> {
+  let body = options.body ?? '';
+  if (options.bodyFile) {
+    body = await Bun.file(options.bodyFile).text();
+  }
+
+  let comments: InlineComment[] = options.comments ?? [];
+  if (options.commentsFile) {
+    comments = await Bun.file(options.commentsFile).json();
+  }
+
+  return { body, comments };
+}
+
+async function submitGhReview(
+  repo: string,
+  prNumber: number,
+  payload: ReviewPayload,
+): Promise<{ id: number | string; html_url?: string }> {
+  const tempPath = `/tmp/pr_review_${Date.now()}.json`;
+  await Bun.write(tempPath, JSON.stringify(payload));
+
+  try {
+    const res =
+      await $`gh api --method POST /repos/${repo}/pulls/${prNumber}/reviews --input ${tempPath}`
+        .quiet()
+        .text();
+    return JSON.parse(res);
+  } finally {
+    try {
+      await $`rm -f ${tempPath}`.quiet();
+    } catch {
+      // ignore
+    }
+  }
+}
+
+export async function postReview(options: PostReviewOptions): Promise<ReviewResult> {
+  const parsed = parsePrTarget(options.pr);
+  const repo = options.repo || parsed.repo || (await detectRepo());
+  const prNumber = parsed.prNumber;
+
+  const { headRefOid, url } = await getPrMetadata(repo, prNumber);
+  const commitId = options.commitId || headRefOid;
+
+  const { body: initialBody, comments: rawComments } = await resolveBodyAndComments(options);
+  const validDiffLines = await getDiffValidLines(repo, prNumber);
+  const { verifiedComments, fallbackComments } = partitionComments(rawComments, validDiffLines);
+  const body = buildReviewBodyWithFallbacks(initialBody, fallbackComments);
 
   const payload: ReviewPayload = {
     commit_id: commitId,
@@ -188,29 +260,76 @@ export async function postReview(options: PostReviewOptions) {
     };
   }
 
-  const tempPath = `/tmp/pr_review_${Date.now()}.json`;
-  await Bun.write(tempPath, JSON.stringify(payload));
+  const result = await submitGhReview(repo, prNumber, payload);
+  return {
+    dryRun: false,
+    repo,
+    prNumber,
+    url,
+    reviewId: result.id,
+    reviewUrl: result.html_url || `${url}#pullrequestreview-${result.id}`,
+    commitId,
+    verifiedCommentsCount: verifiedComments.length,
+    fallbackCommentsCount: fallbackComments.length,
+  };
+}
 
-  try {
-    const res =
-      await $`gh api --method POST /repos/${repo}/pulls/${prNumber}/reviews --input ${tempPath}`
-        .quiet()
-        .text();
-    const result = JSON.parse(res);
-    return {
-      dryRun: false,
-      reviewId: result.id,
-      reviewUrl: result.html_url || `${url}#pullrequestreview-${result.id}`,
-      commitId,
-      verifiedCommentsCount: verifiedComments.length,
-      fallbackCommentsCount: fallbackComments.length,
-    };
-  } finally {
-    try {
-      await $`rm -f ${tempPath}`.quiet();
-    } catch {
-      // ignore
+async function loadCliInputData(
+  inputOption?: string,
+  hasExplicitInput = false,
+): Promise<CliInputPayload | null> {
+  if (inputOption) {
+    if (inputOption === '-') {
+      return JSON.parse(await Bun.stdin.text());
     }
+    return Bun.file(inputOption).json();
+  }
+  if (!process.stdin.isTTY && !hasExplicitInput) {
+    const raw = (await Bun.stdin.text()).trim();
+    if (raw) {
+      try {
+        return JSON.parse(raw);
+      } catch {
+        // not json
+      }
+    }
+  }
+  return null;
+}
+
+async function resolveCliComments(
+  commentsFile?: string,
+  commentsJson?: string,
+  fallback?: InlineComment[],
+): Promise<InlineComment[]> {
+  if (commentsFile) {
+    return Bun.file(commentsFile).json();
+  }
+  if (commentsJson) {
+    return JSON.parse(commentsJson);
+  }
+  return fallback ?? [];
+}
+
+function displayReviewResult(result: ReviewResult): void {
+  if (result.dryRun && result.payload) {
+    console.log('✓ Dry Run Succeeded! Target PR:', result.url);
+    console.log(`Commit: ${result.payload.commit_id} | Event: ${result.payload.event}`);
+    console.log(
+      `Inline comments: ${result.verifiedCommentsCount} valid, ${result.fallbackCommentsCount} fallback`,
+    );
+    console.log('\nPayload:');
+    console.log(JSON.stringify(result.payload, null, 2));
+    return;
+  }
+
+  console.log('✓ Review successfully published!');
+  console.log(`Review URL: ${result.reviewUrl}`);
+  console.log(`Review ID:  ${result.reviewId}`);
+  console.log(`Commit:     ${result.commitId}`);
+  console.log(`Inline comments posted: ${result.verifiedCommentsCount}`);
+  if (result.fallbackCommentsCount > 0) {
+    console.log(`Comments in summary:    ${result.fallbackCommentsCount}`);
   }
 }
 
@@ -253,7 +372,7 @@ Examples:
   const opts = program.opts<{
     repo?: string;
     pr?: string;
-    event?: 'APPROVE' | 'REQUEST_CHANGES' | 'COMMENT';
+    event?: ReviewEvent;
     body?: string;
     bodyFile?: string;
     comments?: string;
@@ -263,43 +382,22 @@ Examples:
     dryRun?: boolean;
   }>();
 
-  let inputData: any = null;
-  if (opts.input) {
-    if (opts.input === '-') {
-      inputData = JSON.parse(await Bun.stdin.text());
-    } else {
-      inputData = await Bun.file(opts.input).json();
-    }
-  } else if (!process.stdin.isTTY && !argPr && !opts.pr && !opts.body && !opts.bodyFile) {
-    const raw = (await Bun.stdin.text()).trim();
-    if (raw) {
-      try {
-        inputData = JSON.parse(raw);
-      } catch {
-        // not json
-      }
-    }
-  }
+  const hasExplicitInput = Boolean(argPr || opts.pr || opts.body || opts.bodyFile);
+  const inputData = await loadCliInputData(opts.input, hasExplicitInput);
 
   const prTarget = opts.pr || argPr || inputData?.pr;
   if (!prTarget) {
     console.error('Error: PR target is required.');
     program.help();
+    return;
   }
 
-  let inlineComments: InlineComment[] = [];
-  if (opts.commentsFile) {
-    inlineComments = await Bun.file(opts.commentsFile).json();
-  } else if (opts.comments) {
-    inlineComments = JSON.parse(opts.comments);
-  } else if (inputData?.comments) {
-    inlineComments = inputData.comments;
-  }
-
-  const event = (inputData?.event || opts.event || 'COMMENT') as
-    | 'APPROVE'
-    | 'REQUEST_CHANGES'
-    | 'COMMENT';
+  const inlineComments = await resolveCliComments(
+    opts.commentsFile,
+    opts.comments,
+    inputData?.comments,
+  );
+  const event = (inputData?.event || opts.event || 'COMMENT') as ReviewEvent;
   const body = opts.body || inputData?.body || '';
 
   try {
@@ -314,24 +412,7 @@ Examples:
       dryRun: opts.dryRun,
     });
 
-    if (result.dryRun && result.payload) {
-      console.log('✓ Dry Run Succeeded! Target PR:', result.url);
-      console.log(`Commit: ${result.payload.commit_id} | Event: ${result.payload.event}`);
-      console.log(
-        `Inline comments: ${result.verifiedCommentsCount} valid, ${result.fallbackCommentsCount} fallback`,
-      );
-      console.log('\nPayload:');
-      console.log(JSON.stringify(result.payload, null, 2));
-    } else {
-      console.log('✓ Review successfully published!');
-      console.log(`Review URL: ${result.reviewUrl}`);
-      console.log(`Review ID:  ${result.reviewId}`);
-      console.log(`Commit:     ${result.commitId}`);
-      console.log(`Inline comments posted: ${result.verifiedCommentsCount}`);
-      if (result.fallbackCommentsCount > 0) {
-        console.log(`Comments in summary:    ${result.fallbackCommentsCount}`);
-      }
-    }
+    displayReviewResult(result);
   } catch (err: unknown) {
     console.error('Error posting review:', err instanceof Error ? err.message : String(err));
     process.exit(1);
@@ -339,8 +420,10 @@ Examples:
 }
 
 if (import.meta.main) {
-  runCli().catch((err: unknown) => {
+  try {
+    await runCli();
+  } catch (err: unknown) {
     console.error('Fatal error:', err instanceof Error ? err.message : String(err));
     process.exit(1);
-  });
+  }
 }
