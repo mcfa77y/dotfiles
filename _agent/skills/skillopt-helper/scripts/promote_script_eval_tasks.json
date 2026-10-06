@@ -1,0 +1,97 @@
+{
+  "format": "skillopt_sleep.tasks.v1",
+  "project": "/Users/joe/Projects/empo_health/remote-health-link",
+  "transcript_source": "synthetic_benchmark",
+  "n_sessions": 4,
+  "target_skill_path": "/Users/joe/dotfiles/_agent/skills/promote-script/SKILL.md",
+  "reviewed": true,
+  "tasks": [
+    {
+      "id": "promote-task-harvest-bash-pipeline",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Promote an ad-hoc multi-pipe bash log extraction command into a reusable, tested TypeScript tool using Bun and Commander.",
+      "context_excerpt": "The user ran: cat logs/*.log | grep 'ERROR' | awk '{print $4, $5}' | sort | uniq -c > summary.txt",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "#!/usr/bin/env bun\nimport { Command } from \"commander\";\n\nconst program = new Command();\nprogram\n  .name(\"summarize-logs\")\n  .description(\"Extract and summarize error logs\")\n  .option(\"-i, --input <path>\", \"Input directory\", \"logs\")\n  .option(\"-o, --output <path>\", \"Output file\", \"summary.txt\")\n  .action(async (opts) => {\n    const glob = new Bun.Glob(\"*.log\");\n    // Implementation\n  });\n\nprogram.parse();\n\n// Run tests: bun test scripts/summarize-logs.spec.ts",
+      "negative_reference": "#!/usr/bin/env bash\n# Simple bash wrapper\ncat logs/*.log | grep 'ERROR' | sort | uniq -c\n",
+      "judge": {
+        "checks": [
+          { "op": "contains", "arg": "#!/usr/bin/env bun" },
+          { "op": "contains", "arg": "commander" },
+          { "op": "contains", "arg": "Command" },
+          { "op": "contains", "arg": "bun test" },
+          { "op": "not_contains", "arg": "#!/usr/bin/env bash" },
+          { "op": "not_contains", "arg": "argparse" }
+        ]
+      }
+    },
+    {
+      "id": "promote-task-modernize-legacy-python",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Refactor a legacy Python migration script in a skill directory into a modern TypeScript Bun CLI tool with commander and unit tests.",
+      "context_excerpt": "Refactoring legacy fetch_failed_logs.py to modern TypeScript.",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "#!/usr/bin/env bun\nimport { Command } from \"commander\";\n\nexport const program = new Command();\nprogram\n  .name(\"fetch-failed-logs\")\n  .description(\"Download and parse CI logs\")\n  .requiredOption(\"--run-id <id>\", \"Workflow run ID\")\n  .action(async (options) => {\n    const file = Bun.file(`logs/${options.runId}.txt`);\n  });\n\nif (import.meta.main) {\n  program.parse();\n}\n\n// Verified via bun test scripts/fetch-failed-logs.spec.ts",
+      "negative_reference": "import argparse\nimport sys\nparser = argparse.ArgumentParser()\nparser.add_argument('--run-id')\nargs = parser.parse_args()\n",
+      "judge": {
+        "checks": [
+          { "op": "contains", "arg": "#!/usr/bin/env bun" },
+          { "op": "contains", "arg": "commander" },
+          { "op": "contains", "arg": "Bun.file" },
+          { "op": "contains", "arg": "bun test" },
+          { "op": "not_contains", "arg": "import argparse" },
+          { "op": "not_contains", "arg": "python" }
+        ]
+      }
+    },
+    {
+      "id": "promote-task-val-tier2-destructive-tool",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Promote a database cleanup script to Tier 2 standards with --dry-run support, atomic operations, and companion test suite.",
+      "context_excerpt": "Utility that purges stale ephemeral databases in staging environment.",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "#!/usr/bin/env bun\nimport { Command } from \"commander\";\n\nexport const program = new Command();\nprogram\n  .name(\"cleanup-ephemeral-dbs\")\n  .description(\"Prune stale preview databases\")\n  .option(\"--dry-run\", \"Simulate actions without deleting\", false)\n  .action(async (opts) => {\n    if (opts.dryRun) {\n      console.log(\"[DRY RUN] Would delete stale DBs\");\n      return;\n    }\n  });\n\nprogram.parse();\n// Run companion suite: bun test scripts/cleanup-ephemeral-dbs.spec.ts",
+      "negative_reference": "#!/bin/sh\nrm -rf /tmp/databases/*\necho 'Deleted'\n",
+      "judge": {
+        "checks": [
+          { "op": "contains", "arg": "#!/usr/bin/env bun" },
+          { "op": "contains", "arg": "--dry-run" },
+          { "op": "contains", "arg": "commander" },
+          { "op": "contains", "arg": "bun test" },
+          { "op": "not_contains", "arg": "#!/bin/sh" }
+        ]
+      }
+    },
+    {
+      "id": "promote-task-val-bun-native-apis",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Promote script preferring native Bun APIs (Bun.file, Bun.$, Bun.write) over Node.js fs/child_process packages.",
+      "context_excerpt": "Promote file transformer script to use Bun standard library.",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "#!/usr/bin/env bun\nimport { Command } from \"commander\";\n\nexport const program = new Command();\nprogram\n  .name(\"transform-assets\")\n  .action(async () => {\n    const content = await Bun.file(\"input.json\").text();\n    await Bun.write(\"output.json\", content.toUpperCase());\n    await Bun.$`echo 'Done'`;\n  });\n\nprogram.parse();\n// Unit tests: bun test scripts/transform-assets.spec.ts",
+      "negative_reference": "const fs = require('fs');\nconst { execSync } = require('child_process');\nfs.readFileSync('input.json');\nexecSync('echo Done');\n",
+      "judge": {
+        "checks": [
+          { "op": "contains", "arg": "Bun.file" },
+          { "op": "contains", "arg": "Bun.write" },
+          { "op": "contains", "arg": "Bun.$" },
+          { "op": "contains", "arg": "commander" },
+          { "op": "not_contains", "arg": "require('fs')" },
+          { "op": "not_contains", "arg": "child_process" }
+        ]
+      }
+    }
+  ]
+}

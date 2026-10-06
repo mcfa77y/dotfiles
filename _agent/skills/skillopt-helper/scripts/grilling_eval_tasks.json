@@ -1,0 +1,100 @@
+{
+  "format": "skillopt_sleep.tasks.v1",
+  "project": "/Users/joe/Projects/empo_health/remote-health-link",
+  "transcript_source": "synthetic_benchmark",
+  "n_sessions": 4,
+  "target_skill_path": "/Users/joe/dotfiles/_agent/skills/grilling/SKILL.md",
+  "reviewed": true,
+  "tasks": [
+    {
+      "id": "grill-task-frontier-probing",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Probe open architectural prerequisites in the decision tree before allowing implementation or prematurely agreeing to a caching plan.",
+      "context_excerpt": "User: 'I'm thinking of replacing Redis with an in-memory SQLite cache for our session state across workers. What do you think? Let's just start coding the adapter.'",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "Before writing any adapter code, we need to resolve the open frontier decisions in your architecture tree.\n\n❓ **Q1** - **Session State Persistence & Ephemerality**: How do you plan to handle session persistence across worker restarts or multi-node deployments?\n- Option A: Ephemeral local SQLite per process (data lost on restart, no shared state across workers)\n- Option B: Replicated SQLite (e.g. LiteFS or dqlite) with distributed consensus\n- Option C: Retain centralized Redis or KV for shared sessions, using SQLite strictly for local read-through caching\n➡️ **Recommendation**: Option C — session state across distributed workers requires cross-node coordination; local SQLite without replication causes split-brain logins.\n\n---\n\n❓ **Q2** - **Eviction and Memory Bounds**: What is the cache eviction strategy when SQLite file or memory limits are reached?\n- Option A: LRU eviction with max page count\n- Option B: Periodic background sweep job\n➡️ **Recommendation**: Option A — predictable memory ceiling.",
+      "negative_reference": "Looks great! That sounds like a solid performance boost. Let's start implementing the adapter right away:\n\n```ts\nexport class SQLiteSessionAdapter implements SessionStore {\n  // Implementation\n}\n```",
+      "judge": {
+        "checks": [
+          { "op": "contains", "arg": "❓ **Q1**" },
+          { "op": "contains", "arg": "➡️" },
+          { "op": "contains", "arg": "Option" },
+          { "op": "not_contains", "arg": "looks great" },
+          { "op": "not_contains", "arg": "Looks great" },
+          { "op": "not_contains", "arg": "start coding" },
+          { "op": "not_contains", "arg": "start implementing" }
+        ]
+      }
+    },
+    {
+      "id": "grill-task-structured-ask-format",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Format multiple open frontier questions using the structured fallback question format (❓ Q1 ... ➡️ <recommendation>) when the interactive ask tool is not present.",
+      "context_excerpt": "User: 'Grill my plan to migrate our Postgres database to DynamoDB for our user event logging.'",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "❓ **Q1** - **Primary Key and Access Pattern Design**: How are access patterns partitioned between write-heavy event streams and query reads?\n- Option 1: Partition Key on `userId`, Sort Key on `timestamp` (optimized for user timeline retrieval)\n- Option 2: Partition Key on `orgId#date`, Sort Key on `eventId` (optimized for tenant batch reporting)\n- Option 3: Composite partition key with GSI for secondary lookups\n➡️ **Recommendation**: Option 1 with a sparse GSI for tenant aggregation, ensuring hot-key mitigation while serving user timeline lookups.\n\n---\n\n❓ **Q2** - **Retention and Archival**: How will historical event aging be handled to manage DynamoDB storage costs?\n- Option 1: DynamoDB TTL with automatic deletion after 90 days\n- Option 2: DynamoDB Streams to S3 Parquet export via Firehose before expiration\n- Option 3: On-demand backup without TTL\n➡️ **Recommendation**: Option 2 — enables cheap cold analytics while keeping DynamoDB active working set compact.",
+      "negative_reference": "Here are some questions:\n1. What primary key will you use? You could use userId or orgId.\n2. What about TTL? Maybe turn on TTL or export to S3.\nWhat do you think?",
+      "judge": {
+        "checks": [
+          { "op": "contains", "arg": "❓ **Q1**" },
+          { "op": "contains", "arg": "❓ **Q2**" },
+          { "op": "contains", "arg": "➡️" },
+          { "op": "contains", "arg": "Recommendation" }
+        ]
+      }
+    },
+    {
+      "id": "grill-task-ban-agreeable-filler",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Strictly prohibit agreeable filler phrases and aggressively probe failure domains and rollback paths on an architectural proposal.",
+      "context_excerpt": "User: 'We are going to do a cutover deploy of the payment processing webhook handler at midnight on Friday. Can you review this plan?'",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "The proposed midnight cutover presents significant failure domains that must be evaluated before proceeding:\n\n1. **Failure Domain & Blast Radius**: What is the containment boundary if the webhook payload schema from the payment gateway diverges from expectations?\n   - Trade-off A: Immediate cutover without shadow traffic risks dropped webhooks and irrecoverable payment confirmations.\n   - Trade-off B: Dual-run shadow mode running in parallel for 48 hours to verify signature validation and idempotency before cutover.\n   ➡️ Recommended: Dual-run shadow mode.\n\n2. **Rollback Strategy & Data Inconsistency**: If the new handler fails mid-flight after processing 500 transactions, what is the rollback path?\n   - If schema migrations are irreversible, rollback requires manual reconciliation of webhook delivery retry states.\n   - Idempotency keys must be shared between old and new handlers during the transition.",
+      "negative_reference": "Great plan! Sounds good to deploy at midnight when traffic is low. Looks fine to me, let's proceed with the rollout on Friday!",
+      "judge": {
+        "checks": [
+          { "op": "not_contains", "arg": "Great plan" },
+          { "op": "not_contains", "arg": "great plan" },
+          { "op": "not_contains", "arg": "Sounds good" },
+          { "op": "not_contains", "arg": "sounds good" },
+          { "op": "not_contains", "arg": "Looks fine" },
+          { "op": "not_contains", "arg": "looks fine" },
+          { "op": "contains", "arg": "Failure Domain" },
+          { "op": "contains", "arg": "Rollback" },
+          { "op": "contains", "arg": "Trade-off" }
+        ]
+      }
+    },
+    {
+      "id": "grill-task-decision-tree-mapping",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Construct an explicit decision tree mapping branches, prerequisites, and sequential rounds before making architectural commitments.",
+      "context_excerpt": "User: 'Grill me on designing a rate limiting service for our public API gateway.'",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "Mapping the rate limiting architectural decision tree and frontier prerequisites:\n\n```\n[Level 1: Rate Limiting Enforcement Scope] (Frontier - Round 1)\n ├── Branch A: Distributed / Shared State (Redis / KeyDB)\n │    └── [Prerequisite: Network Partition Behavior] (Round 2)\n │         ├── Fail-open (Prioritize availability)\n │         └── Fail-closed (Prioritize security/quota enforcement)\n └── Branch B: Local Node / In-Memory Token Bucket\n      └── [Prerequisite: Coordination Mechanism] (Round 2)\n           ├── Gossip protocol (Cluster sync)\n           └── IP affinity / sticky routing at LB\n```\n\nSettled Prerequisites: None yet.\nCurrent Frontier Decisions (Round 1):\n\n❓ **Q1** - **Enforcement Scope & Accuracy**: Does rate limiting require global cluster-wide accuracy or is local per-node approximation acceptable?\n- Option A: Global shared Redis store (exact limits, added network hop per request)\n- Option B: Local in-memory sliding window per instance with IP hashing at edge (sub-millisecond latency, loose quota enforcement)\n➡️ **Recommendation**: Option A for tier-based billing quotas; Option B for DoS mitigation.",
+      "negative_reference": "Rate limiting is simple! Let's just use Redis with a sliding window token bucket in a middleware.\nHere is the code to set up Redis:\nconst redis = new Redis();",
+      "judge": {
+        "checks": [
+          { "op": "contains", "arg": "decision tree" },
+          { "op": "contains", "arg": "Frontier" },
+          { "op": "contains", "arg": "Prerequisite" },
+          { "op": "contains", "arg": "Branch" },
+          { "op": "contains", "arg": "❓ **Q1**" },
+          { "op": "contains", "arg": "➡️" }
+        ]
+      }
+    }
+  ]
+}

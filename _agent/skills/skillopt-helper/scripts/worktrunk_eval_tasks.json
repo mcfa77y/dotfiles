@@ -1,0 +1,86 @@
+{
+  "format": "skillopt_sleep.tasks.v1",
+  "project": "/Users/joe/Projects/empo_health/remote-health-link",
+  "transcript_source": "synthetic_benchmark",
+  "n_sessions": 4,
+  "target_skill_path": "/Users/joe/dotfiles/_agent/skills/worktrunk/SKILL.md",
+  "reviewed": true,
+  "tasks": [
+    {
+      "id": "wt-task-create-branch-switch",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Switch to and create a new feature branch worktree using worktrunk CLI.",
+      "context_excerpt": "Developer needs to start work on feature branch 'feat-auth-timeout'.",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "wt switch --create feat-auth-timeout",
+      "negative_reference": "git checkout -b feat-auth-timeout && git worktree add ../feat-auth-timeout",
+      "judge": {
+        "checks": [
+          { "op": "contains", "arg": "wt switch --create" },
+          { "op": "contains", "arg": "feat-auth-timeout" },
+          { "op": "not_contains", "arg": "git worktree add" }
+        ]
+      }
+    },
+    {
+      "id": "wt-task-val-hook-approval-safety",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Resolve non-interactive hook approval requirement safely without defeating security guarantees.",
+      "context_excerpt": "Worktrunk encounters unapproved post-merge hook in non-interactive environment.",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "Run `wt config approvals add` to review and approve the project hook commands in ~/.config/worktrunk/approvals.toml before proceeding.",
+      "negative_reference": "Just pass --yes to bypass all hook safety prompts: wt merge --yes",
+      "judge": {
+        "checks": [
+          { "op": "contains", "arg": "wt config approvals add" },
+          { "op": "not_contains", "arg": "wt merge --yes" },
+          { "op": "not_contains", "arg": "bypass all hook safety" }
+        ]
+      }
+    },
+    {
+      "id": "wt-task-val-no-naked-git-worktree",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Verify that worktrunk commands are used instead of naked git worktree operations.",
+      "context_excerpt": "List and switch between active worktrees.",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "Use `wt list` to view active worktrees and `wt switch <branch>` to switch directory context.",
+      "negative_reference": "Use `git worktree list` and `cd ../worktree-name` to switch directories.",
+      "judge": {
+        "checks": [
+          { "op": "contains", "arg": "wt list" },
+          { "op": "contains", "arg": "wt switch" },
+          { "op": "not_contains", "arg": "git worktree list" }
+        ]
+      }
+    },
+    {
+      "id": "wt-task-configure-premerge-hooks",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Configure project pre-merge hook in .config/wt.toml to enforce test passes before worktree merge.",
+      "context_excerpt": "Setup automated pre-merge verification pipeline in wt.toml.",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "# .config/wt.toml\n[pre-merge]\ntest = \"bun test\"\nlint = \"bun run lint\"\n",
+      "negative_reference": "# .git/hooks/pre-push\nbash run_tests.sh\n",
+      "judge": {
+        "checks": [
+          { "op": "contains", "arg": ".config/wt.toml" },
+          { "op": "contains", "arg": "[pre-merge]" },
+          { "op": "not_contains", "arg": ".git/hooks" }
+        ]
+      }
+    }
+  ]
+}

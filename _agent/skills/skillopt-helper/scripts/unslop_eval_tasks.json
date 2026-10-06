@@ -1,0 +1,96 @@
+{
+  "format": "skillopt_sleep.tasks.v1",
+  "project": "/Users/joe/Projects/empo_health/remote-health-link",
+  "transcript_source": "synthetic_benchmark",
+  "n_sessions": 4,
+  "target_skill_path": "/Users/joe/dotfiles/_agent/skills/unslop/SKILL.md",
+  "reviewed": true,
+  "tasks": [
+    {
+      "id": "unslop-task-cut-chatbot-filler",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Remove sycophantic chatbot filler and hedge phrasing from a code review response.",
+      "context_excerpt": "Clean up assistant response opening and closing pleasantries.",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "The migration fails because the foreign key index is missing on tenant_id. Add the index to schema.ts before running the migration.",
+      "negative_reference": "Great question! Certainly! I would be happy to help with that. The migration fails because the foreign key index is missing on tenant_id. I hope this helps! Let me know if you have questions!",
+      "judge": {
+        "checks": [
+          { "op": "contains", "arg": "tenant_id" },
+          { "op": "contains", "arg": "schema.ts" },
+          { "op": "not_contains", "arg": "Great question" },
+          { "op": "not_contains", "arg": "Certainly" },
+          { "op": "not_contains", "arg": "I hope this helps" },
+          { "op": "not_contains", "arg": "happy to help" }
+        ]
+      }
+    },
+    {
+      "id": "unslop-task-strip-puffery-and-buzzwords",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Strip marketing puffery and buzzwords from architecture documentation.",
+      "context_excerpt": "Rewrite technical summary to be factual and concrete.",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "We use Redis to cache patient session tokens. This drops authentication latency from 45ms to 3ms.",
+      "negative_reference": "In today's rapidly evolving landscape, our groundbreaking solution leverages a vibrant Redis architecture as a testament to modern engineering, dramatically optimizing key metrics.",
+      "judge": {
+        "checks": [
+          { "op": "contains", "arg": "Redis" },
+          { "op": "contains", "arg": "3ms" },
+          { "op": "not_contains", "arg": "evolving landscape" },
+          { "op": "not_contains", "arg": "groundbreaking" },
+          { "op": "not_contains", "arg": "testament to" },
+          { "op": "not_contains", "arg": "leverages" }
+        ]
+      }
+    },
+    {
+      "id": "unslop-task-val-eliminate-em-dashes",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Rewrite text to eliminate em dashes in favor of clear sentences and commas.",
+      "context_excerpt": "Replace AI em-dash punctuation habits.",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "The scheduler fires every minute. It checks the queue, claims up to ten jobs, and runs them concurrently.",
+      "negative_reference": "The scheduler fires every minute — checking the queue — and claims up to ten jobs — running them concurrently.",
+      "judge": {
+        "checks": [
+          { "op": "contains", "arg": "scheduler" },
+          { "op": "contains", "arg": "ten jobs" },
+          { "op": "not_contains", "arg": "—" },
+          { "op": "not_contains", "arg": "–" }
+        ]
+      }
+    },
+    {
+      "id": "unslop-task-val-plain-speech-and-active-voice",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Convert passive corporate phrasing ('in order to utilize') to plain active voice.",
+      "context_excerpt": "Simplify dense passive explanations.",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "To test the webhook, send a POST request with the mock payload. The handler logs the response to stderr.",
+      "negative_reference": "In order to utilize the webhook endpoint, a POST request must be facilitated with the mock payload due to the fact that responses are processed by the handler.",
+      "judge": {
+        "checks": [
+          { "op": "contains", "arg": "To test the webhook" },
+          { "op": "contains", "arg": "POST" },
+          { "op": "not_contains", "arg": "In order to" },
+          { "op": "not_contains", "arg": "utilize" },
+          { "op": "not_contains", "arg": "due to the fact that" },
+          { "op": "not_contains", "arg": "facilitated" }
+        ]
+      }
+    }
+  ]
+}

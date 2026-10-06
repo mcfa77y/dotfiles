@@ -80,6 +80,40 @@ Offline test harness (0 LLM cost / 0 tokens) verifying that rule judges accurate
 uv run scripts/test_judges.py --tasks-file scripts/pr_helper_eval_tasks.json
 ```
 
+### 4. `audit_skills.ts`
+TypeScript / Bun CLI tool to audit skill document size (lines, words, characters), scripts presence, and test coverage across all skills in `dotfiles` and `~/.omp`.
+
+```bash
+# Audit all skills in dotfiles and ~/.omp:
+bun run scripts/audit_skills.ts
+
+# Filter skills by regex:
+bun run scripts/audit_skills.ts --filter "rhl-.*"
+
+# Output structured JSON:
+bun run scripts/audit_skills.ts --has-scripts --json
+
+# Run test suite:
+bun test scripts/audit_skills.spec.ts
+```
+
+### 5. `harvest_skill_frequency.ts`
+TypeScript / Bun CLI tool to parse session transcripts (`~/.omp/agent/sessions/`), identify skill usage patterns, and rank skills by invocation count to prioritize SkillOpt sleep candidates.
+
+```bash
+# Rank top 20 most frequently invoked skills:
+bun run scripts/harvest_skill_frequency.ts
+
+# Show top 10 non-RHL skills:
+bun run scripts/harvest_skill_frequency.ts --non-rhl --limit 10
+
+# Filter sessions by project:
+bun run scripts/harvest_skill_frequency.ts --project remote-health-link --json
+
+# Run test suite:
+bun test scripts/harvest_skill_frequency.spec.ts
+```
+
 ---
 
 ## Standard Workflows

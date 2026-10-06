@@ -1,0 +1,15 @@
+{
+  "name": "skillopt-helper",
+  "module": "scripts/audit_skills.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "^1.4.2"
+  },
+  "peerDependencies": {
+    "typescript": "^7"
+  },
+  "dependencies": {
+    "commander": "^15.0.0"
+  }
+}

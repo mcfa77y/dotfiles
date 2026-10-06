@@ -44,14 +44,22 @@ def test_single_task(task: dict) -> bool:
         print(f"   Rationale: {rationale}")
 
     # Negative Check
-    bad_output = ref.replace("Detailed Description\n--------------------", "## Detailed Description")
-    bad_hard, _, bad_rationale = score_rule_judge(judge, bad_output)
-    is_neg_caught = not math.isclose(bad_hard, 1.0)
-    neg_status = "✅ CORRECTLY CAUGHT" if is_neg_caught else "❌ MISSED FAILURE"
-    if not is_neg_caught:
-        passed = False
-    print(f"   Negative check (ATX header): {neg_status} -> {bad_rationale}\n")
-
+    if "negative_reference" in task:
+        bad_output = task["negative_reference"]
+        bad_hard, _, bad_rationale = score_rule_judge(judge, bad_output)
+        is_neg_caught = not math.isclose(bad_hard, 1.0)
+        neg_status = "✅ CORRECTLY CAUGHT" if is_neg_caught else "❌ MISSED FAILURE"
+        if not is_neg_caught:
+            passed = False
+        print(f"   Negative check: {neg_status} -> {bad_rationale}\n")
+    elif "Detailed Description\n--------------------" in ref:
+        bad_output = ref.replace("Detailed Description\n--------------------", "## Detailed Description")
+        bad_hard, _, bad_rationale = score_rule_judge(judge, bad_output)
+        is_neg_caught = not math.isclose(bad_hard, 1.0)
+        neg_status = "✅ CORRECTLY CAUGHT" if is_neg_caught else "❌ MISSED FAILURE"
+        if not is_neg_caught:
+            passed = False
+        print(f"   Negative check (ATX header): {neg_status} -> {bad_rationale}\n")
     return passed
 
 def main():

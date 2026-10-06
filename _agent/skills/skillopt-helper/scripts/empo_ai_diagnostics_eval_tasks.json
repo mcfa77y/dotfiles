@@ -1,0 +1,106 @@
+{
+  "format": "skillopt_sleep.tasks.v1",
+  "project": "/Users/joe/Projects/empo_health/remote-health-link",
+  "transcript_source": "synthetic_benchmark",
+  "n_sessions": 4,
+  "target_skill_path": "/Users/joe/dotfiles/_agent/skills/empo-ai-diagnostics/SKILL.md",
+  "reviewed": true,
+  "tasks": [
+    {
+      "id": "empo-task-thought-signature-400",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Diagnosing 400 'Function call is missing a thought_signature' error in Gemini models by inspecting tool signatures with inspect-thought-signature and switching model to google/gemini-2.5-pro.",
+      "context_excerpt": "Tool execution fails with HTTP 400 error 'Function call is missing a thought_signature' when using Gemini 3.x models via the empo-ai gateway.",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "The HTTP 400 error \"Function call is missing a thought_signature\" occurs because Gemini 3.x models enforce thought signatures on tool calls, but the upstream gateway dropped the thought_signature during OpenAI schema translation.\n\nTo diagnose and resolve:\n1. Inspect tool signatures and captured request payloads:\n   `~/.agents/skills/empo-ai-diagnostics/scripts/inspect-thought-signature`\n2. Switch the active model in `~/.omp/agent/config.yml.empo-ai` to `google/gemini-2.5-pro` (or `google/gemini-2.5-flash`), which does not require thought signatures.",
+      "negative_reference": "Encountered HTTP 400 Bad Request error with thought_signature from the gemini model. The gateway might be temporarily unstable. Let's perform a generic retry of the request with exponential backoff.",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "thought_signature"
+          },
+          {
+            "op": "contains",
+            "arg": "gemini"
+          },
+          {
+            "op": "not_contains",
+            "arg": "generic retry"
+          }
+        ]
+      }
+    },
+    {
+      "id": "empo-task-oauth-token-expired-401",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Diagnosing 401/invalid_grant expired OAuth token from Cloudflare Access by running refresh-token or /login empo-ai and inspecting ~/.omp/agent/agent.db auth_credentials table.",
+      "context_excerpt": "Empo AI provider requests fail with HTTP 401 Unauthorized / invalid_grant: Grant not found from Cloudflare Access.",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "The HTTP 401 Unauthorized (`invalid_grant: Grant not found` or expired refresh token) error indicates that the Cloudflare Access OAuth token has expired or been revoked.\n\nTo fix:\n1. Run the headless token refresher:\n   `~/.agents/skills/empo-ai-diagnostics/scripts/refresh-token`\n   Or re-authenticate interactively in omp using:\n   `/login empo-ai`\n2. Inspect and verify credential records stored in `~/.omp/agent/agent.db` within the `auth_credentials` table for the `empo-ai` provider.",
+      "negative_reference": "Encountered HTTP 401 Unauthorized error from Cloudflare Access. Check your internet connection and verify that your proxy settings are correct, or ask the administrator to grant permissions.",
+      "judge": {
+        "checks": [
+          {
+            "op": "regex",
+            "arg": "refresh-token|/login empo-ai"
+          },
+          {
+            "op": "regex",
+            "arg": "agent\\.db|auth_credentials"
+          }
+        ]
+      }
+    },
+    {
+      "id": "empo-task-headroom-proxy-502",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Diagnosing 502 Bad Gateway from local Headroom proxy (127.0.0.1:8765) or upstream ai.empohealth.com by running diagnose-empo-ai and replay-400-request.",
+      "context_excerpt": "Requests to 127.0.0.1:8765 fail with 502 Bad Gateway indicating upstream issues communicating with ai.empohealth.com.",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "A 502 Bad Gateway error on `127.0.0.1:8765` means the local Headroom proxy received an upstream failure when contacting `ai.empohealth.com`.\n\nTo diagnose and troubleshoot:\n1. Run the provider health diagnostic to check upstream connectivity and token status:\n   `~/.agents/skills/empo-ai-diagnostics/scripts/diagnose-empo-ai`\n2. Replay captured failed requests directly against the upstream gateway to isolate whether the issue is in Headroom or upstream:\n   `~/.agents/skills/empo-ai-diagnostics/scripts/replay-400-request --url https://ai.empohealth.com/v1/chat/completions`",
+      "negative_reference": "Encountered 502 Bad Gateway on port 8765. The local server process seems to have crashed. Kill the process on port 8765 and restart your development server.",
+      "judge": {
+        "checks": [
+          {
+            "op": "regex",
+            "arg": "diagnose-empo-ai|replay-400-request"
+          },
+          {
+            "op": "contains",
+            "arg": "ai.empohealth.com"
+          }
+        ]
+      }
+    },
+    {
+      "id": "empo-task-quota-check",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Checking remaining daily budget against the $40/day limit (Rule 09d3d265) by running check-remaining-quota.",
+      "context_excerpt": "User wants to check current Empo AI daily gateway spend and remaining capacity before launching benchmark sessions.",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "To check your remaining daily budget against the Cloudflare AI Gateway $40/day spend limit (Rule `09d3d265`), run the daily quota checker:\n\n```bash\n~/.agents/skills/empo-ai-diagnostics/scripts/check-remaining-quota\n```\n\nThis displays a progress bar of today's spend against the $40 budget, estimated headroom, and remaining token/turn capacity. You can also pass `--json` for machine-readable output or `--quiet` for a one-line summary.",
+      "negative_reference": "To check your remaining daily budget, open your web browser, navigate to the Cloudflare dashboard billing page, and manually inspect the invoices for the current month.",
+      "judge": {
+        "checks": [
+          {
+            "op": "regex",
+            "arg": "check-remaining-quota|09d3d265"
+          }
+        ]
+      }
+    }
+  ]
+}

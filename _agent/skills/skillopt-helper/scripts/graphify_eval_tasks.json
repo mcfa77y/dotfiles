@@ -1,0 +1,81 @@
+{
+  "format": "skillopt_sleep.tasks.v1",
+  "project": "/Users/joe/Projects/empo_health/remote-health-link",
+  "transcript_source": "synthetic_benchmark",
+  "n_sessions": 4,
+  "target_skill_path": "/Users/joe/dotfiles/_agent/skills/graphify/SKILL.md",
+  "reviewed": true,
+  "tasks": [
+    {
+      "id": "graphify-task-fast-path-detection",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Check whether graphify-out/graph.json already exists before re-running full AST extraction when answering codebase questions.",
+      "context_excerpt": "User asks: 'How does the authentication middleware interact with database sessions?' The project workspace already contains a previously generated knowledge graph.",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "Before starting file detection or full AST extraction, check whether `graphify-out/graph.json` exists relative to the current working directory. Since `graphify-out/graph.json` already exists and this is a natural-language question about codebase architecture, take the fast path: jump straight to `/graphify query \"How does the authentication middleware interact with database sessions?\"` without re-running extraction or modifying the graph.",
+      "negative_reference": "Initiating unconditional re-run by deleting graph first: rm -rf graphify-out && /graphify . to extract all AST nodes from scratch.",
+      "judge": {
+        "checks": [
+          { "op": "contains", "arg": "graphify-out/graph.json" },
+          { "op": "not_contains", "arg": "unconditional re-run" },
+          { "op": "not_contains", "arg": "deleting graph" }
+        ]
+      }
+    },
+    {
+      "id": "graphify-task-query-bfs-dfs",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Execute graph queries with BFS or DFS traversal options to explore architecture instead of raw grep.",
+      "context_excerpt": "Investigate the call graph and dependencies between AuthModule and TokenStore in the codebase graph.",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "To inspect the relationship between AuthModule and TokenStore, query the knowledge graph:\n\n- Broad context query (BFS traversal):\n`/graphify query \"How does AuthModule interact with TokenStore?\"`\n\n- Specific call chain trace (DFS traversal):\n`/graphify query \"Trace execution path from AuthModule to TokenStore\" --dfs`",
+      "negative_reference": "Let's run a raw grep codebase search to find where TokenStore is mentioned:\ngrep -rn \"TokenStore\" src/auth/",
+      "judge": {
+        "checks": [
+          { "op": "contains", "arg": "/graphify query" },
+          { "op": "regex", "arg": "(--dfs|BFS)" },
+          { "op": "not_contains", "arg": "raw grep codebase" }
+        ]
+      }
+    },
+    {
+      "id": "graphify-task-export-modes",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Run graphify with export options for SVG, GraphML, or headless mode skipping visualization.",
+      "context_excerpt": "Configure graph generation for CI pipeline and documentation diagram export.",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "Run graphify with the appropriate export or visualization flags:\n\n- Headless CI execution (skip HTML viz):\n`/graphify . --no-viz`\n\n- Vector diagram export (embeddable in Notion/GitHub):\n`/graphify . --svg`\n\n- GraphML export (for Gephi/yEd analysis):\n`/graphify . --graphml`",
+      "negative_reference": "Run default HTML visualization in desktop browser:\n/open-browser graphify-out/graph.html",
+      "judge": {
+        "checks": [
+          { "op": "contains", "arg": "/graphify" },
+          { "op": "regex", "arg": "(--no-viz|--svg|--graphml)" }
+        ]
+      }
+    },
+    {
+      "id": "graphify-task-cli-script-run",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Execute python3 helper run_graphify.py with target directory and output path.",
+      "context_excerpt": "Automate end-to-end AST extraction, community clustering, and graph report generation in a single automated step using the standalone helper script.",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "spec",
+      "reference": "Execute end-to-end AST extraction, clustering, and graph report generation with the standalone helper script:\n```bash\npython3 /Users/joe/.gemini/config/skills/graphify/scripts/run_graphify.py . --output graphify-out --directed\n```",
+      "negative_reference": "Ad-hoc AST parsing without using helper script:\npython3 -c \"import ast, os; [ast.parse(open(f).read()) for f in os.listdir('.') if f.endswith('.py')]\"",
+      "judge": {
+        "checks": [{ "op": "contains", "arg": "run_graphify.py" }]
+      }
+    }
+  ]
+}
