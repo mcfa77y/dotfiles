@@ -54,8 +54,18 @@ If multiple jobs failed (✗), investigate each one.
 gh run view <RUN_ID> --log-failed --repo EmpoHealth/core
 ```
 
-### 4. Additional Diagnostic Tools
+### 4. Automated PR Failure Triage & Diagnostic Tools
 ```bash
+# Automated triage of failing PR checks with diagnostic root-cause matching:
+bun run scripts/triage-pr-failures.ts --pr <PR_NUMBER>
+
+# Inspect a specific Actions run ID with markdown or JSON output:
+bun run scripts/triage-pr-failures.ts --run-id <RUN_ID> --format markdown
+bun run scripts/triage-pr-failures.ts --run-id <RUN_ID> --format json
+
+# Dry-run simulation:
+bun run scripts/triage-pr-failures.ts --pr <PR_NUMBER> --dry-run
+
 # Decompress and parse Vitest HTML metadata report:
 bun run scripts/parse_vitest_results.ts
 
@@ -65,6 +75,12 @@ bun run scripts/inspect_cache.ts --details
 # Validate workflow YAML syntax:
 bun run scripts/validate_yaml.ts .github/workflows/
 ```
+
+`triage-pr-failures.ts` inspects failing checks (`gh pr checks`) and matches logs against known failure signatures:
+- **Terraform Workspace EOF (`Failed to select workspace: EOF`)**: Diagnoses `.terraform/environment` restored from Actions cache or `TF_PLUGIN_CACHE_DIR` mismatch prompting interactively in CI.
+- **Playwright ALB Gateway Errors (`503 Service Temporarily Unavailable`, `502 Bad Gateway`)**: Diagnoses unhealthy or warming ECS tasks in preview environment target groups.
+- **Yarn Berry Immutable Lockfile (`YN0028`)**: Diagnoses unsynced `yarn.lock` under `--immutable`.
+- **Docker Push / Registry Auth Failures**: Diagnoses expired ECR credentials or missing IAM push permissions.
 
 ### 5. Classify Each Failure
 Determine which category each failure falls into:
