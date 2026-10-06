@@ -6,6 +6,7 @@ import {
   generateTriageReport,
   parseChecksOutput,
   runCli,
+  stripAnsi,
 } from './triage-pr-failures.ts';
 
 describe('triage-pr-failures', () => {
@@ -172,6 +173,23 @@ ERROR: failed to solve: denied: requested access to the resource is denied
       expect(diagnostics[0]!.recommendation).toContain('aws-actions/amazon-ecr-login');
     });
 
+    it('detects Vitest unit and integration test failures even with ANSI escape sequences', () => {
+      const vitestLog = `
+\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[43m integration (chromium) \u001b[49m\u001b[39m sources/modules/dashboard/Screenings.spec.tsx:307:1 > loads newer data points
+\u001b[31m\u001b[1mVitestBrowserElementError\u001b[22m: Cannot find element with locator: getByRole('dialog')
+One or more frontend test shards failed or were cancelled.
+`;
+
+      const diagnostics = diagnoseLogFailures(vitestLog);
+      expect(diagnostics).toHaveLength(1);
+      expect(diagnostics[0]!.category).toBe('Frontend Vitest Unit / Integration Test Failure');
+      expect(diagnostics[0]!.errorExcerpt).toContain('Screenings.spec.tsx');
+      expect(diagnostics[0]!.rootCause).toContain(
+        'Vitest unit or browser-mode test assertion failed',
+      );
+      expect(diagnostics[0]!.recommendation).toContain('yarn vitest run');
+    });
+
     it('detects multiple diagnostic failures in a single combined log', () => {
       const multiLog = `
 --- Job 1: Yarn setup ---
@@ -195,6 +213,10 @@ Built bundle in 2.3s.
 Done in 12.4s.
 `;
       expect(diagnoseLogFailures(normalLog)).toEqual([]);
+    });
+    it('correctly strips ANSI escape codes', () => {
+      const colored = '\u001b[31mError:\u001b[0m \u001b[1mFailed\u001b[22m';
+      expect(stripAnsi(colored)).toBe('Error: Failed');
     });
   });
 

@@ -9,6 +9,14 @@
 
 import { $ } from 'bun';
 import { Command } from 'commander';
+import stripAnsiPkg from 'strip-ansi';
+
+/**
+ * Strips standard ANSI terminal escape sequences and gh-CLI caret-bracket escapes (^[[...m).
+ */
+export function stripAnsi(text: string): string {
+  return stripAnsiPkg(text).replace(/\^\[\[[0-9;]*[a-zA-Z]/g, '');
+}
 
 export const DEFAULT_REPO = 'EmpoHealth/core';
 
@@ -151,7 +159,8 @@ function extractContextExcerpt(lines: string[], matchIndex: number, radius = 1):
  */
 export function diagnoseLogFailures(logText: string): DiagnosticFailure[] {
   const diagnostics: DiagnosticFailure[] = [];
-  const lines = logText.split('\n');
+  const cleanLog = stripAnsi(logText);
+  const lines = cleanLog.split('\n');
 
   // Rule 1: Terraform workspace interactive EOF prompt
   const tfEofIndex = lines.findIndex(
@@ -241,6 +250,28 @@ export function diagnoseLogFailures(logText: string): DiagnosticFailure[] {
         'AWS ECR or Docker registry authentication failed, access token expired, or IAM role lacks write/push permissions for the target repository.',
       recommendation:
         'Verify AWS ECR login step (aws-actions/amazon-ecr-login) and ensure runner IAM role includes ecr:BatchCheckLayerAvailability, ecr:PutImage, and ecr:InitiateLayerUpload.',
+    });
+  }
+  // Rule 5: Frontend Vitest unit / integration test failure
+  const vitestIndex = lines.findIndex(
+    (line) =>
+      /FAIL\s+.*(?:sources\/|\.spec\.[jt]sx?)/i.test(line) ||
+      /VitestBrowserElementError/i.test(line) ||
+      /Failed Tests\s+\d+/i.test(line) ||
+      /One or more frontend test shards failed/i.test(line),
+  );
+  if (vitestIndex !== -1) {
+    const specificFailIndex = lines.findIndex(
+      (line) => /FAIL\s+.*\.spec\.[jt]sx?/i.test(line) || /VitestBrowserElementError/i.test(line),
+    );
+    const targetIndex = specificFailIndex !== -1 ? specificFailIndex : vitestIndex;
+    diagnostics.push({
+      category: 'Frontend Vitest Unit / Integration Test Failure',
+      errorExcerpt: extractContextExcerpt(lines, targetIndex),
+      rootCause:
+        'Vitest unit or browser-mode test assertion failed or timed out during test shard execution.',
+      recommendation:
+        'Run the failing test file locally (e.g. `yarn vitest run <file>` or `yarn test:browser`), inspect test screenshot artifacts in `.tests-results/screenshots`, and verify locator or assertion timing.',
     });
   }
 
@@ -366,7 +397,9 @@ export async function runCli(argv: string[] = process.argv): Promise<void> {
 
       if (opts.pr) {
         try {
-          const checksOutput = await $`gh pr checks ${opts.pr} --repo ${DEFAULT_REPO}`.text();
+          const checksOutput = await $`gh pr checks ${opts.pr} --repo ${DEFAULT_REPO}`
+            .nothrow()
+            .text();
           checks = parseChecksOutput(checksOutput);
         } catch (err: unknown) {
           const errorMsg = err instanceof Error ? err.message : String(err);
