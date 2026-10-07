@@ -12,3 +12,11 @@ zsh/.zcompdump
 *.lock
 __pycache__/
 *.pyc
+
+# --- Superfile State Files ---
+superfile/.config/superfile/firstUseCheck
+superfile/.config/superfile/lastCheckVersion
+superfile/.config/superfile/themeFileVersion
+superfile/.config/superfile/toggleDotFile
+superfile/.config/superfile/toggleFooter
+superfile/.config/superfile/pinned.json
