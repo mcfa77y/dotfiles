@@ -34,14 +34,15 @@ export async function updatePullRequest(
 
   const lines = cleanedContent.split(/\r?\n/);
   const title = lines[0] || '';
-  const body = lines.slice(1).join('\n').replace(/^\n+/, '');
+  const body = lines.slice(1).join('\n').replace(/^\n+/, '').trimEnd();
 
   console.log(`Updating PR ${targetLabel} on GitHub...`);
   await applyRemotePr(prTarget, { title, body });
 
   console.log(`Verifying PR ${targetLabel} after update...`);
   const remote = await fetchRemotePr(prTarget, ['number', 'title', 'body']);
-  const remoteFullMessage = `${remote.title}\n\n${remote.body || ''}`;
+  // Emulate exact CI pipeline: printf '%s\n\n%s\n' "${PR_TITLE}" "${PR_BODY}"
+  const remoteFullMessage = `${remote.title}\n\n${remote.body || ''}\n`;
   const remoteValidation = validateCommitMessage(remoteFullMessage);
 
   if (!remoteValidation.valid) {

@@ -57,7 +57,7 @@ The CI check `Lint PR title and description body` enforces these rules (defined 
 All helper tools in this skill follow modern CLI and Bun runtime standards:
 
 1. **Runtime & Language**:
-   - TypeScript executed directly via [Bun](https://bun.sh/) (`bun run <script>.ts`).
+   - TypeScript executed directly via [Bun](https://bun.sh/) (`bun run ~/.gemini/config/skills/rhl-pr-helper/scripts/<script>.ts`).
    - Built-in test suite powered by `bun test` in `*.spec.ts`.
 2. **CLI Experience**:
    - Robust argument parsing, flag handling, validation, and rich examples using `commander`.
@@ -71,7 +71,13 @@ All helper tools in this skill follow modern CLI and Bun runtime standards:
 
 ## Bundled Scripts
 
-The skill provides modular TypeScript CLI tools under `./scripts/`:
+> [!IMPORTANT]
+> **Script Location**: The scripts described below are bundled with this skill and live in the **skill directory** at:
+> `~/.gemini/config/skills/rhl-pr-helper/scripts/`
+>
+> They do **NOT** live in the target Git repository's `./scripts/` folder. Always invoke them using their path within the skill directory via `bun run ~/.gemini/config/skills/rhl-pr-helper/scripts/<script>.ts`.
+
+The skill provides modular TypeScript CLI tools in `~/.gemini/config/skills/rhl-pr-helper/scripts/`:
 
 ### 1. `lint_pr.ts`
 Validates any piped commit message or PR markdown file.

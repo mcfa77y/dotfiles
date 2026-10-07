@@ -12,12 +12,7 @@ import { Command } from 'commander';
 import { validateCommitMessage } from './lint_pr.ts';
 import { printLintErrors } from './utils.ts';
 
-export const DEFAULT_REVIEWERS = [
-  'pm-pp',
-  'simon57b',
-  'singhmadhurima123',
-  'jofay-empo',
-];
+export const DEFAULT_REVIEWERS = ['pm-pp', 'simon57b', 'singhmadhurima123', 'jofay-empo'];
 
 export const INFRA_REVIEWER = 'edahlseng';
 
@@ -44,7 +39,10 @@ export interface CreatePrResult {
 export async function hasInfraChanges(base = 'origin/main'): Promise<boolean> {
   try {
     const output = await $`git diff --name-only ${base}...HEAD`.quiet().text();
-    const files = output.split('\n').map((f) => f.trim()).filter(Boolean);
+    const files = output
+      .split('\n')
+      .map((f) => f.trim())
+      .filter(Boolean);
     return files.some((f) => /\.(tf|ya?ml)$/i.test(f));
   } catch {
     return false;
@@ -82,9 +80,8 @@ export async function createPullRequest(
   const body = lines.slice(1).join('\n').replace(/^\n+/, '');
 
   const baseBranch = options.base || 'main';
-  const reviewers = options.reviewers && options.reviewers.length > 0
-    ? options.reviewers
-    : DEFAULT_REVIEWERS;
+  const reviewers =
+    options.reviewers && options.reviewers.length > 0 ? options.reviewers : DEFAULT_REVIEWERS;
 
   console.log(`Creating ${options.draft ? 'draft ' : ''}PR against '${baseBranch}'...`);
   console.log(`Title: ${title}`);
@@ -139,12 +136,19 @@ export async function runCli(): Promise<void> {
   const program = new Command()
     .name('create_pr')
     .description('Validate PR format and create a Pull Request on GitHub via gh CLI.')
-    .argument('[file]', 'Path to PR message file containing title on line 1, blank line 2, and Setext body')
+    .argument(
+      '[file]',
+      'Path to PR message file containing title on line 1, blank line 2, and Setext body',
+    )
     .option('-d, --draft', 'Create as draft pull request (default: true)', true)
     .option('--no-draft', 'Create as ready for review (non-draft)')
     .option('-b, --base <branch>', 'Base branch (default: main)', 'main')
     .option('-r, --reviewers <reviewers>', 'Comma-separated reviewer GitHub usernames')
-    .option('--auto-infra', 'Automatically add infra reviewer (edahlseng) if .tf/.yml files changed', true)
+    .option(
+      '--auto-infra',
+      'Automatically add infra reviewer (edahlseng) if .tf/.yml files changed',
+      true,
+    )
     .option('--title <title>', 'Explicit PR title')
     .option('--body <body>', 'Explicit PR body')
     .addHelpText(
@@ -184,17 +188,24 @@ Examples:
   } else if (!process.stdin.isTTY) {
     content = await Bun.stdin.text();
   } else {
-    console.error('Error: Please provide a PR message file, pass --title and --body, or pipe content via stdin.');
+    console.error(
+      'Error: Please provide a PR message file, pass --title and --body, or pipe content via stdin.',
+    );
     program.help();
   }
 
   let reviewers: string[] = [];
   if (opts.reviewers) {
-    reviewers = opts.reviewers.split(',').map((r: string) => r.trim()).filter(Boolean);
+    reviewers = opts.reviewers
+      .split(',')
+      .map((r: string) => r.trim())
+      .filter(Boolean);
   } else {
     reviewers = [...DEFAULT_REVIEWERS];
     if (opts.autoInfra && (await hasInfraChanges(opts.base))) {
-      console.log(`Detected infrastructure files changed (*.tf, *.yml). Adding '${INFRA_REVIEWER}' to reviewers.`);
+      console.log(
+        `Detected infrastructure files changed (*.tf, *.yml). Adding '${INFRA_REVIEWER}' to reviewers.`,
+      );
       if (!reviewers.includes(INFRA_REVIEWER)) {
         reviewers.push(INFRA_REVIEWER);
       }

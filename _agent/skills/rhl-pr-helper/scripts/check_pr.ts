@@ -25,7 +25,8 @@ export async function checkPullRequest(
     prData.number,
   );
 
-  const fullMessage = `${prData.title}\n\n${prData.body || ''}`;
+  // Emulate exact CI pipeline: printf '%s\n\n%s\n' "${PR_TITLE}" "${PR_BODY}"
+  const fullMessage = `${prData.title}\n\n${prData.body || ''}\n`;
   const validation = validateCommitMessage(fullMessage);
 
   if (!validation.valid) {
