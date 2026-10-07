@@ -23,8 +23,6 @@
 [pull]
 	rebase = true
 	ff = false
-[credential]
-	helper = --help
 [gitbutler]
 	aiModelProvider = ollama
 	aiOllamaModelName = qwen3:14b
