@@ -7,7 +7,7 @@ modelRoles:
   vision: empo-ai/google/gemini-3.8-flash:high
   designer: empo-ai/google/gemini-3.8-flash:high
   advisor: empo-ai/google/gemini-3.8-flash:high
-  smol: empo-ai/google/gemini-3.7-flash:low
+  smol: empo-ai/google/gemini-3.8-flash:low
   commit: empo-ai/google/gemini-3.5-flash-lite:minimal
   tiny: empo-ai/google/gemini-3.5-flash-lite:minimal
 defaultThinkingLevel: auto
@@ -26,7 +26,7 @@ retry:
       - empo-ai/google/gemini-3.7-flash:high
       - empo-ai/google/gemini-3.6-flash:high
     smol:
-      - empo-ai/google/gemini-3.7-flash:minimal
+      - empo-ai/google/gemini-3.7-flash:low
       - empo-ai/google/gemini-3.6-flash:low
       - empo-ai/google/gemini-3.5-flash-lite:low
     vision:
@@ -38,13 +38,11 @@ retry:
       - empo-ai/google/gemini-3.7-flash:medium
       - empo-ai/google/gemini-3.6-flash:high
     commit:
-      - empo-ai/google/gemini-3.5-flash-lite:low
       - empo-ai/google/gemini-3.1-flash-lite:minimal
-      - empo-ai/google/gemini-3.5-flash:minimal
+      - empo-ai/google/gemini-2.5-flash-lite:minimal
     tiny:
-      - empo-ai/google/gemini-3.5-flash-lite:low
       - empo-ai/google/gemini-3.1-flash-lite:minimal
-      - empo-ai/google/gemini-3.5-flash:minimal
+      - empo-ai/google/gemini-2.5-flash-lite:minimal
     designer:
       - empo-ai/google/gemini-3.8-flash:medium
       - empo-ai/google/gemini-3.7-flash:high
