@@ -11,10 +11,24 @@ cache_completion() {
   if command -v "$cmd" &>/dev/null; then
     local target_dir="$HOME/.zsh/completions"
     local target_file="$target_dir/$completion_file"
-    if [[ ! -f "$target_file" ]]; then
-      mkdir -p "$target_dir"
-      eval "$completion_generator" >"$target_file" 2>/dev/null
+    local bin_path="$(whence -p "$cmd")"
+
+    # Resolve pyenv shim to actual binary if applicable
+    if [[ "$bin_path" == *".pyenv/shims"* ]] && command -v pyenv &>/dev/null; then
+      bin_path="$(pyenv which "$cmd" 2>/dev/null || echo "$bin_path")"
     fi
+
+    # Automatically regenerate if cache file doesn't exist, is empty, or is older than the binary
+    if [[ ! -s "$target_file" || ( -n "$bin_path" && "$target_file" -ot "$bin_path" ) ]]; then
+      mkdir -p "$target_dir"
+      local tmp_file="${target_file}.tmp.$$"
+      if eval "$completion_generator" >"$tmp_file" 2>/dev/null && [[ -s "$tmp_file" ]]; then
+        mv -f "$tmp_file" "$target_file"
+      else
+        rm -f "$tmp_file"
+      fi
+    fi
+
     if [[ -f "$target_file" && "$completion_file" != _* ]]; then
       source "$target_file"
     fi

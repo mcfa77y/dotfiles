@@ -42,6 +42,12 @@ zstyle ':completion:*' group-name ''
 LISTMAX=1000
 # CARAPACE_DEBUG=0
 
+# --- SHELL OPTIONS & DIRECTORY NAVIGATION ---
+setopt AUTO_CD              # Type directory name directly to cd into it
+setopt AUTO_PUSHD           # Automatically push old directory to stack on cd
+setopt PUSHD_IGNORE_DUPS    # Avoid duplicate directories on directory stack
+setopt CDABLE_VARS          # Expand arguments matching variables to directories
+
 # --- ZINIT PACKAGE MANAGER BOOTSTRAP & SETUP ---
 # Set the directory where Zinit will be installed
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
@@ -150,6 +156,10 @@ fi
 zstyle ':autocomplete:*complete*:*' insert-unambiguous yes
 zstyle ':autocomplete:*history*:*' insert-unambiguous yes
 zstyle ':autocomplete:menu-search:*' insert-unambiguous yes
+
+# Prevent zsh-autocomplete from freezing ZLE when inserting commands from history or paste
+zstyle ':autocomplete:*' min-input 2
+zstyle ':autocomplete:*' delay 0.2
 
 # Re-enable fzf-completion after zsh-autocomplete key bindings override Tab
 if whence -f fzf-completion &>/dev/null; then
