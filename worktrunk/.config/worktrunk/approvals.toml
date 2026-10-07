@@ -204,6 +204,7 @@ mkdir -p {{ worktree_path }}/workspaces/backend-api {{ worktree_path }}/workspac
 true
 """,
     "git sparse-checkout set .github .yarn workspaces/common workspaces/backend-api workspaces/frontend-app workspaces/helper-scripts workspaces/qa workspaces/mock-services graphify-out",
+    "git sparse-checkout set .github .yarn workspaces/common workspaces/backend-api workspaces/frontend-app workspaces/helper-scripts workspaces/qa workspaces/mock-services graphify-out scripts",
     """
 export CMUX_QUIET=1
 command -v cmux >/dev/null 2>&1 && cmux ping >/dev/null 2>&1 || exit 0
