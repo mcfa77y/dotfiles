@@ -7,6 +7,18 @@ description: "Refresh any agent/config.yml.provider model catalog from omp model
 
 Update `agent/config.yml.<provider>` (e.g. `config.yml.empo-ai`, `config.yml.devin`) to use the newest available models from `omp models <provider>`. Works for any provider; pick the best model for each role regardless of family, or restrict to a single family (e.g. `google/*`) if the user asks.
 
+## Quick CLI Utility
+
+Use the bundled TypeScript utility to inspect live models, filter by family, and validate existing configs:
+
+```bash
+# View live models for a provider, optionally filtered by family
+bun run scripts/refresh-model-config.ts --provider empo-ai --catalog --family google/
+
+# Validate a provider config against live catalog
+bun run scripts/refresh-model-config.ts --provider empo-ai --config agent/config.yml.empo-ai --validate
+```
+
 ## Steps
 
 1. **Read current config.** Read `agent/config.yml.<provider>` to see existing `modelRoles` and `retry.fallbackChains`. Preserve all non-model settings (`dev`, `symbolPreset`, `prewalk`, `autolearn`, `github`, etc.) verbatim.
@@ -17,7 +29,7 @@ Update `agent/config.yml.<provider>` (e.g. `config.yml.empo-ai`, `config.yml.dev
    omp models <provider> --json 2>/dev/null | jq -r '.models[] | "\(.id)\tctx=\(.contextWindow)\tmax=\(.maxTokens)\tthink=\(.thinking|tostring)\tinput=\(.input|join(","))\treasoning=\(.reasoning)"'
    ```
 
-   Add a `select(.id|startswith("google/"))` filter if the user wants a single family.
+   Or run: `bun run scripts/refresh-model-config.ts --provider <provider> --catalog [--family <prefix>]`
 
 3. **Identify upgrades.** Compare current config models against the catalog. Look for:
    - Same model with larger context (e.g. `glm-5-2` 200K → `glm-5-2-1m` 1M).
