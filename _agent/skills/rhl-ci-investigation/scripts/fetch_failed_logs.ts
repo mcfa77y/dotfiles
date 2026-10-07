@@ -142,7 +142,9 @@ export function extractPlaywrightErrors(logText: string): PlaywrightError[] {
 
 export async function fetchJobLog(repo: string, jobId: string): Promise<string> {
   try {
-    return await $`gh api repos/${repo}/actions/jobs/${jobId}/logs`.quiet().text();
+    return await $`gh api repos/${repo}/actions/jobs/${jobId}/logs --allow-escape-sequences`
+      .quiet()
+      .text();
   } catch (err: unknown) {
     throw new Error(
       `Failed to fetch logs for job ${jobId}: ${err instanceof Error ? err.message : String(err)}`,
