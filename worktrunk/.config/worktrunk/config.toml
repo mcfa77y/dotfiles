@@ -54,6 +54,7 @@
 # `~` expands to the home directory. Relative paths resolve from `repo_path`.
 #
 worktree-path = "{{ repo_path }}/../empo-worktrees/{{ branch | sanitize }}"
+skip-shell-integration-prompt = true
 
 ## LLM commit messages
 #
