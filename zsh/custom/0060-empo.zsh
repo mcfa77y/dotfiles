@@ -273,6 +273,76 @@ local_playwright() {
   cd "$HERE" || exit
 }
 
+# 2026-10-07
+# Load local test configs (capped to 4 workers by default / MAX_WORKERS)
+load_test_configs() {
+  local WORKTREE_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+  if [ -z "$WORKTREE_ROOT" ]; then
+    echo "Not in a git repository"
+    return 1
+  fi
+
+  local CONFIGS_DIR="$SCRIPTS_DIR/testing-configs"
+  if [ ! -d "$CONFIGS_DIR" ]; then
+    echo "Testing configs directory not found: $CONFIGS_DIR"
+    return 1
+  fi
+
+  [ -f "$CONFIGS_DIR/backend.jest.config.js" ] && [ -d "$WORKTREE_ROOT/workspaces/backend-api" ] && \
+    cp "$CONFIGS_DIR/backend.jest.config.js" "$WORKTREE_ROOT/workspaces/backend-api/jest.config.js" && \
+    echo "  -> updated backend-api/jest.config.js"
+
+  [ -f "$CONFIGS_DIR/backend-e2e.jest.config.js" ] && [ -d "$WORKTREE_ROOT/workspaces/backend-api/sources/e2e" ] && \
+    cp "$CONFIGS_DIR/backend-e2e.jest.config.js" "$WORKTREE_ROOT/workspaces/backend-api/sources/e2e/jest-e2e.config.js" && \
+    echo "  -> updated backend-api/sources/e2e/jest-e2e.config.js"
+
+  [ -f "$CONFIGS_DIR/frontend.vitest.config.ts" ] && [ -d "$WORKTREE_ROOT/workspaces/frontend-app" ] && \
+    cp "$CONFIGS_DIR/frontend.vitest.config.ts" "$WORKTREE_ROOT/workspaces/frontend-app/vitest.config.ts" && \
+    echo "  -> updated frontend-app/vitest.config.ts"
+
+  [ -f "$CONFIGS_DIR/mock-services.vitest.config.mts" ] && [ -d "$WORKTREE_ROOT/workspaces/mock-services" ] && \
+    cp "$CONFIGS_DIR/mock-services.vitest.config.mts" "$WORKTREE_ROOT/workspaces/mock-services/vitest.config.mts" && \
+    echo "  -> updated mock-services/vitest.config.mts"
+
+  [ -f "$CONFIGS_DIR/playwright.config.ts" ] && [ -d "$WORKTREE_ROOT/workspaces/qa" ] && \
+    cp "$CONFIGS_DIR/playwright.config.ts" "$WORKTREE_ROOT/workspaces/qa/playwright.config.ts" && \
+    echo "  -> updated qa/playwright.config.ts"
+
+  echo "Loaded local test configs (capped to 4 workers)"
+}
+alias ltc='load_test_configs'
+
+# Unload local test configs (revert back to git HEAD)
+unload_test_configs() {
+  local WORKTREE_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+  if [ -z "$WORKTREE_ROOT" ]; then
+    echo "Not in a git repository"
+    return 1
+  fi
+
+  local FILES_TO_CHECKOUT=(
+    "workspaces/backend-api/jest.config.js"
+    "workspaces/backend-api/sources/e2e/jest-e2e.config.js"
+    "workspaces/frontend-app/vitest.config.ts"
+    "workspaces/mock-services/vitest.config.mts"
+    "workspaces/qa/playwright.config.ts"
+  )
+
+  for file in "${FILES_TO_CHECKOUT[@]}"; do
+    if [ -f "$WORKTREE_ROOT/$file" ]; then
+      git -C "$WORKTREE_ROOT" checkout -- "$file" 2>/dev/null
+    fi
+  done
+
+  echo "Unloaded local test configs (reverted to git HEAD)"
+}
+alias utc='unload_test_configs'
+
+# Playwright Trace Downloader (Beautiful TUI/CLI)
+playwright-trace() {
+  bun run --cwd "$EMPO_DIR/scripts/playwright-trace-from-url" src/index.ts "$@"
+}
+
 # 2026-09-17
 # Configure QA environment variables for current branch/commit (overrides previous branch values)
 local_qa_env() {
