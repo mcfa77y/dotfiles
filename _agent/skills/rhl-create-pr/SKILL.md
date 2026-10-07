@@ -18,7 +18,7 @@ description: Creates a GitHub Pull Request describing changes on the current bra
      - Conventional commit type (`feat:`, `fix:`, `refactor:`, `perf:`, `chore:`, etc.).
      - **Hard constraint**: The entire title **must not exceed 72 characters** (including the ` (RHL-XXXX)` suffix).
      - No trailing period.
-   - **PR Body**: Must follow the exact structure required by `scripts/lint-pull-request.js`:
+   - **PR Body**: Must follow the exact structure required by `/Users/joe/.gemini/config/skills/rhl-pr-helper/scripts/lint_pr.ts` (also in repo at `scripts/lint-pull-request.js`):
      - Must start with a blank line after the title.
      - Must contain exactly these 3 sections in this exact order using **Level 2 Setext headers** where the underline length matches the header title length exactly:
      ```markdown
@@ -46,8 +46,11 @@ description: Creates a GitHub Pull Request describing changes on the current bra
    - Verify title length <= 72 characters.
    - Run validation before submission:
      ```bash
-     printf '%s\n\n%s\n' "<Title>" "<Body>" | ./scripts/lint-pull-request.js
+     bun run /Users/joe/.gemini/config/skills/rhl-pr-helper/scripts/lint_pr.ts --string "<Title>
+
+<Body>"
      ```
+     *(Or pipe via stdin: `printf '%s\n\n%s\n' "<Title>" "<Body>" | bun run /Users/joe/.gemini/config/skills/rhl-pr-helper/scripts/lint_pr.ts`)*
 7. **Create PR**:
    ```bash
    gh pr create --title "<Title>" --body "<Body>" --reviewer "<Reviewers>"

@@ -16,7 +16,7 @@ All pull requests in Empo Health are squash merged into `main` by Mergify. The m
 
 ## PR Formatting Rules
 
-The CI check `Lint PR title and description body` enforces these rules (defined in `scripts/lint-pull-request.js`):
+The CI check `Lint PR title and description body` enforces these rules (implemented in `~/.gemini/config/skills/rhl-pr-helper/scripts/lint_pr.ts` and the repository's `scripts/lint-pull-request.js`):
 
 1. **Title Length**:
    - Must be **72 characters or fewer**.
