@@ -1,6 +1,10 @@
-# --- Homebrew ---
-if command -v brew >/dev/null 2>&1; then
+# --- Package Updates ---
+if command -v brew >/dev/null 2>&1 && command -v cargo-install-update >/dev/null 2>&1; then
+  alias bu='brew update && brew upgrade --yes && cargo install-update -a && notify_done "done brew and cargo update"'
+elif command -v brew >/dev/null 2>&1; then
   alias bu='brew update && brew upgrade --yes && notify_done "done brew upgrade"'
+elif command -v cargo-install-update >/dev/null 2>&1; then
+  alias bu='cargo install-update -a && notify_done "done cargo update"'
 fi
 
 # --- Ollama ---
