@@ -288,24 +288,24 @@ load_test_configs() {
     return 1
   fi
 
-  [ -f "$CONFIGS_DIR/backend.jest.config.js" ] && [ -d "$WORKTREE_ROOT/workspaces/backend-api" ] && \
-    cp "$CONFIGS_DIR/backend.jest.config.js" "$WORKTREE_ROOT/workspaces/backend-api/jest.config.js" && \
+  [ -f "$CONFIGS_DIR/backend.jest.config.js" ] && [ -d "$WORKTREE_ROOT/workspaces/backend-api" ] &&
+    cp "$CONFIGS_DIR/backend.jest.config.js" "$WORKTREE_ROOT/workspaces/backend-api/jest.config.js" &&
     echo "  -> updated backend-api/jest.config.js"
 
-  [ -f "$CONFIGS_DIR/backend-e2e.jest.config.js" ] && [ -d "$WORKTREE_ROOT/workspaces/backend-api/sources/e2e" ] && \
-    cp "$CONFIGS_DIR/backend-e2e.jest.config.js" "$WORKTREE_ROOT/workspaces/backend-api/sources/e2e/jest-e2e.config.js" && \
+  [ -f "$CONFIGS_DIR/backend-e2e.jest.config.js" ] && [ -d "$WORKTREE_ROOT/workspaces/backend-api/sources/e2e" ] &&
+    cp "$CONFIGS_DIR/backend-e2e.jest.config.js" "$WORKTREE_ROOT/workspaces/backend-api/sources/e2e/jest-e2e.config.js" &&
     echo "  -> updated backend-api/sources/e2e/jest-e2e.config.js"
 
-  [ -f "$CONFIGS_DIR/frontend.vitest.config.ts" ] && [ -d "$WORKTREE_ROOT/workspaces/frontend-app" ] && \
-    cp "$CONFIGS_DIR/frontend.vitest.config.ts" "$WORKTREE_ROOT/workspaces/frontend-app/vitest.config.ts" && \
+  [ -f "$CONFIGS_DIR/frontend.vitest.config.ts" ] && [ -d "$WORKTREE_ROOT/workspaces/frontend-app" ] &&
+    cp "$CONFIGS_DIR/frontend.vitest.config.ts" "$WORKTREE_ROOT/workspaces/frontend-app/vitest.config.ts" &&
     echo "  -> updated frontend-app/vitest.config.ts"
 
-  [ -f "$CONFIGS_DIR/mock-services.vitest.config.mts" ] && [ -d "$WORKTREE_ROOT/workspaces/mock-services" ] && \
-    cp "$CONFIGS_DIR/mock-services.vitest.config.mts" "$WORKTREE_ROOT/workspaces/mock-services/vitest.config.mts" && \
+  [ -f "$CONFIGS_DIR/mock-services.vitest.config.mts" ] && [ -d "$WORKTREE_ROOT/workspaces/mock-services" ] &&
+    cp "$CONFIGS_DIR/mock-services.vitest.config.mts" "$WORKTREE_ROOT/workspaces/mock-services/vitest.config.mts" &&
     echo "  -> updated mock-services/vitest.config.mts"
 
-  [ -f "$CONFIGS_DIR/playwright.config.ts" ] && [ -d "$WORKTREE_ROOT/workspaces/qa" ] && \
-    cp "$CONFIGS_DIR/playwright.config.ts" "$WORKTREE_ROOT/workspaces/qa/playwright.config.ts" && \
+  [ -f "$CONFIGS_DIR/playwright.config.ts" ] && [ -d "$WORKTREE_ROOT/workspaces/qa" ] &&
+    cp "$CONFIGS_DIR/playwright.config.ts" "$WORKTREE_ROOT/workspaces/qa/playwright.config.ts" &&
     echo "  -> updated qa/playwright.config.ts"
 
   echo "Loaded local test configs (capped to 4 workers)"
@@ -420,18 +420,21 @@ brd() {
 backend_start() {
   kill_by_port 3000
   zbe
+  yarn install
   yarn start --debug --watch | npx pino-pretty --colorize --levelFirst --ignore pid,hostname --translateTime 'HH:MM:ss'
 }
 
 frontend_start() {
   kill_by_port 3002
   zfe
+  yarn install
   yarn start
 }
 
 mock_service_start() {
   kill_by_port 3001
   zms
+  yarn install
   yarn start
 }
 

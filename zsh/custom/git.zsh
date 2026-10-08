@@ -28,7 +28,7 @@ alias wprune='uv run $GIT_TOOL_DIR/git_worktree_prune.py --directory $PWD'
 alias wls='uv run $GIT_TOOL_DIR/git_worktree_list.py --directory $PWD'
 
 # - use worktrunk with config
-alias wtc='wt'
+alias wtc='wt  --config $GIT_TOOL_JS_DIR/.config/wt.toml '
 # - add working tree from existing remote branch
 # alias wta='uv run $GIT_TOOL_DIR/git_worktree_and_branches.py --here_directory $PWD'
 alias wtexisting='HERE=$(pwd); cd $RHL_DIR; gf; wt switch --remotes $(clippaste); cd $HERE'
