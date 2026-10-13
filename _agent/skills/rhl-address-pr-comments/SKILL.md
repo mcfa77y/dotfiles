@@ -23,7 +23,20 @@ End-to-end workflow to triage, decide, fix, verify, commit, and respond to code 
 
 ## 2. Fetch Active Review Comments & Threads
 
-Retrieve all active review comments and discussion threads on the pull request:
+Retrieve active review comments, top-level reviews, and conversation threads using the skill tool:
+
+```bash
+# Fetch and list unresolved review comment threads
+bun run scripts/manage_pr_comments.ts fetch <PR_NUMBER_OR_URL> --unresolved-only
+
+# Generate formatted Markdown summary
+bun run scripts/manage_pr_comments.ts fetch <PR_NUMBER_OR_URL> --markdown
+
+# Output full structured JSON
+bun run scripts/manage_pr_comments.ts fetch <PR_NUMBER_OR_URL> --json
+```
+
+Or manually via `gh api`:
 
 ```bash
 # Fetch inline review comments on the pull request
@@ -93,7 +106,20 @@ Whenever there are architectural trade-offs, multiple implementation options, or
 ## 7. Post Threaded Replies & Update PR
 
 1. **Reply to Each Review Comment**:
-   Post a threaded reply to the root comment on GitHub:
+   Post a threaded reply to the root comment on GitHub using the skill tool:
+
+   ```bash
+   # Preview reply without posting
+   bun run scripts/manage_pr_comments.ts reply <PR_NUMBER_OR_URL> -c <COMMENT_ID> -b "<Reply text>" --dry-run
+
+   # Post reply to GitHub
+   bun run scripts/manage_pr_comments.ts reply <PR_NUMBER_OR_URL> -c <COMMENT_ID> -b "<Reply text>"
+
+   # Or post a batch of replies from a JSON file
+   bun run scripts/manage_pr_comments.ts reply <PR_NUMBER_OR_URL> -r replies.json
+   ```
+
+   Or manually via `gh api`:
    ```bash
    gh api --method POST /repos/{owner}/{repo}/pulls/<PR_NUMBER>/comments/<COMMENT_ID>/replies \
      -f body="<Reply text detailing fix or clarification, referencing commit hash if applicable>"
