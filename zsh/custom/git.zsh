@@ -71,7 +71,7 @@ wtjs-cli() {
 # 2026-02-13
 # change directory to a worktree
 alias wtsd='zrhl; wt switch; cdev'
-alias wts='zrhl; wt switch '
+alias wts='zrhl; wt switch'
 
 # 2026-08-19 worktrees list
 alias wtl='wt list'

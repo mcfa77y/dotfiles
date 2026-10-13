@@ -1,11 +1,31 @@
 # --- Package Updates ---
-if command -v brew >/dev/null 2>&1 && command -v cargo-install-update >/dev/null 2>&1; then
-  alias bu='brew update && brew upgrade --yes && cargo install-update -a && notify_done "done brew and cargo update"'
-elif command -v brew >/dev/null 2>&1; then
-  alias bu='brew update && brew upgrade --yes && notify_done "done brew upgrade"'
-elif command -v cargo-install-update >/dev/null 2>&1; then
-  alias bu='cargo install-update -a && notify_done "done cargo update"'
-fi
+() {
+  local -a cmds names
+  if command -v brew >/dev/null 2>&1; then
+    cmds+=("brew update && brew upgrade --yes")
+    names+=("brew")
+  fi
+  if command -v cargo-install-update >/dev/null 2>&1; then
+    cmds+=("cargo install-update -a")
+    names+=("cargo")
+  fi
+  if command -v uv >/dev/null 2>&1; then
+    cmds+=("uv tool upgrade --all")
+    names+=("uv")
+  fi
+
+  if (( ${#cmds} > 0 )); then
+    local msg
+    if (( ${#names} == 1 )); then
+      msg="done ${names[1]} upgrade"
+    elif (( ${#names} == 2 )); then
+      msg="done ${names[1]} and ${names[2]} update"
+    else
+      msg="done ${(j:, :)names[1,-2]} and ${names[-1]} update"
+    fi
+    alias bu="${(j: && :)cmds} && notify_done \"${msg}\""
+  fi
+}
 
 # --- Ollama ---
 alias ask="ollama run gemma4:latest"
