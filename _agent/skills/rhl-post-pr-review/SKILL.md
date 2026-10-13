@@ -123,3 +123,10 @@ gh api --method POST /repos/<OWNER>/<REPO>/pulls/<PR_NUMBER>/reviews --input /tm
 gh api /repos/<OWNER>/<REPO>/pulls/<PR_NUMBER>/reviews/<REVIEW_ID>/comments --jq '.[].path'
 ```
 - Provide the user with the direct link to the submitted GitHub PR review.
+
+---
+
+## Related Skills
+
+- [`rhl-address-pr-comments`](file:///Users/joe/.gemini/config/skills/rhl-address-pr-comments/SKILL.md): Fetch unresolved comment threads, apply fixes, and post threaded replies on GitHub.
+- [`rhl-review-pr`](file:///Users/joe/.gemini/config/skills/rhl-review-pr/SKILL.md): Perform local PR code reviews with Graphify blast-radius checks and save markdown reports to `docs/`.

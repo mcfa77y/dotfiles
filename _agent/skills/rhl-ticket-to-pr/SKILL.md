@@ -142,12 +142,26 @@ Determine the active harness and execute the appropriate review workflow:
 
 ## Step 8: Remediate Findings & Clarify
 
-1. **Triage Review Findings**:
-   - **P0 / P1 (Blockers/Bugs)**: Auto-fix immediately.
-   - **P2 / P3 (Improvements/Suggestions)** or ambiguous items: Use interactive questions (`ask_question`) to clarify intent or confirm trade-offs with the user.
+1. **Triage Review Findings & PR Comments**:
+   - **Pre-publish / Automated Review**:
+     - **P0 / P1 (Blockers/Bugs)**: Auto-fix immediately.
+     - **P2 / P3 (Improvements/Suggestions)** or ambiguous items: Use interactive questions (`ask_question`) to clarify intent or confirm trade-offs with the user.
+   - **Post-publish / GitHub Review Comments**:
+     - If addressing existing GitHub review comments on the PR, use the [`rhl-address-pr-comments`](file:///Users/joe/.gemini/config/skills/rhl-address-pr-comments/SKILL.md) skill:
+       ```bash
+       bun run ~/.gemini/config/skills/rhl-address-pr-comments/scripts/manage_pr_comments.ts fetch <PR_NUMBER_OR_URL> --unresolved-only
+       ```
 2. **Apply Fixes & Verify**:
    - Implement the agreed-upon corrections.
    - Re-run test suites and linter to verify regressions are avoided.
+   - If CI workflows (`.github/workflows/*.yml`) are edited, validate syntax:
+     ```bash
+     bun run ~/.gemini/config/skills/rhl-ci-investigation/scripts/validate_yaml.ts .github/workflows/
+     ```
+   - If resolving GitHub PR review comments, reply using the skill tool:
+     ```bash
+     bun run ~/.gemini/config/skills/rhl-address-pr-comments/scripts/manage_pr_comments.ts reply <PR_NUMBER_OR_URL> -c <COMMENT_ID> -b "<Reply text>"
+     ```
 
 ---
 

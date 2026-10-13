@@ -23,17 +23,22 @@ End-to-end workflow to triage, decide, fix, verify, commit, and respond to code 
 
 ## 2. Fetch Active Review Comments & Threads
 
+> [!NOTE]
+> **Script Location**: The bundled script lives in the skill directory:
+> `~/.gemini/config/skills/rhl-address-pr-comments/scripts/manage_pr_comments.ts`
+> Always run it via `bun run ~/.gemini/config/skills/rhl-address-pr-comments/scripts/manage_pr_comments.ts`.
+
 Retrieve active review comments, top-level reviews, and conversation threads using the skill tool:
 
 ```bash
 # Fetch and list unresolved review comment threads
-bun run scripts/manage_pr_comments.ts fetch <PR_NUMBER_OR_URL> --unresolved-only
+bun run ~/.gemini/config/skills/rhl-address-pr-comments/scripts/manage_pr_comments.ts fetch <PR_NUMBER_OR_URL> --unresolved-only
 
 # Generate formatted Markdown summary
-bun run scripts/manage_pr_comments.ts fetch <PR_NUMBER_OR_URL> --markdown
+bun run ~/.gemini/config/skills/rhl-address-pr-comments/scripts/manage_pr_comments.ts fetch <PR_NUMBER_OR_URL> --markdown
 
 # Output full structured JSON
-bun run scripts/manage_pr_comments.ts fetch <PR_NUMBER_OR_URL> --json
+bun run ~/.gemini/config/skills/rhl-address-pr-comments/scripts/manage_pr_comments.ts fetch <PR_NUMBER_OR_URL> --json
 ```
 
 Or manually via `gh api`:
@@ -86,6 +91,10 @@ Whenever there are architectural trade-offs, multiple implementation options, or
 2. **Verify Changes**:
    - Run affected unit / integration tests (e.g. `yarn test` in the target workspace).
    - Run workspace linters / formatters (e.g. `yarn lint`, `yarn build`, `terraform fmt`, `terraform validate`).
+   - If CI workflows (`.github/workflows/*.yml`) or Actions YAML files are touched, validate syntax:
+     ```bash
+     bun run ~/.gemini/config/skills/rhl-ci-investigation/scripts/validate_yaml.ts .github/workflows/
+     ```
    - Fix any regressions immediately.
 
 ---
@@ -110,13 +119,13 @@ Whenever there are architectural trade-offs, multiple implementation options, or
 
    ```bash
    # Preview reply without posting
-   bun run scripts/manage_pr_comments.ts reply <PR_NUMBER_OR_URL> -c <COMMENT_ID> -b "<Reply text>" --dry-run
+   bun run ~/.gemini/config/skills/rhl-address-pr-comments/scripts/manage_pr_comments.ts reply <PR_NUMBER_OR_URL> -c <COMMENT_ID> -b "<Reply text>" --dry-run
 
    # Post reply to GitHub
-   bun run scripts/manage_pr_comments.ts reply <PR_NUMBER_OR_URL> -c <COMMENT_ID> -b "<Reply text>"
+   bun run ~/.gemini/config/skills/rhl-address-pr-comments/scripts/manage_pr_comments.ts reply <PR_NUMBER_OR_URL> -c <COMMENT_ID> -b "<Reply text>"
 
    # Or post a batch of replies from a JSON file
-   bun run scripts/manage_pr_comments.ts reply <PR_NUMBER_OR_URL> -r replies.json
+   bun run ~/.gemini/config/skills/rhl-address-pr-comments/scripts/manage_pr_comments.ts reply <PR_NUMBER_OR_URL> -r replies.json
    ```
 
    Or manually via `gh api`:
