@@ -14,11 +14,11 @@
     names+=("uv")
   fi
 
-  if (( ${#cmds} > 0 )); then
+  if ((${#cmds} > 0)); then
     local msg
-    if (( ${#names} == 1 )); then
+    if ((${#names} == 1)); then
       msg="done ${names[1]} upgrade"
-    elif (( ${#names} == 2 )); then
+    elif ((${#names} == 2)); then
       msg="done ${names[1]} and ${names[2]} update"
     else
       msg="done ${(j:, :)names[1,-2]} and ${names[-1]} update"
