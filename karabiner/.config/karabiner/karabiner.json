@@ -521,6 +521,7 @@
                     },
                     {
                         "description": "Strict Tab/Caps Swap",
+                        "enabled": false,
                         "manipulators": [
                             {
                                 "description": "Caps Lock to Tab",
