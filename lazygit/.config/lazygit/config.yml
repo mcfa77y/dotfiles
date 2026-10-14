@@ -1,6 +1,4 @@
 gui:
-  # authorColors: {}
-  branchColors: {}
   scrollHeight: 2
   scrollPastBottom: true
   scrollOffMargin: 2
@@ -15,7 +13,7 @@ gui:
   expandedSidePanelWeight: 2
   mainPanelSplitMode: flexible
   enlargedSideViewLocation: left
-  wrapLinesInStagingView: true
+  wrapLinesInDiffView: true
   language: auto
   timeFormat: 02 Jan 06
   shortTimeFormat: 3:04PM
@@ -39,8 +37,10 @@ gui:
       - "#cad3f5"
     searchingActiveBorderColor:
       - "#eed49f"
-  authorColors:
-    "*": "#b7bdf8"
+    authorColors:
+      "*": "#b7bdf8"
+    # authorColors: {}
+    branchColorPatterns: {}
   commitLength:
     show: true
   showListFooter: true
