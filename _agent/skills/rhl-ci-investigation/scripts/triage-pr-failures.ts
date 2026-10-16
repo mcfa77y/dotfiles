@@ -179,7 +179,25 @@ export function diagnoseLogFailures(logText: string): DiagnosticFailure[] {
     });
   }
 
-  // Rule 2: Playwright timeouts and HTTP 503 / 502 ALB errors
+  // Rule 2: Playwright timeouts, HTTP 503 / 502 ALB errors, and DNS resolution failures
+  const dnsErrorIndex = lines.findIndex(
+    (line) =>
+      /ERR_NAME_NOT_RESOLVED/i.test(line) ||
+      /ENOTFOUND/i.test(line) ||
+      /getaddrinfo (?:ENOTFOUND|EAI_AGAIN)/i.test(line) ||
+      /NXDOMAIN/i.test(line),
+  );
+  if (dnsErrorIndex !== -1) {
+    diagnostics.push({
+      category: 'Preview DNS / Workspace Unresolved (ERR_NAME_NOT_RESOLVED)',
+      errorExcerpt: extractContextExcerpt(lines, dnsErrorIndex),
+      rootCause:
+        'Target domain name could not be resolved (net::ERR_NAME_NOT_RESOLVED / NXDOMAIN). Typically caused by premature teardown/destruction of the ephemeral workspace (e.g. concurrent PR cleanup), missing Cloudflare DNS record provisioning, or typo in frontend/backend subdomain routing.',
+      recommendation:
+        'Verify if the ephemeral workspace was destroyed by automated cleanup (e.g. "Frontend PR Closed - Terraform Cleanup"), re-trigger the frontend/backend build & deploy workflow, and verify Cloudflare DNS records exist before running E2E suites.',
+    });
+  }
+
   const albErrorIndex = lines.findIndex(
     (line) =>
       /503\s+Service\s+Temporarily\s+Unavailable/i.test(line) ||

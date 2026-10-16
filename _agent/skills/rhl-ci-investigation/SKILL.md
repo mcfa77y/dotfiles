@@ -79,6 +79,7 @@ bun run scripts/validate_yaml.ts .github/workflows/
 `triage-pr-failures.ts` inspects failing checks (`gh pr checks`) and matches logs against known failure signatures:
 - **Terraform Workspace EOF (`Failed to select workspace: EOF`)**: Diagnoses `.terraform/environment` restored from Actions cache or `TF_PLUGIN_CACHE_DIR` mismatch prompting interactively in CI.
 - **Playwright ALB Gateway Errors (`503 Service Temporarily Unavailable`, `502 Bad Gateway`)**: Diagnoses unhealthy or warming ECS tasks in preview environment target groups.
+- **Preview DNS / Workspace Unresolved (`net::ERR_NAME_NOT_RESOLVED`, `NXDOMAIN`)**: Diagnoses premature teardown or destruction of preview/ephemeral environments (e.g. concurrent PR cleanup workflows) or missing Cloudflare DNS records.
 - **Yarn Berry Immutable Lockfile (`YN0028`)**: Diagnoses unsynced `yarn.lock` under `--immutable`.
 - **Docker Push / Registry Auth Failures**: Diagnoses expired ECR credentials or missing IAM push permissions.
 

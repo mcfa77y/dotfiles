@@ -25,6 +25,16 @@ export async function validateWorkflowYaml(filePath: string): Promise<Validation
     }
 
     const dict = data as Record<string, any>;
+    const isAction =
+      'runs' in dict || filePath.endsWith('action.yml') || filePath.endsWith('action.yaml');
+
+    if (isAction) {
+      if (!dict.runs || typeof dict.runs !== 'object') {
+        return { file: filePath, valid: false, error: "Missing required 'runs' mapping in action" };
+      }
+      return { file: filePath, valid: true, jobCount: 0 };
+    }
+
     const hasOn =
       'on' in dict || 'true' in dict || (dict as Record<string, unknown>).on !== undefined;
     if (!hasOn) {
@@ -67,7 +77,11 @@ export async function validateWorkflowFileList(files: string[]): Promise<{ failu
   for (const file of files) {
     const res = await validateWorkflowYaml(file);
     if (res.valid) {
-      console.log(`✓ ${file} is valid (${res.jobCount} jobs defined)`);
+      const details =
+        res.jobCount && res.jobCount > 0
+          ? ` (${res.jobCount} jobs defined)`
+          : ' (action definition)';
+      console.log(`✓ ${file} is valid${details}`);
     } else {
       console.error(`✗ ${file} validation error:\n    ${res.error}`);
       failureCount++;

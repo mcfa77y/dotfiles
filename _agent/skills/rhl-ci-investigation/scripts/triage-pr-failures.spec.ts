@@ -109,6 +109,24 @@ Error: Process completed with exit code 1.
       expect(diagnostics[0]!.recommendation).toContain('ECS target groups');
     });
 
+    it('detects DNS resolution failures and destroyed ephemeral environments', () => {
+      const dnsLog = `
+      1) [chromium] › tests/e2e/login.test.ts:40:2 › Login flow
+        Error: page.goto: net::ERR_NAME_NOT_RESOLVED at https://link-pr-2418-rhl-3873.staging.empohealth.com/
+        =========================== logs ===========================
+        navigating to "https://link-pr-2418-rhl-3873.staging.empohealth.com/", waiting until "load"
+        ============================================================
+`;
+      const diagnostics = diagnoseLogFailures(dnsLog);
+      expect(diagnostics).toHaveLength(1);
+      expect(diagnostics[0]!.category).toBe(
+        'Preview DNS / Workspace Unresolved (ERR_NAME_NOT_RESOLVED)',
+      );
+      expect(diagnostics[0]!.errorExcerpt).toContain('net::ERR_NAME_NOT_RESOLVED');
+      expect(diagnostics[0]!.rootCause).toContain('premature teardown/destruction');
+      expect(diagnostics[0]!.recommendation).toContain('Frontend PR Closed - Terraform Cleanup');
+    });
+
     it('detects 502 Bad Gateway error', () => {
       const alb502Log = `
 Request failed with status: 502 Bad Gateway

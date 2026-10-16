@@ -51,4 +51,34 @@ describe('rhl-ci-investigation', () => {
       expect(formatBytes(1024 * 1024 * 1024 * 3.5)).toBe('3.50 GiB');
     });
   });
+
+  describe('validateWorkflowYaml', () => {
+    it('validates workflow and action files', async () => {
+      const { validateWorkflowYaml } = await import('./validate_yaml.ts');
+      const fs = await import('node:fs');
+      const path = await import('node:path');
+
+      // Attempt to resolve from active repo or dotfiles
+      const possibleRoots = [process.cwd(), '/Users/joe/Projects/empo_health/main'];
+      let actionPath = 'workspaces/common/.github/actions/setup-node-for-workspace/action.yml';
+      let workflowPath = '.github/workflows/lint-pr.yml';
+
+      for (const root of possibleRoots) {
+        const candidate = path.resolve(root, actionPath);
+        if (fs.existsSync(candidate)) {
+          actionPath = candidate;
+          workflowPath = path.resolve(root, workflowPath);
+          break;
+        }
+      }
+
+      const actionReport = await validateWorkflowYaml(actionPath);
+      expect(actionReport.valid).toBe(true);
+      expect(actionReport.jobCount).toBe(0);
+
+      const workflowReport = await validateWorkflowYaml(workflowPath);
+      expect(workflowReport.valid).toBe(true);
+      expect(workflowReport.jobCount).toBeGreaterThan(0);
+    });
+  });
 });
