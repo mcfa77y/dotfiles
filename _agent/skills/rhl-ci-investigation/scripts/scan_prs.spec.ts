@@ -2,6 +2,7 @@ import { describe, expect, it } from 'bun:test';
 import {
   formatMarkdownReport,
   matchDestroyedBackendSignature,
+  matchFilePattern,
   matchTerraformWorkspaceSignature,
   parsePullRequestsJson,
   type ScannedPRResult,
@@ -53,6 +54,32 @@ describe('scan_prs', () => {
     it('returns null for clean logs', () => {
       const log = 'Apply complete! Resources: 1 added, 0 changed, 0 destroyed.';
       expect(matchTerraformWorkspaceSignature(log)).toBeNull();
+    });
+  });
+  describe('matchFilePattern', () => {
+    it('matches exact and substring filenames case-insensitively', () => {
+      expect(
+        matchFilePattern('workspaces/qa/sources/tests/regression/all-visits.test.ts', 'all-visits'),
+      ).toBe(true);
+      expect(matchFilePattern('workspaces/qa/sources/utils/PageUtils.ts', 'pageutils.ts')).toBe(
+        true,
+      );
+    });
+
+    it('matches regex patterns', () => {
+      expect(
+        matchFilePattern(
+          'workspaces/qa/sources/tests/regression/all-visits.test.ts',
+          'all-visits.*\\.ts$',
+        ),
+      ).toBe(true);
+    });
+
+    it('returns false when no match or empty pattern', () => {
+      expect(matchFilePattern('workspaces/qa/sources/utils/PageUtils.ts', 'nonexistent')).toBe(
+        false,
+      );
+      expect(matchFilePattern('workspaces/qa/sources/utils/PageUtils.ts', '')).toBe(false);
     });
   });
 
@@ -116,6 +143,24 @@ describe('scan_prs', () => {
       expect(report).toContain('`rhl-3873-webhook`');
       expect(report).toContain('getaddrinfo ENOTFOUND');
       expect(report).toContain('Currently selected workspace does not exist');
+    });
+    it('formats matched files when filtering by file pattern', () => {
+      const mockResult: ScannedPRResult = {
+        prNumber: 3154,
+        prTitle: 'fix: optimize visit query',
+        prUrl: 'https://github.com/EmpoHealth/core/pull/3154',
+        author: 'developer',
+        branch: 'fix-visits',
+        destroyedBackendQAFailures: [],
+        terraformInitWorkspaceFailures: [],
+        matchedFiles: ['workspaces/qa/sources/tests/regression/all-visits.test.ts'],
+      };
+
+      const report = formatMarkdownReport([mockResult]);
+      expect(report).toContain('Found **1** matching pull requests.');
+      expect(report).toContain('| PR | Author | Branch | Matched Files |');
+      expect(report).toContain('[#3154](https://github.com/EmpoHealth/core/pull/3154)');
+      expect(report).toContain('`workspaces/qa/sources/tests/regression/all-visits.test.ts`');
     });
   });
 });

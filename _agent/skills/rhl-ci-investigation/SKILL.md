@@ -59,11 +59,11 @@ gh run view <RUN_ID> --log-failed --repo EmpoHealth/core
 # Automated triage of failing PR checks with diagnostic root-cause matching:
 bun run scripts/triage-pr-failures.ts --pr <PR_NUMBER>
 
-# Scan open pull requests for premature environment teardown and Terraform workspace errors:
+# Scan open pull requests for environment teardown/Terraform errors or modified file patterns:
 bun run scripts/scan_prs.ts --repo EmpoHealth/core --limit 100
 bun run scripts/scan_prs.ts --format json
 bun run scripts/scan_prs.ts --pr <PR_NUMBER>
-
+bun run scripts/scan_prs.ts --files all-visits.test.ts
 # Inspect a specific Actions run ID with markdown or JSON output:
 bun run scripts/triage-pr-failures.ts --run-id <RUN_ID> --format markdown
 bun run scripts/triage-pr-failures.ts --run-id <RUN_ID> --format json
@@ -74,10 +74,10 @@ bun run scripts/triage-pr-failures.ts --pr <PR_NUMBER> --dry-run
 # Decompress and parse Vitest HTML metadata report:
 bun run scripts/parse_vitest_results.ts
 
-# Parse and extract Playwright trace action timeline and failure steps:
+# Parse and extract Playwright trace action timeline, failure steps, and network requests:
 bun run scripts/parse_playwright_trace.ts <PATH_TO_TRACE_ZIP_OR_DIR>
 bun run scripts/parse_playwright_trace.ts <PATH_TO_TRACE_ZIP_OR_DIR> --limit 20 --json
-
+bun run scripts/parse_playwright_trace.ts <PATH_TO_TRACE_ZIP_OR_DIR> --network
 # Inspect cache quotas, collisions, and sizes:
 bun run scripts/inspect_cache.ts --details
 

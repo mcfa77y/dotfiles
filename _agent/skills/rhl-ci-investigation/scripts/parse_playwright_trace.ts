@@ -13,10 +13,16 @@ export interface TraceCall {
   class?: string;
   method?: string;
   title?: string;
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
   stack?: Array<{ file?: string; line?: number; column?: number; function?: string }>;
   error?: { name?: string; message?: string; stack?: string };
   message?: string;
+}
+export interface NetworkCall {
+  method: string;
+  url: string;
+  status?: number;
+  statusText?: string;
 }
 
 export interface ParsedTraceResult {
@@ -33,6 +39,7 @@ export interface ParsedTraceResult {
     time?: number;
     stack?: { file?: string; line?: number; column?: number; function?: string };
   }>;
+  networkCalls?: NetworkCall[];
 }
 
 export function findTraceZips(targetPath: string): string[] {
@@ -99,31 +106,84 @@ export function parseTraceLines(
       type: c.type,
       title: c.title,
       method: c.method,
-      selector: c.params?.selector,
+      selector: typeof c.params?.selector === 'string' ? c.params.selector : undefined,
       time: c.startTime,
       stack: c.stack?.[0],
     })),
   };
 }
+export function parseNetworkLines(lines: string[]): NetworkCall[] {
+  const calls: NetworkCall[] = [];
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    try {
+      const obj = JSON.parse(line);
+      const snap = obj.snapshot;
+      if (snap?.request?.url) {
+        calls.push({
+          method: snap.request.method || 'GET',
+          url: snap.request.url,
+          status: snap.response?.status,
+          statusText: snap.response?.statusText,
+        });
+      }
+    } catch {
+      // ignore non-json line
+    }
+  }
+  return calls;
+}
 
-export function parseTraceZip(zipPath: string, limit: number = 15): ParsedTraceResult | null {
+export function parseTraceZip(
+  zipPath: string,
+  limit: number = 15,
+  options?: { includeNetwork?: boolean },
+): ParsedTraceResult | null {
   try {
     const zip = new AdmZip(zipPath);
-    const testTraceEntry = zip.getEntry('test.trace');
-    if (!testTraceEntry) {
+    const entries = zip.getEntries();
+    const traceEntries = entries.filter((e) => e.entryName.endsWith('.trace'));
+    if (traceEntries.length === 0) {
       return null;
     }
 
-    const content = zip.readAsText(testTraceEntry);
-    const lines = content.split('\n');
+    const lines: string[] = [];
+    for (const entry of traceEntries) {
+      const content = zip.readAsText(entry);
+      lines.push(...content.split('\n'));
+    }
+
     const parsed = parseTraceLines(lines, limit);
+
+    let networkCalls: NetworkCall[] | undefined;
+    const networkEntries = entries.filter((e) => e.entryName.endsWith('.network'));
+    if (networkEntries.length > 0) {
+      const netLines: string[] = [];
+      for (const entry of networkEntries) {
+        const netContent = zip.readAsText(entry);
+        netLines.push(...netContent.split('\n'));
+      }
+      const parsedNet = parseNetworkLines(netLines);
+      if (options?.includeNetwork) {
+        networkCalls = parsedNet;
+      } else {
+        const failed = parsedNet.filter(
+          (n) => typeof n.status === 'number' && (n.status >= 400 || n.status < 0),
+        );
+        if (failed.length > 0) {
+          networkCalls = failed;
+        }
+      }
+    }
 
     return {
       traceFile: zipPath,
       ...parsed,
+      networkCalls,
     };
-  } catch (err: any) {
-    console.error(`Failed to parse ${zipPath}: ${err.message}`);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`Failed to parse ${zipPath}: ${message}`);
     return null;
   }
 }
@@ -144,6 +204,16 @@ export function formatTextReport(results: ParsedTraceResult[]): string {
         out.push(`  - [${call.type}] ${call.title || call.method || 'call'}${detail}${loc}`);
       }
     }
+    if (res.networkCalls && res.networkCalls.length > 0) {
+      out.push(`\nNetwork Requests (${res.networkCalls.length}):`);
+      for (const net of res.networkCalls.slice(0, 20)) {
+        const statusStr = net.status !== undefined ? ` [${net.status}]` : '';
+        out.push(`  - ${net.method}${statusStr} ${net.url}`);
+      }
+      if (res.networkCalls.length > 20) {
+        out.push(`  ... and ${res.networkCalls.length - 20} more`);
+      }
+    }
     out.push('======================================================\n');
   }
 
@@ -159,29 +229,32 @@ export function buildCli(): Command {
     .argument('<path>', 'Path to trace.zip file or directory containing trace.zip files')
     .option('-l, --limit <number>', 'Number of preceding actions before failure to display', '15')
     .option('--json', 'Output results in JSON format')
-    .action(async (targetPath: string, options: { limit: string; json?: boolean }) => {
-      const limit = parseInt(options.limit, 10) || 15;
-      const traceZips = findTraceZips(targetPath);
+    .option('--network', 'Include all network requests captured in trace')
+    .action(
+      async (targetPath: string, options: { limit: string; json?: boolean; network?: boolean }) => {
+        const limit = parseInt(options.limit, 10) || 15;
+        const traceZips = findTraceZips(targetPath);
 
-      if (traceZips.length === 0) {
-        console.error(`No trace .zip files found in '${targetPath}'.`);
-        process.exit(1);
-      }
-
-      const results: ParsedTraceResult[] = [];
-      for (const zipPath of traceZips) {
-        const parsed = parseTraceZip(zipPath, limit);
-        if (parsed) {
-          results.push(parsed);
+        if (traceZips.length === 0) {
+          console.error(`No trace .zip files found in '${targetPath}'.`);
+          process.exit(1);
         }
-      }
 
-      if (options.json) {
-        console.log(JSON.stringify(results, null, 2));
-      } else {
-        console.log(formatTextReport(results));
-      }
-    });
+        const results: ParsedTraceResult[] = [];
+        for (const zipPath of traceZips) {
+          const parsed = parseTraceZip(zipPath, limit, { includeNetwork: options.network });
+          if (parsed) {
+            results.push(parsed);
+          }
+        }
+
+        if (options.json) {
+          console.log(JSON.stringify(results, null, 2));
+        } else {
+          console.log(formatTextReport(results));
+        }
+      },
+    );
 
   return program;
 }

@@ -44,6 +44,7 @@ export interface ScannedPRResult {
   branch: string;
   destroyedBackendQAFailures: FailureMatch[];
   terraformInitWorkspaceFailures: FailureMatch[];
+  matchedFiles?: string[];
 }
 
 export interface ScanOptions {
@@ -53,6 +54,7 @@ export interface ScanOptions {
   pr?: number;
   format?: 'table' | 'json' | 'markdown';
   dryRun?: boolean;
+  files?: string;
 }
 
 /**
@@ -86,6 +88,17 @@ export function matchTerraformWorkspaceSignature(logText: string): string | null
   }
   return null;
 }
+/**
+ * Matches a file path against a regex or case-insensitive pattern.
+ */
+export function matchFilePattern(filePath: string, pattern: string): boolean {
+  if (!pattern) return false;
+  try {
+    return new RegExp(pattern, 'i').test(filePath);
+  } catch {
+    return filePath.toLowerCase().includes(pattern.toLowerCase());
+  }
+}
 
 /**
  * Parses raw JSON output from `gh pr list` into typed PullRequest array.
@@ -114,18 +127,34 @@ export function formatMarkdownReport(results: ScannedPRResult[]): string {
     return '### Open PR Environment Scan\n\nNo affected pull requests detected. All ephemeral environments and workflows are healthy.\n';
   }
 
+  const isFileScan = results.some((r) => r.matchedFiles && r.matchedFiles.length > 0);
   let out = '### Open PR Environment Scan Report\n\n';
-  out += `Found **${results.length}** affected pull requests.\n\n`;
-  out += '| PR | Author | Branch | Destroyed QA Failures | Terraform Workspace Errors |\n';
-  out += '|---|---|---|:---:|:---:|\n';
+  out += `Found **${results.length}** matching pull requests.\n\n`;
 
-  for (const r of results) {
-    out += `| [#${r.prNumber}](${r.prUrl}) | @${r.author} | \`${r.branch}\` | ${r.destroyedBackendQAFailures.length} | ${r.terraformInitWorkspaceFailures.length} |\n`;
+  if (isFileScan) {
+    out += '| PR | Author | Branch | Matched Files |\n';
+    out += '|---|---|---|:---:|\n';
+    for (const r of results) {
+      const count = r.matchedFiles ? r.matchedFiles.length : 0;
+      out += `| [#${r.prNumber}](${r.prUrl}) | @${r.author} | \`${r.branch}\` | ${count} |\n`;
+    }
+  } else {
+    out += '| PR | Author | Branch | Destroyed QA Failures | Terraform Workspace Errors |\n';
+    out += '|---|---|---|:---:|:---:|\n';
+    for (const r of results) {
+      out += `| [#${r.prNumber}](${r.prUrl}) | @${r.author} | \`${r.branch}\` | ${r.destroyedBackendQAFailures.length} | ${r.terraformInitWorkspaceFailures.length} |\n`;
+    }
   }
 
-  out += '\n#### Failure Details\n\n';
+  out += '\n#### Details\n\n';
   for (const r of results) {
     out += `##### PR #${r.prNumber}: ${r.prTitle}\n`;
+    if (r.matchedFiles && r.matchedFiles.length > 0) {
+      out += '- **Matched Files**:\n';
+      for (const f of r.matchedFiles) {
+        out += `  - \`${f}\`\n`;
+      }
+    }
     if (r.destroyedBackendQAFailures.length > 0) {
       out += '- **Destroyed Backend Failures**:\n';
       for (const f of r.destroyedBackendQAFailures) {
@@ -174,8 +203,23 @@ export async function fetchFailedRunLog(repo: string, runId: number): Promise<st
     const cmd = `gh run view ${runId} --repo ${repo} --log-failed`;
     const result = await $`sh -c ${cmd}`.quiet().text();
     return result;
-  } catch (err: any) {
-    return err?.stdout?.toString() || '';
+  } catch (err: unknown) {
+    if (err && typeof err === 'object' && 'stdout' in err) {
+      return String(err.stdout);
+    }
+    return '';
+  }
+}
+export async function fetchPRModifiedFiles(repo: string, prNumber: number): Promise<string[]> {
+  try {
+    const cmd = `gh pr diff ${prNumber} --repo ${repo} --name-only`;
+    const result = await $`sh -c ${cmd}`.quiet().text();
+    return result
+      .split('\n')
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+  } catch {
+    return [];
   }
 }
 
@@ -208,9 +252,6 @@ export async function scanPRs(options: ScanOptions = {}): Promise<ScannedPRResul
 
   for (const pr of prs) {
     if (!pr.headRefName) continue;
-    const runs = await fetchBranchRuns(repo, pr.headRefName, 10);
-    const failedRuns = runs.filter((r) => r.conclusion === 'failure');
-    if (failedRuns.length === 0) continue;
 
     const result: ScannedPRResult = {
       prNumber: pr.number,
@@ -222,35 +263,49 @@ export async function scanPRs(options: ScanOptions = {}): Promise<ScannedPRResul
       terraformInitWorkspaceFailures: [],
     };
 
-    for (const run of failedRuns) {
-      const log = await fetchFailedRunLog(repo, run.databaseId);
-      const destroyedMatch = matchDestroyedBackendSignature(log);
-      if (destroyedMatch) {
-        result.destroyedBackendQAFailures.push({
-          runId: run.databaseId,
-          jobName: run.name,
-          runUrl: run.url,
-          category: 'destroyed-backend',
-          matchedText: destroyedMatch,
-        });
+    if (options.files) {
+      const files = await fetchPRModifiedFiles(repo, pr.number);
+      const matched = files.filter((f) => matchFilePattern(f, options.files!));
+      if (matched.length > 0) {
+        result.matchedFiles = matched;
       }
+    } else {
+      const runs = await fetchBranchRuns(repo, pr.headRefName, 10);
+      const failedRuns = runs.filter((r) => r.conclusion === 'failure');
+      if (failedRuns.length === 0) continue;
 
-      const tfMatch = matchTerraformWorkspaceSignature(log);
-      if (tfMatch) {
-        result.terraformInitWorkspaceFailures.push({
-          runId: run.databaseId,
-          jobName: run.name,
-          runUrl: run.url,
-          category: 'terraform-workspace',
-          matchedText: tfMatch,
-        });
+      for (const run of failedRuns) {
+        const log = await fetchFailedRunLog(repo, run.databaseId);
+        const destroyedMatch = matchDestroyedBackendSignature(log);
+        if (destroyedMatch) {
+          result.destroyedBackendQAFailures.push({
+            runId: run.databaseId,
+            jobName: run.name,
+            runUrl: run.url,
+            category: 'destroyed-backend',
+            matchedText: destroyedMatch,
+          });
+        }
+
+        const tfMatch = matchTerraformWorkspaceSignature(log);
+        if (tfMatch) {
+          result.terraformInitWorkspaceFailures.push({
+            runId: run.databaseId,
+            jobName: run.name,
+            runUrl: run.url,
+            category: 'terraform-workspace',
+            matchedText: tfMatch,
+          });
+        }
       }
     }
 
-    if (
+    const hasFailures =
       result.destroyedBackendQAFailures.length > 0 ||
-      result.terraformInitWorkspaceFailures.length > 0
-    ) {
+      result.terraformInitWorkspaceFailures.length > 0;
+    const hasMatchedFiles = (result.matchedFiles?.length ?? 0) > 0;
+
+    if (options.files ? hasMatchedFiles : hasFailures) {
       affectedResults.push(result);
     }
   }
@@ -269,6 +324,7 @@ if (import.meta.main) {
     .option('-a, --author <author>', 'Filter by PR author')
     .option('-p, --pr <pr>', 'Scan a single pull request by number')
     .option('-f, --format <format>', 'Output format: table, json, or markdown', 'markdown')
+    .option('--files <pattern>', 'Filter open PRs modifying files matching pattern or path')
     .action(async (opts) => {
       const limit = parseInt(opts.limit, 10) || 100;
       const prNumber = opts.pr ? parseInt(opts.pr, 10) : undefined;
@@ -278,6 +334,7 @@ if (import.meta.main) {
         limit,
         author: opts.author,
         pr: prNumber,
+        files: opts.files,
       });
 
       if (opts.format === 'json') {
