@@ -1,0 +1,34 @@
+{
+  "$schema": "https://unpkg.com/knip@5/overview/configuration-schema.json",
+  "rules": {
+    "duplicates": "off"
+  },
+  "workspaces": {
+    ".": {
+      "entry": ["*/scripts/*.ts", "*/scripts/*.spec.ts"],
+      "project": ["*/scripts/**/*.ts"],
+      "ignore": ["cloudflare/**"],
+      "ignoreDependencies": ["sonarqube-scanner"],
+      "ignoreBinaries": ["whiteboard"]
+    },
+    "rhl-ci-investigation": {
+      "entry": ["scripts/*.ts", "scripts/*.spec.ts"],
+      "project": ["scripts/**/*.ts"],
+      "ignoreDependencies": ["@types/adm-zip", "@types/js-yaml"]
+    },
+    "rhl-mock-services": {
+      "entry": ["scripts/*.ts", "scripts/*.spec.ts"],
+      "project": ["scripts/**/*.ts"],
+      "ignoreBinaries": ["build"]
+    },
+    "rhl-pr-helper": {
+      "entry": ["scripts/*.ts", "scripts/*.spec.ts"],
+      "project": ["scripts/**/*.ts"],
+      "ignoreBinaries": ["linear", "wt"]
+    },
+    "*": {
+      "entry": ["scripts/*.ts", "scripts/*.spec.ts"],
+      "project": ["scripts/**/*.ts"]
+    }
+  }
+}

@@ -11,6 +11,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
     "@types/bun": "latest",
+    "knip": "^6.42.1",
     "oxlint": "^1.86.0",
     "sonarqube-scanner": "^5.0.1",
     "typescript": "^7.0.2"
@@ -23,7 +24,8 @@
     "lint:biome": "bun x biome lint .",
     "format": "bun x biome format --write .",
     "format:check": "bun x biome format .",
-    "check": "bun run format:check && bun run lint && bun run typecheck && bun run test",
+    "knip": "bun x knip",
+    "check": "bun run format:check && bun run lint && bun run typecheck && bun run knip && bun run test",
     "sonar": "bun x sonar-scanner"
   }
 }
