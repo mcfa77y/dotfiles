@@ -147,6 +147,24 @@ bun run ~/.gemini/config/skills/rhl-pr-helper/scripts/create_pr.ts --no-draft <p
 cat <path_to_message.txt> | bun run ~/.gemini/config/skills/rhl-pr-helper/scripts/create_pr.ts
 ```
 
+### 8. `decommission_pr_ticket.ts`
+Safely decommissions superseded, duplicate, or obsolete PRs:
+- Posts explanatory comment linking replacement PRs to the Linear issue.
+- Sets Linear status to `Canceled` (or `Done` / `Duplicate`).
+- Optionally closes the GitHub PR via `gh pr close`.
+- Removes the local worktree and deletes the local and remote branch.
+```bash
+# Decommission with replacement PRs and full cleanup
+bun run scripts/decommission_pr_ticket.ts \
+  --ticket RHL-4323 \
+  --replacement-prs 3115 3121 3122 \
+  --state Canceled \
+  --branch rhl-4323-optimize-pr-backend-test-and-build-deploy-job-duration
+
+# Preview actions with dry-run
+bun run scripts/decommission_pr_ticket.ts --ticket RHL-4323 --replacement-prs 3115 --dry-run
+```
+
 ---
 
 ## Standard PR Template
