@@ -29,35 +29,42 @@ A PR is considered **READY** to enter the Mergify merge queue when:
 
 ---
 
+## Run Monitoring Policy
+
+- **Single-shot audit and action only**: Evaluate PR status, report results, and queue ready PRs. Do NOT autonomously monitor, poll, sleep, or watch in-progress CI runs or merge queues.
+- **Prompt when monitoring is needed**: If PRs have pending checks or queue operations that require tracking, report their current state and prompt the user (via `ask`) asking whether to start a monitoring session. Never initiate monitoring without user confirmation.
+
+---
+
 ## Bundled CLI Tool
 
 The primary tool is located at:
-`~/.gemini/config/skills/rhl-mergify-queue/scripts/queue_prs.ts`
+`~/.omp/agent/skills/rhl-mergify-queue/scripts/queue_prs.ts`
 
 ### 1. Inspect PR Readiness
 Audit open PRs for a specific author or repository:
 ```bash
 # Audit open PRs for the current user
-bun run ~/.gemini/config/skills/rhl-mergify-queue/scripts/queue_prs.ts
+bun run ~/.omp/agent/skills/rhl-mergify-queue/scripts/queue_prs.ts
 
 # Audit open PRs for a specific author and repository
-bun run ~/.gemini/config/skills/rhl-mergify-queue/scripts/queue_prs.ts --repo EmpoHealth/core --author mcfa77y
+bun run ~/.omp/agent/skills/rhl-mergify-queue/scripts/queue_prs.ts --repo EmpoHealth/core --author mcfa77y
 
 # Output Markdown report table (ideal for agent responses)
-bun run ~/.gemini/config/skills/rhl-mergify-queue/scripts/queue_prs.ts --format markdown
+bun run ~/.omp/agent/skills/rhl-mergify-queue/scripts/queue_prs.ts --format markdown
 
 # Output structured JSON
-bun run ~/.gemini/config/skills/rhl-mergify-queue/scripts/queue_prs.ts --format json
+bun run ~/.omp/agent/skills/rhl-mergify-queue/scripts/queue_prs.ts --format json
 ```
 
 ### 2. Queue a Pull Request
 Queue a specific PR or all verified ready PRs:
 ```bash
 # Queue a specific PR by number
-bun run ~/.gemini/config/skills/rhl-mergify-queue/scripts/queue_prs.ts --queue 3003
+bun run ~/.omp/agent/skills/rhl-mergify-queue/scripts/queue_prs.ts --queue 3003
 
 # Automatically queue all PRs verified as READY
-bun run ~/.gemini/config/skills/rhl-mergify-queue/scripts/queue_prs.ts --queue-all-ready
+bun run ~/.omp/agent/skills/rhl-mergify-queue/scripts/queue_prs.ts --queue-all-ready
 ```
 
 ---
@@ -66,5 +73,5 @@ bun run ~/.gemini/config/skills/rhl-mergify-queue/scripts/queue_prs.ts --queue-a
 
 The skill includes automated tests executed via `bun test`:
 ```bash
-bun test ~/.gemini/config/skills/rhl-mergify-queue/scripts/queue_prs.spec.ts
+bun test ~/.omp/agent/skills/rhl-mergify-queue/scripts/queue_prs.spec.ts
 ```
