@@ -1,6 +1,6 @@
 {
   "name": "rhl-post-pr-review",
-  "module": "index.ts",
+  "module": "scripts/post-review.ts",
   "type": "module",
   "private": true,
   "devDependencies": {

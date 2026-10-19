@@ -1,6 +1,6 @@
 {
   "name": "rhl-docker-sbom",
-  "module": "index.ts",
+  "module": "scripts/verify_docker_sbom_caching.ts",
   "type": "module",
   "private": true,
   "devDependencies": {

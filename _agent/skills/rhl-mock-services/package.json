@@ -1,6 +1,6 @@
 {
   "name": "rhl-mock-services",
-  "module": "index.ts",
+  "module": "scripts/mock_service_ctl.ts",
   "type": "module",
   "private": true,
   "devDependencies": {

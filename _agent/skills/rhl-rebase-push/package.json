@@ -1,6 +1,6 @@
 {
   "name": "rhl-rebase-push",
-  "module": "index.ts",
+  "module": "scripts/rebase_stack_onto.ts",
   "type": "module",
   "private": true,
   "devDependencies": {
