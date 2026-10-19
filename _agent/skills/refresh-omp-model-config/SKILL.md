@@ -1,5 +1,5 @@
 ---
-name: omp-refresh-model-config
+name: refresh-omp-model-config
 description: "Refresh any agent/config.yml.provider model catalog from omp models, picking the newest/best models per role. Use when new models are available and a provider config (empo-ai, devin, etc.) needs updating."
 ---
 
