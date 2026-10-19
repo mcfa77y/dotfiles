@@ -48,13 +48,15 @@ Drop any folder of code, docs, papers, images, or video into graphify and get a 
 
 ## Helper Script
 
-A standalone, parameterized helper script is available at `scripts/run_graphify.py` (relative to this skill directory):
+A standalone, parameterized helper script is available at `scripts/run_graphify.ts` (relative to this skill directory):
 
 ```bash
-python3 /Users/joe/.gemini/config/skills/graphify/scripts/run_graphify.py [path] [--output dir] [--directed] [--no-viz]
+bun run scripts/run_graphify.ts build [path] [--output dir] [--directed] [--no-viz] [--dry-run]
+bun run scripts/run_graphify.ts status [path]
+bun run scripts/run_graphify.ts query "<term>" [path]
 ```
 
-Use this script to execute end-to-end AST extraction, community clustering, diagnostics, and report generation in a single command.
+Use this script to execute end-to-end AST extraction, community clustering, diagnostics, graph metrics status, query navigation, and report generation in a single command.
 
 ## What You Must Do When Invoked
 
