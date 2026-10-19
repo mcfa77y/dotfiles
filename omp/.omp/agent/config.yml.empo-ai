@@ -2,8 +2,8 @@ setupVersion: 2
 modelRoles:
   default: empo-ai/google/gemini-3.8-flash:high
   task: empo-ai/google/gemini-3.8-flash:high
-  slow: empo-ai/google/gemini-3.8-flash:high
-  plan: empo-ai/google/gemini-3.8-flash:medium
+  slow: empo-ai/google/gemini-4-argon:high
+  plan: empo-ai/google/gemini-4-argon:medium
   vision: empo-ai/google/gemini-3.8-flash:high
   designer: empo-ai/google/gemini-3.8-flash:high
   advisor: empo-ai/google/gemini-3.8-flash:high
@@ -18,9 +18,9 @@ retry:
       - empo-ai/google/gemini-3.7-flash:high
       - empo-ai/google/gemini-3.6-flash:high
     slow:
-      - empo-ai/google/gemini-3.8-flash:medium
+      - empo-ai/google/gemini-4-argon:medium
+      - empo-ai/google/gemini-3.8-flash:high
       - empo-ai/google/gemini-3.7-flash:high
-      - empo-ai/google/gemini-3.6-flash:high
     task:
       - empo-ai/google/gemini-3.8-flash:medium
       - empo-ai/google/gemini-3.7-flash:high
@@ -34,9 +34,9 @@ retry:
       - empo-ai/google/gemini-3.7-flash:high
       - empo-ai/google/gemini-3.6-flash:high
     plan:
-      - empo-ai/google/gemini-3.8-flash:low
+      - empo-ai/google/gemini-4-argon:low
+      - empo-ai/google/gemini-3.8-flash:medium
       - empo-ai/google/gemini-3.7-flash:medium
-      - empo-ai/google/gemini-3.6-flash:high
     commit:
       - empo-ai/google/gemini-3.1-flash-lite:minimal
       - empo-ai/google/gemini-2.5-flash-lite:minimal

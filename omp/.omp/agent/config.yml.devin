@@ -5,7 +5,7 @@ modelRoles:
   slow: devin/claude-opus-5-5-fast:high
   vision: devin/gemini-3-8-flash:medium
   plan: devin/gpt-6-astra-fast:low
-  designer: devin/claude-sonnet-5:medium
+  designer: devin/claude-sonnet-5-5:medium
   commit: devin/glm-5-3-flash-1m:low
   tiny: devin/swe-1-7-lightning:medium
   task: devin/glm-5-3-1m:high
@@ -38,9 +38,9 @@ retry:
       - devin/gpt-6-astra:low
       - devin/gpt-5-6-luna:medium
     designer:
-      - devin/claude-sonnet-5:low
+      - devin/claude-sonnet-5-5:low
+      - devin/claude-sonnet-5:medium
       - devin/claude-sonnet-4-6-1m:high
-      - devin/gpt-6-astra-fast:medium
     commit:
       - devin/swe-1-7-lightning:medium
       - devin/swe-2:medium
