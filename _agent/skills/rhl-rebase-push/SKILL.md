@@ -33,6 +33,11 @@ Rebases the current working branch onto the latest `origin/main` and force-pushe
        This safely shelves unrelated unstaged edits (preventing git rebase aborts), runs `yarn install` to let Yarn auto-resolve lockfile markers, stages the resolved lockfile(s), and advances the rebase.
      - **Other Code Conflicts**: Do not force through invalid merges. Report failing files and conflict details to the user. Provide choices to resolve conflicts or abort via `git rebase --abort`.
 
+    - **Ancestry Divergence & Upstream Conflict Cuts**: When older intermediate ancestor commits (e.g. outdated dependency bumps or merged PRs) cause structural rebase conflicts, use `rebase_stack_onto.ts`:
+      ```bash
+      bun run scripts/rebase_stack_onto.ts --new-base main --old-base <ancestor-sha> --push
+      ```
+      This executes `git rebase --onto <new-base> <old-base> <branch>`, skipping conflicting older ancestors and force-pushing the re-anchored branch.
 4. **Force-Push with Lease**:
    - Once rebase is complete:
      ```bash
