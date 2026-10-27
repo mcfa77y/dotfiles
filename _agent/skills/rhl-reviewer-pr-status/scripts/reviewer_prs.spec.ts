@@ -3,6 +3,7 @@ import {
   evaluateReviewerStatus,
   formatMarkdownReport,
   formatSlackDigest,
+  formatSlackDmMessages,
   getLatestReviewsByUser,
   groupPrsByReviewers,
   type PullRequest,
@@ -213,6 +214,64 @@ describe('reviewer_prs', () => {
       expect(slack).toContain('👤 *@edahlseng*');
       expect(slack).toContain('*(Changes addressed — re-review requested)*');
       expect(slack).toContain('👤 *@singhmadhurima123*');
+    });
+  });
+
+  describe('formatSlackDmMessages', () => {
+    it('formats copy-friendly Slack DMs grouped by reviewer without blockquote markers', () => {
+      const pr1: PullRequest = {
+        number: 3172,
+        title: 'fix: Await visit creation in all-visits test suite (RHL-4540)',
+        url: 'https://github.com/EmpoHealth/core/pull/3172',
+        reviewRequests: [{ login: 'pm-pp' }, { login: 'simon57b' }],
+      };
+      const pr2: PullRequest = {
+        number: 2970,
+        title: 'fix: Dismiss floating notifications on tab clicks (RHL-4491)',
+        url: 'https://github.com/EmpoHealth/core/pull/2970',
+        reviewRequests: [{ login: 'pm-pp' }],
+      };
+
+      const reviews = new Map<number, Review[]>([
+        [3172, []],
+        [
+          2970,
+          [
+            {
+              user: { login: 'pm-pp' },
+              state: 'CHANGES_REQUESTED',
+              submitted_at: '2026-10-18T10:00:00Z',
+            },
+          ],
+        ],
+      ]);
+
+      const summaries = groupPrsByReviewers([pr1, pr2], reviews);
+      const dmMessages = formatSlackDmMessages(summaries);
+
+      // Header and reviewer headers
+      expect(dmMessages).toContain('# Slack Review Requests (Grouped by Reviewer)');
+      expect(dmMessages).toContain('## 1. `@pm-pp`');
+      expect(dmMessages).toContain('## 2. `@simon57b`');
+
+      // Must NOT contain markdown blockquote '>' markers
+      expect(dmMessages).not.toContain('\n> ');
+      expect(dmMessages).not.toMatch(/^> /m);
+
+      // Specific feedback tags
+      expect(dmMessages).toContain(
+        '• [#2970](https://github.com/EmpoHealth/core/pull/2970): fix: Dismiss floating notifications on tab clicks (RHL-4491) *(Feedback addressed)*',
+      );
+      expect(dmMessages).toContain(
+        '• [#3172](https://github.com/EmpoHealth/core/pull/3172): fix: Await visit creation in all-visits test suite (RHL-4540) *(Initial review)*',
+      );
+
+      // Target single reviewer option
+      const singleReviewer = formatSlackDmMessages(summaries, {
+        targetReviewer: 'simon57b',
+      });
+      expect(singleReviewer).toContain('## 1. `@simon57b`');
+      expect(singleReviewer).not.toContain('`@pm-pp`');
     });
   });
 });

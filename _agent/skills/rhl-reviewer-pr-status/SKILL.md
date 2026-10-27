@@ -23,13 +23,17 @@ bun run ~/.omp/agent/skills/rhl-reviewer-pr-status/scripts/reviewer_prs.ts --rev
 
 # Generate a ready-to-paste Slack digest for reviewers
 bun run ~/.omp/agent/skills/rhl-reviewer-pr-status/scripts/reviewer_prs.ts --format slack
+# Generate individual copy-friendly Slack DM messages per reviewer (clean markdown without blockquote `>`)
+bun run ~/.omp/agent/skills/rhl-reviewer-pr-status/scripts/reviewer_prs.ts --format slack-dm
+
+# Generate Slack DM messages and write directly to markdown file
+bun run ~/.omp/agent/skills/rhl-reviewer-pr-status/scripts/reviewer_prs.ts --format slack-dm -o docs/slack-review-requests.md
 
 # Generate Slack digest with critical unfreeze PR highlighted
 bun run ~/.omp/agent/skills/rhl-reviewer-pr-status/scripts/reviewer_prs.ts --format slack --unfreeze-pr 3146
 
 # Output structured JSON for automation or subagents
 bun run ~/.omp/agent/skills/rhl-reviewer-pr-status/scripts/reviewer_prs.ts --format json
-```
 
 ### Testing
 Run unit test suite:

@@ -91,6 +91,7 @@ bun run scripts/validate_yaml.ts .github/workflows/
 - **Preview DNS / Workspace Unresolved (`net::ERR_NAME_NOT_RESOLVED`, `NXDOMAIN`)**: Diagnoses premature teardown or destruction of preview/ephemeral environments (e.g. concurrent PR cleanup workflows) or missing Cloudflare DNS records.
 - **Yarn Berry Immutable Lockfile (`YN0028`)**: Diagnoses unsynced `yarn.lock` under `--immutable`.
 - **Docker Push / Registry Auth Failures**: Diagnoses expired ECR credentials or missing IAM push permissions.
+- **External Auth / Clerk API Failures (`sendCustomResetPasswordInvitation`, retry exhaustion)**: Diagnoses backend mark-fulfillment or invitation failures caused by Clerk API outages, network degradation, or rate limits.
 
 ### 5. Classify Each Failure
 Determine which category each failure falls into:

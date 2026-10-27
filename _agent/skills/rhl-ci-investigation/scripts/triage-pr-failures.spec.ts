@@ -207,6 +207,23 @@ One or more frontend test shards failed or were cancelled.
       );
       expect(diagnostics[0]!.recommendation).toContain('yarn vitest run');
     });
+    it('detects external Clerk auth invitation failure after max retries', () => {
+      const clerkLog = `
+2026-10-27T19:44:03.9178767Z         "message": "Failed to mark fulfillment: Failed to handle both email and phone number invitation: Clerk sendCustomResetPasswordInvitation error after 3 attempts!"
+2026-10-27T19:44:03.9181358Z [2026-10-27 12:44:03] ERROR: AxiosError: Request failed with status code 500
+      `;
+
+      const diagnostics = diagnoseLogFailures(clerkLog);
+      expect(diagnostics).toHaveLength(1);
+      expect(diagnostics[0]!.category).toBe('External Auth / Clerk API Error');
+      expect(diagnostics[0]!.errorExcerpt).toContain(
+        'Clerk sendCustomResetPasswordInvitation error after 3 attempts',
+      );
+      expect(diagnostics[0]!.rootCause).toContain(
+        'Clerk authentication invitation / password reset API',
+      );
+      expect(diagnostics[0]!.recommendation).toContain('status.clerk.com');
+    });
 
     it('detects multiple diagnostic failures in a single combined log', () => {
       const multiLog = `

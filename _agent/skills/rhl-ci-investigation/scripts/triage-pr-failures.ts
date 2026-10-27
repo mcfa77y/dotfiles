@@ -292,6 +292,23 @@ export function diagnoseLogFailures(logText: string): DiagnosticFailure[] {
         'Run the failing test file locally (e.g. `yarn vitest run <file>` or `yarn test:browser`), inspect test screenshot artifacts in `.tests-results/screenshots`, and verify locator or assertion timing.',
     });
   }
+  // Rule 6: External Auth / Clerk API failure (e.g. mark-fulfillment reset password invitation errors)
+  const clerkErrorIndex = lines.findIndex(
+    (line) =>
+      /Clerk sendCustomResetPasswordInvitation/i.test(line) ||
+      /Clerk\s+.*error after \d+ attempts/i.test(line) ||
+      (/@clerk\/backend/i.test(line) && /status(?:Code)?:?\s*5\d\d/i.test(line)),
+  );
+  if (clerkErrorIndex !== -1) {
+    diagnostics.push({
+      category: 'External Auth / Clerk API Error',
+      errorExcerpt: extractContextExcerpt(lines, clerkErrorIndex),
+      rootCause:
+        'Backend failed while calling Clerk authentication invitation / password reset API (e.g. sendCustomResetPasswordInvitation retry exhaustion). Indicates external Clerk service degradation, network timeout, rate limit, or invalid Clerk API credentials.',
+      recommendation:
+        'Check Clerk status dashboard (status.clerk.com), inspect preview/staging backend environment CLERK_SECRET_KEY, and re-run once Clerk API recovers.',
+    });
+  }
 
   return diagnostics;
 }

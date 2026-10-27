@@ -346,6 +346,68 @@ export function formatSlackDigest(
 }
 
 /**
+ * Formats individual, copy-paste ready Slack DM messages grouped by reviewer.
+ * Does not include Markdown blockquote ('>') markers so users can cleanly copy
+ * directly into Slack DMs.
+ */
+export function formatSlackDmMessages(
+  summaries: Map<string, ReviewerSummary>,
+  options: { targetReviewer?: string } = {},
+): string {
+  const lines: string[] = [
+    '# Slack Review Requests (Grouped by Reviewer)',
+    '',
+    'Ready-to-send Slack messages for each reviewer with the consolidated list of pull requests awaiting their review or re-review.',
+    '',
+    '---',
+    '',
+  ];
+
+  let reviewerIndex = 1;
+  for (const [reviewer, summary] of summaries.entries()) {
+    if (options.targetReviewer && reviewer !== options.targetReviewer) continue;
+
+    const pendingItems = [...summary.changesRequested, ...summary.reviewRequested];
+    if (pendingItems.length === 0) continue;
+
+    lines.push(`## ${reviewerIndex}. \`@${reviewer}\``);
+    lines.push('');
+    lines.push(
+      `Hi \`@${reviewer}\`! 👋 When you have a moment, could you please take a look at the following PR${
+        pendingItems.length === 1 ? '' : 's'
+      } awaiting your review / re-review?`,
+    );
+    lines.push('');
+
+    if (summary.changesRequested.length > 0) {
+      for (const item of summary.changesRequested) {
+        lines.push(`• [#${item.prNumber}](${item.url}): ${item.title} *(Feedback addressed)*`);
+      }
+    }
+
+    if (summary.reviewRequested.length > 0) {
+      for (const item of summary.reviewRequested) {
+        lines.push(`• [#${item.prNumber}](${item.url}): ${item.title} *(Initial review)*`);
+      }
+    }
+
+    lines.push('');
+    lines.push('Thanks so much! 🙏');
+    lines.push('');
+    lines.push('---');
+    lines.push('');
+
+    reviewerIndex++;
+  }
+
+  if (lines[lines.length - 2] === '---') {
+    lines.splice(lines.length - 2, 2);
+  }
+
+  return lines.join('\n').trim() + '\n';
+}
+
+/**
  * Main execution logic.
  */
 export async function run(): Promise<void> {
@@ -363,7 +425,20 @@ export async function run(): Promise<void> {
     )
     .option('-a, --author <author>', 'Target PR author (default: mcfa77y)', 'mcfa77y')
     .option('--reviewer <reviewer>', 'Filter status for a specific reviewer login')
-    .option('-f, --format <format>', 'Output format: markdown, slack, json, table', 'markdown')
+    .option(
+      '-f, --format <format>',
+      'Output format: markdown, slack, slack-dm, json, table',
+      'markdown',
+    )
+    .option(
+      '--unapproved-only',
+      'Filter out PRs with reviewDecision=APPROVED to focus only on pending reviews',
+      false,
+    )
+    .option(
+      '-o, --output <file>',
+      'Write output directly to a file path (e.g. docs/slack-review-requests.md)',
+    )
     .option(
       '--unfreeze-pr <number>',
       'Highlight a specific PR number as deployment unfreeze critical path',
@@ -401,29 +476,47 @@ export async function run(): Promise<void> {
   }
 
   // 3. Group and analyze
-  const summaries = groupPrsByReviewers(prs, reviewsByPr);
+  // 3. Filter PRs if unapproved-only or slack-dm format
+  let activePrs = prs;
+  if (opts.unapprovedOnly || format === 'slack-dm') {
+    activePrs = prs.filter(
+      (pr) =>
+        pr.reviewDecision === 'REVIEW_REQUIRED' ||
+        pr.reviewDecision === 'CHANGES_REQUESTED' ||
+        !pr.reviewDecision,
+    );
+  }
 
-  // 4. Output according to requested format
+  // 4. Group and analyze
+  const summaries = groupPrsByReviewers(activePrs, reviewsByPr);
+
+  // 5. Generate output according to requested format
+  let output = '';
   if (format === 'json') {
     if (targetReviewer) {
-      console.log(JSON.stringify(summaries.get(targetReviewer) || null, null, 2));
+      output = JSON.stringify(summaries.get(targetReviewer) || null, null, 2);
     } else {
       const obj: Record<string, ReviewerSummary> = {};
       for (const [k, v] of summaries.entries()) {
         obj[k] = v;
       }
-      console.log(JSON.stringify(obj, null, 2));
+      output = JSON.stringify(obj, null, 2);
     }
-    return;
+  } else if (format === 'slack') {
+    output = formatSlackDigest(summaries, { unfreezePrNumber: opts.unfreezePr });
+  } else if (format === 'slack-dm') {
+    output = formatSlackDmMessages(summaries, { targetReviewer });
+  } else {
+    // Default: markdown
+    output = formatMarkdownReport(summaries, targetReviewer);
   }
 
-  if (format === 'slack') {
-    console.log(formatSlackDigest(summaries, { unfreezePrNumber: opts.unfreezePr }));
-    return;
+  if (opts.output) {
+    await Bun.write(opts.output, output);
+    console.log(`Successfully wrote ${output.length} bytes to ${opts.output}`);
+  } else {
+    console.log(output);
   }
-
-  // Default: markdown
-  console.log(formatMarkdownReport(summaries, targetReviewer));
 }
 
 if (import.meta.main) {
