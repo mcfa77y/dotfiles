@@ -50,3 +50,20 @@ bun run scripts/mock_service_ctl.ts start --port 3001
 bun run scripts/mock_service_ctl.ts test
 bun run scripts/mock_service_ctl.ts test sources/tests/regression/twilio-mock-services.test.ts
 ```
+
+### 4. Scenario Management & Provisioning
+Manage active mock scenarios and register Memfault device scenarios:
+```bash
+# Reset all scenarios globally
+bun run scripts/mock_service_ctl.ts reset-scenarios --port 3001
+
+# Reset scenarios partitioned by PR tag
+bun run scripts/mock_service_ctl.ts reset-scenarios --port 3001 --pr-tag pr-4332
+
+# Register a Memfault mock device provisioning scenario
+bun run scripts/mock_service_ctl.ts register-memfault \
+  --serial qa-model-001 \
+  --cohort qa-cohort-001 \
+  --pr-tag pr-4332 \
+  --port 3001
+```
