@@ -222,4 +222,102 @@ bun run --cwd "$CMUX_TS_DIR" src/index.ts dev "{{ worktree_path }}" --omp "$HARN
     "cwrn",
     "cwrn {{ branch }}",
     "command -v cwrn {{ branch }}",
+    """
+SOURCE_GRAPHIFY="/Users/joe/Projects/empo_health/main/graphify-out"
+[ ! -d "$SOURCE_GRAPHIFY" ] && SOURCE_GRAPHIFY="{{ repo_path }}/graphify-out"
+if [ -d "$SOURCE_GRAPHIFY" ] && [ ! -f "{{ worktree_path }}/graphify-out/graph.json" ]; then
+  mkdir -p {{ worktree_path }}/graphify-out
+  cp -R "$SOURCE_GRAPHIFY/." {{ worktree_path }}/graphify-out/ 2>/dev/null || true
+fi
+""",
+    """
+yarn set version 4.7.0
+echo "node: $(node --version)"
+echo "yarn: $(yarn --version)"
+time yarn install
+zqa
+yarn install 
+zms
+yarn install
+zfe
+yarn install
+""",
+    """
+CONFIGS_DIR="/Users/joe/Projects/empo_health/scripts/testing-configs"
+if [ -d "$CONFIGS_DIR" ]; then
+  [ -f "$CONFIGS_DIR/backend.jest.config.js" ] && [ -d "{{ worktree_path }}/workspaces/backend-api" ] && cp "$CONFIGS_DIR/backend.jest.config.js" "{{ worktree_path }}/workspaces/backend-api/jest.config.js"
+
+  [ -f "$CONFIGS_DIR/backend-e2e.jest.config.js" ] && [ -d "{{ worktree_path }}/workspaces/backend-api/sources/e2e" ] && cp "$CONFIGS_DIR/backend-e2e.jest.config.js" "{{ worktree_path }}/workspaces/backend-api/sources/e2e/jest-e2e.config.js"
+
+  [ -f "$CONFIGS_DIR/frontend.vitest.config.ts" ] && [ -d "{{ worktree_path }}/workspaces/frontend-app" ] && cp "$CONFIGS_DIR/frontend.vitest.config.ts" "{{ worktree_path }}/workspaces/frontend-app/vitest.config.ts"
+
+  [ -f "$CONFIGS_DIR/mock-services.vitest.config.mts" ] && [ -d "{{ worktree_path }}/workspaces/mock-services" ] && cp "$CONFIGS_DIR/mock-services.vitest.config.mts" "{{ worktree_path }}/workspaces/mock-services/vitest.config.mts"
+
+  [ -f "$CONFIGS_DIR/playwright.config.ts" ] && [ -d "{{ worktree_path }}/workspaces/qa" ] && cp "$CONFIGS_DIR/playwright.config.ts" "{{ worktree_path }}/workspaces/qa/playwright.config.ts"
+
+  echo "Loaded local test configs (capped to 4 workers)"
+fi
+""",
+    """
+if [ -d "/Users/joe/Projects/empo_health/main/graphify-out" ] && [ ! -f "{{ worktree_path }}/graphify-out/graph.json" ]; then
+  mkdir -p {{ worktree_path }}/graphify-out
+  cp -R /Users/joe/Projects/empo_health/main/graphify-out/. {{ worktree_path }}/graphify-out/ 2>/dev/null || true
+fi
+command -v graphify >/dev/null 2>&1 && (cd {{ worktree_path }} && graphify update . >/dev/null 2>&1 &) || true
+""",
+    """
+CONFIGS_DIR="/Users/joe/Projects/empo_health/scripts/testing-configs"
+if [ -d "$CONFIGS_DIR" ]; then
+  [ -f "$CONFIGS_DIR/backend.jest.config.js" ] && [ -d "{{ worktree_path }}/workspaces/backend-api" ] && cp "$CONFIGS_DIR/backend.jest.config.js" "{{ worktree_path }}/workspaces/backend-api/jest.config.js"
+
+  [ -f "$CONFIGS_DIR/backend-e2e.jest.config.js" ] && [ -d "{{ worktree_path }}/workspaces/backend-api/sources/e2e" ] && cp "$CONFIGS_DIR/backend-e2e.jest.config.js" "{{ worktree_path }}/workspaces/backend-api/sources/e2e/jest-e2e.config.js"
+  [ -f "$CONFIGS_DIR/frontend.vitest.config.ts" ] && [ -d "{{ worktree_path }}/workspaces/frontend-app" ] && cp "$CONFIGS_DIR/frontend.vitest.config.ts" "{{ worktree_path }}/workspaces/frontend-app/vitest.config.ts"
+
+  [ -f "$CONFIGS_DIR/mock-services.vitest.config.mts" ] && [ -d "{{ worktree_path }}/workspaces/mock-services" ] && cp "$CONFIGS_DIR/mock-services.vitest.config.mts" "{{ worktree_path }}/workspaces/mock-services/vitest.config.mts"
+
+  [ -f "$CONFIGS_DIR/playwright.config.ts" ] && [ -d "{{ worktree_path }}/workspaces/qa" ] && cp "$CONFIGS_DIR/playwright.config.ts" "{{ worktree_path }}/workspaces/qa/playwright.config.ts"
+
+  echo "Loaded local test configs (capped to 4 workers)"
+fi
+""",
+    """
+[ -f "{{ repo_path }}/../env/.env.backend-api" ] && ln -sf {{ repo_path }}/../env/.env.backend-api {{ worktree_path }}/workspaces/backend-api/.env
+[ -f "{{ repo_path }}/../env/.env.frontend-app" ] && ln -sf {{ repo_path }}/../env/.env.frontend-app {{ worktree_path }}/workspaces/frontend-app/.env
+[ -f "{{ repo_path }}/../env/.env.qa" ] && ln -sf {{ repo_path }}/../env/.env.qa {{ worktree_path }}/workspaces/qa/.env
+[ -f "{{ repo_path }}/../env/.env.mock-services" ] && ln -sf {{ repo_path }}/../env/.env.mock-services {{ worktree_path }}/workspaces/mock-services/.env
+[ -f "{{ repo_path }}/../env/.env.rhl-api-tools" ] && ln -sf {{ repo_path }}/../env/.env.rhl-api-tools {{ worktree_path }}/workspaces/helper-scripts/rhl-api-tools/.env
+
+if [ -d "{{ worktree_path }}/.vscode" ]; then
+  [ -f "{{ repo_path }}/../env/vscode/launch.json" ] && ln -sf {{ repo_path }}/../env/vscode/launch.json {{ worktree_path }}/.vscode/
+  [ -f "{{ repo_path }}/../env/vscode/tasks.json" ] && ln -sf {{ repo_path }}/../env/vscode/tasks.json {{ worktree_path }}/.vscode/
+fi
+true
+""",
+    "mkdir -p {{ worktree_path }}/.config && ln -sf /Users/joe/Projects/js_for_fun/git-tools-js/.config/wt.toml {{ worktree_path }}/.config/wt.toml",
+    """
+yarn set version 4.7.0
+echo "node: $(node --version)"
+echo "yarn: $(yarn --version)"
+time yarn install
+[ -d "{{ worktree_path }}/workspaces/qa" ] && (cd "{{ worktree_path }}/workspaces/qa" && yarn install)
+[ -d "{{ worktree_path }}/workspaces/mock-services" ] && (cd "{{ worktree_path }}/workspaces/mock-services" && yarn install)
+[ -d "{{ worktree_path }}/workspaces/frontend-app" ] && (cd "{{ worktree_path }}/workspaces/frontend-app" && yarn install)
+""",
+    "zoxide remove {{ worktree_path }} || true",
+    """
+command -v cmux >/dev/null 2>&1 && cmux ping >/dev/null 2>&1 || exit 0
+command -v jq >/dev/null 2>&1 || exit 0
+WORKSPACE_REF=$(cmux list-workspaces --json 2>/dev/null | jq -r --arg t "{{ branch | sanitize }}" '.workspaces[] | select(.title == $t) | .ref' | head -1)
+[ -n "$WORKSPACE_REF" ] && cmux close-workspace --workspace "$WORKSPACE_REF" 2>/dev/null || true
+""",
+    """
+yarn set version 4.7.0
+echo "node: $(node --version)"
+echo "yarn: $(yarn --version)"
+time yarn install
+[ -d "{{ worktree_path }}/workspaces/qa" ] && (cd "{{ worktree_path }}/workspaces/qa" && yarn install)
+[ -d "{{ worktree_path }}/workspaces/mock-services" ] && (cd "{{ worktree_path }}/workspaces/mock-services" && yarn install)
+[ -d "{{ worktree_path }}/workspaces/frontend-app" ] && (cd "{{ worktree_path }}/workspaces/frontend-app" && yarn install)
+[ -d "{{ worktree_path }}/workspaces/backend-api" ] && (cd "{{ worktree_path }}/workspaces/backend-api" && yarn install)
+""",
 ]
