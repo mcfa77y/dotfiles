@@ -11,6 +11,21 @@ Use this workflow to publish code review findings and inline diff comments direc
 - Active GitHub authentication via `gh auth status` or GitHub MCP tools.
 - PR number / URL and review report (e.g., from `rhl-review-pr` output in `docs/` or session findings).
 
+## Core Rule: Inline File Comments Are Mandatory
+
+> **CRITICAL**: Code review findings, suggestions, and critiques MUST NEVER be posted solely as a wall of text in the top-level review summary.
+>
+> 1. **Every specific critique, bug finding, risk, or code improvement MUST be commented inline** on its respective file and line in the diff.
+> 2. **The top-level review body (`body` / `--body-file`) is strictly an executive summary & verdict**:
+>    - High-level verdict (e.g., APPROVE, REQUEST_CHANGES).
+>    - Architectural impact / blast radius summary.
+>    - A brief bulleted list referencing the inline comments posted on the files.
+>    - Verification instructions.
+> 3. **Never collapse per-file findings into summary-only**:
+>    - Use `scripts/find-diff-line.ts` to locate the exact modified diff lines.
+>    - Always pass `--comments` or `--comments-file` containing the file-specific comments.
+>    - If a finding strictly concerns an unchanged line outside the diff hunk, target the nearest changed line in that file or explicitly document why it fell back to the summary.
+
 ## Locating Exact Diff Lines via Helper Script
 To find the exact line numbers inside PR diff hunks and ensure comments target valid reviewable lines, use `scripts/find-diff-line.ts`:
 ```bash

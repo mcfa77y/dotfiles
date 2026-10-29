@@ -38,11 +38,15 @@ When this skill is invoked, follow these steps to perform a code review on the c
    - If you need more input from the user at any point (e.g., missing context, clarification on a change), use the `run_command` tool to run `cmux notify --title "PR Review Needs Input" --body "<Brief description of what you need>"` to alert the user.
 
 7. **Publishing Review or Remediating**:
-   - To publish inline review comments and a summary to GitHub, use [`rhl-post-pr-review`](file:///Users/joe/.gemini/config/skills/rhl-post-pr-review/SKILL.md):
+   - To publish inline review comments and a summary to GitHub, use [`rhl-post-pr-review`](file:///Users/joe/.gemini/config/skills/rhl-post-pr-review/SKILL.md).
+   - **Crucial**: Review findings on specific files MUST NOT be submitted as summary-only text. Always extract per-file comments to a JSON comments file (e.g., `docs/pr_review_comments_<branch_name>.json`) and post them as inline diff comments:
      ```bash
-     bun run ~/.gemini/config/skills/rhl-post-pr-review/scripts/post-review.ts --pr <PR_NUMBER> --body-file docs/pr_review_<branch_name>.md
+     bun run ~/.omp/agent/skills/rhl-post-pr-review/scripts/post-review.ts \
+       --pr <PR_NUMBER> \
+       --body-file docs/pr_review_summary_<branch_name>.md \
+       --comments-file docs/pr_review_comments_<branch_name>.json
      ```
    - To address review comments left by others and reply in threads, use [`rhl-address-pr-comments`](file:///Users/joe/.gemini/config/skills/rhl-address-pr-comments/SKILL.md):
      ```bash
-     bun run ~/.gemini/config/skills/rhl-address-pr-comments/scripts/manage_pr_comments.ts fetch <PR_NUMBER_OR_URL> --unresolved-only
+     bun run ~/.omp/agent/skills/rhl-address-pr-comments/scripts/manage_pr_comments.ts fetch <PR_NUMBER_OR_URL> --unresolved-only
      ```
