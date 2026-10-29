@@ -10,6 +10,7 @@
                 "rules": [
                     {
                         "description": "Hyper and Meh Keys",
+                        "enabled": false,
                         "manipulators": [
                             {
                                 "description": "Right Command -> Hyper Key (Cmd+Ctrl+Opt+Shift)",
@@ -322,6 +323,7 @@
                     },
                     {
                         "description": "Home Row Mods (Delayed Action): A=Opt, S=Ctrl, D=Shift, F=Cmd | J=Cmd, K=Shift, L=Ctrl, ;=Opt",
+                        "enabled": false,
                         "manipulators": [
                             {
                                 "description": "F to Command",
@@ -519,6 +521,7 @@
                     },
                     {
                         "description": "Strict Tab/Caps Swap",
+                        "enabled": false,
                         "manipulators": [
                             {
                                 "description": "Caps Lock to Tab",
@@ -645,6 +648,7 @@
                     },
                     {
                         "description": "Long press C/X/V to copy, cut, paste",
+                        "enabled": false,
                         "manipulators": [
                             {
                                 "from": {
