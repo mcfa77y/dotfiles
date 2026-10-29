@@ -51,6 +51,12 @@ describe('scan_prs', () => {
       );
     });
 
+    it('matches Error acquiring the state lock', () => {
+      const log =
+        '│ Error: Error acquiring the state lock\n│ Error message: operation error S3: PutObject';
+      expect(matchTerraformWorkspaceSignature(log)).toBe('Error acquiring the state lock');
+    });
+
     it('returns null for clean logs', () => {
       const log = 'Apply complete! Resources: 1 added, 0 changed, 0 destroyed.';
       expect(matchTerraformWorkspaceSignature(log)).toBeNull();

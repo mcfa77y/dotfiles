@@ -86,6 +86,9 @@ export function matchTerraformWorkspaceSignature(logText: string): string | null
   if (logText.includes('does not exist. Please enter a number to select a workspace')) {
     return 'Workspace does not exist (interactive prompt)';
   }
+  if (logText.includes('Error acquiring the state lock')) {
+    return 'Error acquiring the state lock';
+  }
   return null;
 }
 /**

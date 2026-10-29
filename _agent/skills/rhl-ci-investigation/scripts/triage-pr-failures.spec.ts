@@ -86,6 +86,28 @@ Error: Process completed with exit code 1.
       expect(diagnostics[0]!.recommendation).toContain('Wipe stale .terraform cache');
     });
 
+    it('detects Terraform S3 native state lock acquisition failure (StatusCode 412 PreconditionFailed)', () => {
+      const tfLockLog = `
+2026-10-29T03:08:14.6200001Z ╷
+2026-10-29T03:08:14.6201960Z │ Error: Error acquiring the state lock
+2026-10-29T03:08:14.6203389Z │ 
+2026-10-29T03:08:14.6204773Z │ Error message: operation error S3: PutObject, https response error
+2026-10-29T03:08:14.6206704Z │ StatusCode: 412, RequestID: JECESWQ6RF9XKC3P, HostID: XOHYDpMrq0kCiJSlWlMI9ZQxZZ/c44l3NtTZaF+7IvVATMMMBSukTPA450L16gmcnDejEz7c/IEgwxmlh/Hx2HpGr44eo2CK,
+2026-10-29T03:08:14.6211276Z │ api error PreconditionFailed: At least one of the pre-conditions you
+2026-10-29T03:08:14.6221722Z │ specified did not hold
+2026-10-29T03:08:14.6222865Z │ Lock Info:
+2026-10-29T03:08:14.6224111Z │   ID:        38d7c3e0-03fa-6f35-f73f-4083eb8e126a
+2026-10-29T03:08:14.6226247Z │   Path:      empo-health-staging-terraform-state/backend/pr-3297/backend/terraform.tfstate
+`;
+
+      const diagnostics = diagnoseLogFailures(tfLockLog);
+      expect(diagnostics).toHaveLength(1);
+      expect(diagnostics[0]!.category).toBe('Terraform State Lock (S3 Lockfile Orphaned)');
+      expect(diagnostics[0]!.errorExcerpt).toContain('Error acquiring the state lock');
+      expect(diagnostics[0]!.rootCause).toContain('orphaned .tflock object in S3');
+      expect(diagnostics[0]!.recommendation).toContain('aws s3 rm');
+    });
+
     it('detects Playwright timeouts and HTTP 503 / 502 ALB gateway errors', () => {
       const playwrightAlbLog = `
   1) [chromium] › e2e/appointments.spec.ts:34:5 › Book Appointment

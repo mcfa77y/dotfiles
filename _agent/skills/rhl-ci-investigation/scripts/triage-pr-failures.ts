@@ -179,6 +179,24 @@ export function diagnoseLogFailures(logText: string): DiagnosticFailure[] {
     });
   }
 
+  // Rule 1b: Terraform state lock / orphaned S3 lockfile (StatusCode 412 PreconditionFailed)
+  const tfLockIndex = lines.findIndex(
+    (line) =>
+      /Error acquiring the state lock/i.test(line) ||
+      (/operation error S3: PutObject/i.test(line) && /PreconditionFailed/i.test(line)) ||
+      (/StatusCode:\s*412/i.test(line) && /PreconditionFailed/i.test(line)),
+  );
+  if (tfLockIndex !== -1) {
+    diagnostics.push({
+      category: 'Terraform State Lock (S3 Lockfile Orphaned)',
+      errorExcerpt: extractContextExcerpt(lines, tfLockIndex, 3),
+      rootCause:
+        'An orphaned .tflock object in S3 (e.g. from an abruptly canceled or timed-out previous workflow run) prevents Terraform from acquiring the state lock.',
+      recommendation:
+        'Locate the S3 lockfile in the state bucket (e.g. `s3://<bucket>/<prefix>/terraform.tfstate.tflock`), verify no active apply is running, and remove it with `aws s3 rm` or `terraform force-unlock <LOCK_ID>`.',
+    });
+  }
+
   // Rule 2: Playwright timeouts, HTTP 503 / 502 ALB errors, and DNS resolution failures
   const dnsErrorIndex = lines.findIndex(
     (line) =>
