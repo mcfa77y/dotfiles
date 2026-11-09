@@ -50,3 +50,23 @@ When this skill is invoked, follow these steps to perform a code review on the c
      ```bash
      bun run ~/.omp/agent/skills/rhl-address-pr-comments/scripts/manage_pr_comments.ts fetch <PR_NUMBER_OR_URL> --unresolved-only
      ```
+
+8. **Review Worktree & Artifact Cleanup**:
+   - Check for lingering temporary review worktrees or artifacts created during review (e.g. under `.git/dev-fast/reviews/`):
+     ```bash
+     git worktree list | grep -E 'reviews/|\.git/dev-fast'
+     ```
+   - If review worktrees exist (for example, `./.git/dev-fast/reviews/<uuid>/head/<commit_sha>`), prompt the user to clean them up.
+   - You can inspect candidate artifacts with dry-run or execute cleanup using the automated helper script:
+     ```bash
+     # Inspect cleanup candidates without removing
+     bun run ~/.omp/agent/skills/rhl-review-pr/scripts/cleanup-review-worktrees.ts --dry-run
+
+     # Clean up review worktrees, prune metadata, and delete orphaned review directories
+     bun run ~/.omp/agent/skills/rhl-review-pr/scripts/cleanup-review-worktrees.ts
+     ```
+   - Or alternatively provide the manual commands:
+     ```bash
+     git worktree remove --force <worktree_path>
+     git worktree prune
+     ```

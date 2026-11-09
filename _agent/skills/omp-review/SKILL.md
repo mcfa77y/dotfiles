@@ -164,3 +164,27 @@ Render the review results directly in the response using the following structure
 Conclude the review by offering actionable next steps:
 - "Would you like me to automatically fix any of the P0/P1 issues?"
 - "Would you like me to generate test cases for the uncovered edge cases?"
+
+---
+
+## 7. Review Worktree & Artifact Cleanup
+Conclude by checking if any temporary review worktrees or artifacts were left behind (e.g., from review harnesses or `dev-fast`):
+```bash
+git worktree list | grep -E 'reviews/|\.git/dev-fast'
+```
+If review worktrees exist (e.g. `./.git/dev-fast/reviews/<uuid>/head/<commit_sha>`), prompt the user to clean them up:
+- List the lingering review worktree path(s).
+- Offer to run the cleanup script or provide the commands:
+  ```bash
+  # Inspect candidates via dry-run
+  bun run ~/.omp/agent/skills/rhl-review-pr/scripts/cleanup-review-worktrees.ts --dry-run
+
+  # Execute cleanup
+  bun run ~/.omp/agent/skills/rhl-review-pr/scripts/cleanup-review-worktrees.ts
+  ```
+- Or manual fallback:
+  ```bash
+  git worktree remove --force <worktree_path>
+  git worktree prune
+  ```
+- If orphaned review directories remain in `.git/dev-fast/reviews/`, offer to remove them.
