@@ -1,0 +1,110 @@
+{
+  "format": "skillopt_sleep.tasks.v1",
+  "project": "/Users/joe/Projects/empo_health/remote-health-link",
+  "transcript_source": "guided_mining",
+  "n_sessions": 4,
+  "target_skill_path": "/Users/joe/dotfiles/_agent/skills/rhl-mergify-queue/SKILL.md",
+  "reviewed": true,
+  "tasks": [
+    {
+      "id": "rhl_mergify_queue_task_01",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "were my comments addressed?\n\nhttps://github.com/EmpoHealth/core/pull/3036#pullrequestreview-5657088476\nif so then lets approve the pr",
+      "context_excerpt": "Context for rhl-mergify-queue: >-...",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "bun test"
+          }
+        ]
+      },
+      "tags": ["rhl-mergify-queue", "harvested"],
+      "source_sessions": [],
+      "split": "train",
+      "origin": "harvested",
+      "derived_from": "rhl-mergify-queue",
+      "skill_hint": "rhl-mergify-queue"
+    },
+    {
+      "id": "rhl_mergify_queue_task_02",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "what is the status",
+      "context_excerpt": "Context for rhl-mergify-queue: >-...",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "bun test"
+          }
+        ]
+      },
+      "tags": ["rhl-mergify-queue", "harvested"],
+      "source_sessions": [],
+      "split": "val",
+      "origin": "harvested",
+      "derived_from": "rhl-mergify-queue",
+      "skill_hint": "rhl-mergify-queue"
+    },
+    {
+      "id": "rhl_mergify_queue_task_03",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "started up docker again; try once more",
+      "context_excerpt": "Context for rhl-mergify-queue: >-...",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "bun test"
+          }
+        ]
+      },
+      "tags": ["rhl-mergify-queue", "harvested"],
+      "source_sessions": [],
+      "split": "train",
+      "origin": "harvested",
+      "derived_from": "rhl-mergify-queue",
+      "skill_hint": "rhl-mergify-queue"
+    },
+    {
+      "id": "rhl_mergify_queue_task_04",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets push the changes",
+      "context_excerpt": "Context for rhl-mergify-queue: >-...",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "bun test"
+          }
+        ]
+      },
+      "tags": ["rhl-mergify-queue", "harvested"],
+      "source_sessions": [],
+      "split": "val",
+      "origin": "harvested",
+      "derived_from": "rhl-mergify-queue",
+      "skill_hint": "rhl-mergify-queue"
+    }
+  ]
+}

@@ -114,6 +114,29 @@ bun run scripts/harvest_skill_frequency.ts --project remote-health-link --json
 bun test scripts/harvest_skill_frequency.spec.ts
 ```
 
+### 6. `generate_skill_tasks.ts`
+TypeScript / Bun CLI tool to scaffold deterministic SkillOpt benchmark suites (`<skill>_eval_tasks.json`) conforming to `skillopt_sleep.tasks.v1`. Automatically extracts positive rule checks (`contains`), negative exclusions (`not_contains`), and backticked commands from `SKILL.md`, and pairs them with historical user intents from sessions where the skill was loaded.
+
+```bash
+# Scaffold benchmark task suite for a skill:
+bun run scripts/generate_skill_tasks.ts --skill rhl-commit-push
+
+# Generate 6 tasks with custom output destination:
+bun run scripts/generate_skill_tasks.ts --skill rhl-ci-investigation --max-tasks 6
+
+# Run test suite:
+bun test scripts/generate_skill_tasks.spec.ts
+```
+
+---
+
+## Task Evaluation & Mining Precedence
+
+When optimizing any target skill:
+1. **Curated Benchmark File First**: `rhl_skillopt.py` checks `scripts/<skill>_eval_tasks.json` (or `pr_helper_eval_tasks.json`). If present, these verified test fixtures are used directly.
+2. **Skill-Targeted Session Mining**: If no benchmark file exists, `omp_harvest.py` isolates sessions where `read skill://<skill>` was actually executed, extracting the preceding user prompt as the task intent.
+3. **Auto-Rule Fallback**: If mined session tasks lack rule assertions (`checks: []`), `rhl_skillopt.py` automatically extracts RFC 2119 clauses (`MUST` -> `contains`, `NEVER`/exclusions -> `not_contains`) from the target `SKILL.md` and attaches them to the seeded tasks so the validation gate can score compliance.
+
 ---
 
 ## Standard Workflows

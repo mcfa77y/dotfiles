@@ -1,0 +1,142 @@
+{
+  "format": "skillopt_sleep.tasks.v1",
+  "project": "/Users/joe/Projects/empo_health/remote-health-link",
+  "transcript_source": "guided_mining",
+  "n_sessions": 4,
+  "target_skill_path": "/Users/joe/dotfiles/_agent/skills/rhl-ci-investigation/SKILL.md",
+  "reviewed": true,
+  "tasks": [
+    {
+      "id": "rhl_ci_investigation_task_01",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "what would this look like?\nif for workspaces/qa/sources/utils/mock-service/builders/*.builder.ts\n\n I see a lot of these builders end up building up these classes and abstract classes.\n\nin general, I found that, it can be a little bit more robust, reliable, easier to test, and composable, to use a pattern of free functions that take in a config parameter rather than using a class.",
+      "context_excerpt": "Context for rhl-ci-investigation: \"Investigate failing GitHub Actions CI pipelines in RHL/EmpoHealth repositories. Use when a GitHub Actions run fails and...",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "gh run view --log-failed"
+          },
+          {
+            "op": "contains",
+            "arg": "gh api"
+          },
+          {
+            "op": "contains",
+            "arg": "gh pr checks"
+          }
+        ]
+      },
+      "tags": ["rhl-ci-investigation", "harvested"],
+      "source_sessions": [],
+      "split": "train",
+      "origin": "harvested",
+      "derived_from": "rhl-ci-investigation",
+      "skill_hint": "rhl-ci-investigation"
+    },
+    {
+      "id": "rhl_ci_investigation_task_02",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "could you elaborate on the pros and cons of the 2 different approaches",
+      "context_excerpt": "Context for rhl-ci-investigation: \"Investigate failing GitHub Actions CI pipelines in RHL/EmpoHealth repositories. Use when a GitHub Actions run fails and...",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "gh run view --log-failed"
+          },
+          {
+            "op": "contains",
+            "arg": "gh api"
+          },
+          {
+            "op": "contains",
+            "arg": "gh pr checks"
+          }
+        ]
+      },
+      "tags": ["rhl-ci-investigation", "harvested"],
+      "source_sessions": [],
+      "split": "val",
+      "origin": "harvested",
+      "derived_from": "rhl-ci-investigation",
+      "skill_hint": "rhl-ci-investigation"
+    },
+    {
+      "id": "rhl_ci_investigation_task_03",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lgtm split work up onto parallel agents where it makes sense to split up the work.",
+      "context_excerpt": "Context for rhl-ci-investigation: \"Investigate failing GitHub Actions CI pipelines in RHL/EmpoHealth repositories. Use when a GitHub Actions run fails and...",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "gh run view --log-failed"
+          },
+          {
+            "op": "contains",
+            "arg": "gh api"
+          },
+          {
+            "op": "contains",
+            "arg": "gh pr checks"
+          }
+        ]
+      },
+      "tags": ["rhl-ci-investigation", "harvested"],
+      "source_sessions": [],
+      "split": "train",
+      "origin": "harvested",
+      "derived_from": "rhl-ci-investigation",
+      "skill_hint": "rhl-ci-investigation"
+    },
+    {
+      "id": "rhl_ci_investigation_task_04",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets run a sonar scan",
+      "context_excerpt": "Context for rhl-ci-investigation: \"Investigate failing GitHub Actions CI pipelines in RHL/EmpoHealth repositories. Use when a GitHub Actions run fails and...",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "gh run view --log-failed"
+          },
+          {
+            "op": "contains",
+            "arg": "gh api"
+          },
+          {
+            "op": "contains",
+            "arg": "gh pr checks"
+          }
+        ]
+      },
+      "tags": ["rhl-ci-investigation", "harvested"],
+      "source_sessions": [],
+      "split": "val",
+      "origin": "harvested",
+      "derived_from": "rhl-ci-investigation",
+      "skill_hint": "rhl-ci-investigation"
+    }
+  ]
+}

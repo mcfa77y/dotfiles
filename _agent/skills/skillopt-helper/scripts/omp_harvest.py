@@ -7,11 +7,11 @@
 """Harvester adapter for oh-my-pi (omp) and Antigravity (agy) session formats."""
 from __future__ import annotations
 
+import glob
 import json
 import os
-import glob
+import re
 from skillopt_sleep.types import SessionDigest
-
 def _load_json_lines(path: str) -> list[dict]:
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -55,12 +55,29 @@ def _extract_tool_calls(content: list | None) -> list[str]:
         for block in content
         if isinstance(block, dict) and block.get("type") == "toolCall"
     ]
+def _extract_skills_from_content(content: list | None) -> list[str]:
+    if not isinstance(content, list):
+        return []
+    skills = []
+    for block in content:
+        if isinstance(block, dict) and block.get("type") == "toolCall":
+            if block.get("name") == "read":
+                args = block.get("arguments", {})
+                if isinstance(args, dict):
+                    path = args.get("path", "")
+                    if path.startswith("skill://"):
+                        s = path[len("skill://"):].split("/")[0].split("?")[0].strip()
+                        if s and s not in skills:
+                            skills.append(s)
+    return skills
 
 
-def _process_records(records: list[dict], started: str) -> tuple[str, list[str], list[str], list[str]]:
+def _process_records(records: list[dict], started: str) -> tuple[str, list[str], list[str], list[str], list[str], list[str]]:
     user_prompts: list[str] = []
     assistant_finals: list[str] = []
     tools: list[str] = []
+    skills_used: list[str] = []
+    feedback_signals: list[str] = []
     ended = started
 
     for r in records:
@@ -75,15 +92,20 @@ def _process_records(records: list[dict], started: str) -> tuple[str, list[str],
         content = msg.get("content")
 
         if role == "user":
-            user_prompts.extend(_extract_text_content(content))
+            texts = _extract_text_content(content)
+            user_prompts.extend(texts)
+            for t in texts:
+                if re.search(r"\b(no|not|instead|don't|dont|wrong|failed|revert|fix this)\b", t, re.I):
+                    feedback_signals.append(t[:200])
         elif role == "assistant":
             assistant_finals.extend(_extract_text_content(content))
             tools.extend(_extract_tool_calls(content))
+            for sk in _extract_skills_from_content(content):
+                if sk not in skills_used:
+                    skills_used.append(sk)
 
-    return ended, user_prompts, assistant_finals, tools
-
-
-def _parse_session_file(path: str, project: str) -> SessionDigest | None:
+    return ended, user_prompts, assistant_finals, tools, skills_used, feedback_signals
+def _parse_session_file(path: str, project: str, target_skill: str | None = None) -> SessionDigest | None:
     if os.path.basename(path).startswith("."):
         return None
 
@@ -95,8 +117,11 @@ def _parse_session_file(path: str, project: str) -> SessionDigest | None:
     if project and session_cwd and project not in session_cwd:
         return None
 
-    ended, user_prompts, assistant_finals, tools = _process_records(records, started)
+    ended, user_prompts, assistant_finals, tools, skills_used, feedback_signals = _process_records(records, started)
     if not user_prompts:
+        return None
+
+    if target_skill and target_skill not in skills_used:
         return None
 
     session_id = os.path.splitext(os.path.basename(path))[0]
@@ -108,15 +133,16 @@ def _parse_session_file(path: str, project: str) -> SessionDigest | None:
         user_prompts=user_prompts,
         assistant_finals=assistant_finals[-5:],
         tools_used=list(dict.fromkeys(tools)),
+        skills_used=skills_used,
         files_touched=[],
-        feedback_signals=[],
+        feedback_signals=feedback_signals,
         n_user_turns=len(user_prompts),
         n_assistant_turns=len(assistant_finals),
         raw_path=path,
     )
 
 
-def harvest_omp_sessions(sessions_dir: str, project: str = "", limit: int = 40) -> list[SessionDigest]:
+def harvest_omp_sessions(sessions_dir: str, project: str = "", limit: int = 40, target_skill: str | None = None) -> list[SessionDigest]:
     digests = []
     files = sorted(
         glob.glob(os.path.join(sessions_dir, "**", "*.jsonl"), recursive=True),
@@ -125,7 +151,7 @@ def harvest_omp_sessions(sessions_dir: str, project: str = "", limit: int = 40) 
     )
 
     for path in files:
-        digest = _parse_session_file(path, project)
+        digest = _parse_session_file(path, project, target_skill=target_skill)
         if digest is None:
             continue
         digests.append(digest)
@@ -133,7 +159,6 @@ def harvest_omp_sessions(sessions_dir: str, project: str = "", limit: int = 40) 
             break
 
     return digests
-
 if __name__ == "__main__":
     omp_sessions = os.path.expanduser("~/.omp/agent/sessions")
     project = "/Users/joe/Projects/empo_health/remote-health-link"

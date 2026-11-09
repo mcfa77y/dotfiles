@@ -24,8 +24,10 @@ RHL_SCRIPT = "/Users/joe/dotfiles/_agent/skills/skillopt-helper/scripts/rhl_skil
 
 def main():
     parser = argparse.ArgumentParser(description="Nightly SkillOpt consolidation for RHL skills.")
-    parser.add_argument("--backend", default="agy", choices=["agy", "omp", "mock"], help="Backend LLM engine (default: agy)")
-    parser.add_argument("--source", default="agy", choices=["agy", "omp"], help="Session harvest source (default: agy)")
+    parser.add_argument("--backend", default="omp", choices=["agy", "omp", "mock"], help="Backend LLM engine (default: omp)")
+    parser.add_argument("--source", default="omp", choices=["agy", "omp"], help="Session harvest source (default: omp)")
+    parser.add_argument("--skill", default=None, help="Target specific rhl-* skill directory name (default: all active)")
+    parser.add_argument("--include-common", action=argparse.BooleanOptionalAction, default=True, help="Include frequently-used non-RHL skills (default: True)")
     parser.add_argument("--lookback-hours", type=int, default=24, help="Hours of session history to harvest (default: 24)")
     parser.add_argument("--dry-run", action="store_true", help="Perform a dry run without staging changes")
     parser.add_argument("--auto-adopt", action="store_true", help="Automatically adopt changes that pass validation")
@@ -42,6 +44,10 @@ def main():
         "--source", args.source,
         "--lookback-hours", str(args.lookback_hours),
     ]
+    if args.skill:
+        cmd.extend(["--skill", args.skill])
+    if args.include_common:
+        cmd.append("--include-common")
 
     print(f"[{datetime.datetime.now().isoformat()}] Starting nightly SkillOpt consolidation...")
     print(f"Log output: {log_file}")

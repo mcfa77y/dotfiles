@@ -1,0 +1,174 @@
+{
+  "format": "skillopt_sleep.tasks.v1",
+  "project": "/Users/joe/Projects/empo_health/remote-health-link",
+  "transcript_source": "guided_mining",
+  "n_sessions": 4,
+  "target_skill_path": "/Users/joe/dotfiles/_agent/skills/rhl-commit-push/SKILL.md",
+  "reviewed": true,
+  "tasks": [
+    {
+      "id": "rhl_commit_push_task_01",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "for [Image #1, 1325x370] lets provide hover over value for the y axis\nPlease ask me any follow up questions that may be useful to help refine this prompt. Make the questions as an interactive prompt.",
+      "context_excerpt": "Context for rhl-commit-push: Commits and pushes changed files while excluding local dev/test files and adhering to commitlint....",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "not_contains",
+            "arg": "docs/*"
+          },
+          {
+            "op": "not_contains",
+            "arg": "playwright.config.ts"
+          },
+          {
+            "op": "not_contains",
+            "arg": "docker.compose.yml"
+          },
+          {
+            "op": "not_contains",
+            "arg": "test-setup.helper.ts"
+          },
+          {
+            "op": "contains",
+            "arg": "git push --no-verify"
+          }
+        ]
+      },
+      "tags": ["rhl-commit-push", "harvested"],
+      "source_sessions": [],
+      "split": "train",
+      "origin": "harvested",
+      "derived_from": "rhl-commit-push",
+      "skill_hint": "rhl-commit-push"
+    },
+    {
+      "id": "rhl_commit_push_task_02",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets commit our changes",
+      "context_excerpt": "Context for rhl-commit-push: Commits and pushes changed files while excluding local dev/test files and adhering to commitlint....",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "not_contains",
+            "arg": "docs/*"
+          },
+          {
+            "op": "not_contains",
+            "arg": "playwright.config.ts"
+          },
+          {
+            "op": "not_contains",
+            "arg": "docker.compose.yml"
+          },
+          {
+            "op": "not_contains",
+            "arg": "test-setup.helper.ts"
+          },
+          {
+            "op": "contains",
+            "arg": "git push --no-verify"
+          }
+        ]
+      },
+      "tags": ["rhl-commit-push", "harvested"],
+      "source_sessions": [],
+      "split": "val",
+      "origin": "harvested",
+      "derived_from": "rhl-commit-push",
+      "skill_hint": "rhl-commit-push"
+    },
+    {
+      "id": "rhl_commit_push_task_03",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "let setup https://github.com/usetrmnl/trmnl-display\nbased on the guide https://docs.trmnl.com/go/diy/byod-s\nPlease ask me any follow up questions that may be useful to help refine this prompt. Make the questions as an interactive prompt.",
+      "context_excerpt": "Context for rhl-commit-push: Commits and pushes changed files while excluding local dev/test files and adhering to commitlint....",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "not_contains",
+            "arg": "docs/*"
+          },
+          {
+            "op": "not_contains",
+            "arg": "playwright.config.ts"
+          },
+          {
+            "op": "not_contains",
+            "arg": "docker.compose.yml"
+          },
+          {
+            "op": "not_contains",
+            "arg": "test-setup.helper.ts"
+          },
+          {
+            "op": "contains",
+            "arg": "git push --no-verify"
+          }
+        ]
+      },
+      "tags": ["rhl-commit-push", "harvested"],
+      "source_sessions": [],
+      "split": "train",
+      "origin": "harvested",
+      "derived_from": "rhl-commit-push",
+      "skill_hint": "rhl-commit-push"
+    },
+    {
+      "id": "rhl_commit_push_task_04",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "\uf47c \ue5fe  ~/Projects/python_for_fun/inky-frame/apps/trmnl/  3 \n   \u2514\u2574\udb80\udf20  trmnl_app.py  3 \n     \u251c\u2574\uf071  Refactor this function to reduce its Cognitive Complexity from 36 to the 15 allowed. [+18 locations] sonarqube (python:S3776) [137, 9]\n     \u251c\u2574\uf071  Refactor this function to reduce its Cognitive Complexity from 31 to the 15 allowed. [+20 locations] sonarqube (python:S3776) [237, 9]\n     \u2514\u2574\uf071  Merge this if statement with the enclosing one. [+1 location] sonarqube (python:S1066) [247, 21]",
+      "context_excerpt": "Context for rhl-commit-push: Commits and pushes changed files while excluding local dev/test files and adhering to commitlint....",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "not_contains",
+            "arg": "docs/*"
+          },
+          {
+            "op": "not_contains",
+            "arg": "playwright.config.ts"
+          },
+          {
+            "op": "not_contains",
+            "arg": "docker.compose.yml"
+          },
+          {
+            "op": "not_contains",
+            "arg": "test-setup.helper.ts"
+          },
+          {
+            "op": "contains",
+            "arg": "git push --no-verify"
+          }
+        ]
+      },
+      "tags": ["rhl-commit-push", "harvested"],
+      "source_sessions": [],
+      "split": "val",
+      "origin": "harvested",
+      "derived_from": "rhl-commit-push",
+      "skill_hint": "rhl-commit-push"
+    }
+  ]
+}
