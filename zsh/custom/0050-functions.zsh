@@ -76,6 +76,32 @@ yzi() {
   rm -f -- "$tmp"
 }
 
+# --- Superfile File Manager Integration ---
+# allows superfile to cd into directory upon 'Q' (cd_quit)
+spf() {
+  local last_dir_file
+  local candidate_dirs=(
+    "$HOME/Library/Application Support/superfile/lastdir"
+    "${XDG_STATE_HOME:-$HOME/.local/state}/superfile/lastdir"
+    "${SUPERFILE_CONFIG_DIR:-$HOME/.config/superfile}/lastdir"
+  )
+
+  for last_dir_file in "${candidate_dirs[@]}"; do
+    rm -f -- "$last_dir_file" >/dev/null 2>&1
+  done
+
+  command spf "$@"
+
+  for last_dir_file in "${candidate_dirs[@]}"; do
+    if [[ -f "$last_dir_file" ]]; then
+      . "$last_dir_file"
+      rm -f -- "$last_dir_file" >/dev/null 2>&1
+      break
+    fi
+  done
+}
+alias superfile="spf"
+
 # --- Startup Banner ---
 # Run figlet preview on shell load
 if [[ -n "$JS_DIR" && -d "$JS_DIR/figletPreview" ]]; then
