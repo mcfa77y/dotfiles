@@ -1,9 +1,13 @@
 .DS_Store
 *.log
-herdr/*.log
-herdr/release-notes.json
-herdr/session.json
-herdr/.plugins.lock
+herdr/**/session*.json
+herdr/**/session-snapshots/
+herdr/**/.plugins.lock
+herdr/**/plugins/github/
+herdr/**/plugins/github-installations/
+herdr/**/plugins/.locks/
+herdr/**/*.sock*
+herdr/**/release-notes.json
 .vscode/
 /gk/
 /oh-my-zsh/

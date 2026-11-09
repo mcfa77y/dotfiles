@@ -5,8 +5,8 @@
     "version": "0.4.0",
     "min_herdr_version": "0.7.0",
     "description": "Fuzzy command palette that teaches effective Herdr shortcuts",
-    "manifest_path": "/home/joe/.config/herdr/plugins/github/cesarferreira.herdr-palette-57e12190d726/herdr-plugin.toml",
-    "plugin_root": "/home/joe/.config/herdr/plugins/github/cesarferreira.herdr-palette-57e12190d726",
+    "manifest_path": "/Users/joe/.config/herdr/plugins/github-installations/cesarferreira.herdr-palette-57e12190d726/40788-0/checkout/herdr-plugin.toml",
+    "plugin_root": "/Users/joe/.config/herdr/plugins/github-installations/cesarferreira.herdr-palette-57e12190d726/40788-0/checkout",
     "enabled": true,
     "platforms": [
       "linux",
@@ -40,8 +40,55 @@
       "owner": "cesarferreira",
       "repo": "herdr-palette",
       "resolved_commit": "9ca24b801cc0f484ac4287c69936481d9b6232f7",
-      "managed_path": "/home/joe/.config/herdr/plugins/github/cesarferreira.herdr-palette-57e12190d726",
-      "installed_unix_ms": 1789065619495
+      "managed_path": "/Users/joe/.config/herdr/plugins/github-installations/cesarferreira.herdr-palette-57e12190d726/40788-0/checkout",
+      "installed_unix_ms": 1792091861316
+    }
+  },
+  {
+    "plugin_id": "hota911.command-palette",
+    "name": "Command Palette (built-ins)",
+    "version": "0.1.0",
+    "min_herdr_version": "0.8.0",
+    "description": "fzf command palette for herdr built-in operations (tab/workspace/pane). Origin tab/pane ids are captured server-side before the popup takes focus and forwarded via --env.",
+    "manifest_path": "/Users/joe/.config/herdr/plugins/github/hota911.command-palette-d6d874cadef9/herdr-plugin.toml",
+    "plugin_root": "/Users/joe/.config/herdr/plugins/github/hota911.command-palette-d6d874cadef9",
+    "enabled": true,
+    "platforms": [
+      "macos",
+      "linux"
+    ],
+    "actions": [
+      {
+        "id": "open",
+        "title": "Command palette (built-in operations)",
+        "contexts": [
+          "workspace"
+        ],
+        "command": [
+          "bash",
+          "open.sh"
+        ]
+      }
+    ],
+    "panes": [
+      {
+        "id": "palette",
+        "title": "Command palette",
+        "placement": "popup",
+        "command": [
+          "bash",
+          "-c",
+          "exec \"$HERDR_PLUGIN_ROOT/palette.sh\""
+        ]
+      }
+    ],
+    "source": {
+      "kind": "github",
+      "owner": "hota911",
+      "repo": "herdr-command-palette",
+      "resolved_commit": "aadd0717a84695a3c786a4052cf851930e978f82",
+      "managed_path": "/Users/joe/.config/herdr/plugins/github/hota911.command-palette-d6d874cadef9",
+      "installed_unix_ms": 1789065099998
     }
   }
 ]

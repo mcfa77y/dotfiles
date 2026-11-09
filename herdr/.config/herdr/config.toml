@@ -1,7 +1,17 @@
 onboarding = false
 
+[ui.toast]
+delivery = "herdr"
+
+[ui]
+show_agent_labels_on_pane_borders = true
+
+[experimental]
+pane_history = true
+switch_ascii_input_source_in_prefix = true
+
 [[keys.command]]
-key = "ctrl+t"
+key = "ctrl+k"
 type = "shell"
 command = "\"$HERDR_BIN_PATH\" plugin pane open --plugin cesarferreira.herdr-palette --entrypoint picker"
-description = "command palette"
+description = "Open Herdr Palette"
