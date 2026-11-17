@@ -236,4 +236,4 @@ if [ -f "$PROJECTS_DIR/git-apps/google-cloud-sdk/completion.zsh.inc" ]; then . "
 
 
 # bun completions
-[ -s "/Users/joe/.bun/_bun" ] && source "/Users/joe/.bun/_bun"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"

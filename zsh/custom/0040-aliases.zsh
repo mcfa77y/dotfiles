@@ -77,9 +77,11 @@ alias nzsh='nvim ~/.zshrc'
 alias zomz='cd $OMZ_CUSTOM_DIR'
 alias fomz='zomz; nvim $(fzf_multi_select); cd -; sz'
 
-# 2026-09-02 copy path to clipboard macos
-alias copy_path='pwd | pbcopy'
+# Portable clipboard path copy (macOS, Wayland, X11)
+alias copy_path='pwd | clipcopy'
 
 # Wi-Fi IP release & renew (macOS)
-alias renew_wifi='sudo ipconfig set $(networksetup -listallhardwareports | awk "/Wi-Fi/{getline; print \$2}") DHCP'
-alias renew_ip='renew_wifi'
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  alias renew_wifi='sudo ipconfig set $(networksetup -listallhardwareports | awk "/Wi-Fi/{getline; print \$2}") DHCP'
+  alias renew_ip='renew_wifi'
+fi

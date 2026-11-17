@@ -47,6 +47,9 @@ export LLMFIT_DASHBOARD_PORT=8790
 export XDG_CONFIG_HOME="$HOME/.config"
 export SUPERFILE_CONFIG_DIR="$HOME/.config/superfile"
 
+# Glow
+export GLOW_STYLE="$HOME/.config/glow/themes/catppuccin-mocha.json"
+
 # --- SonarQube ---
 export SONAR_HOST_URL="http://localhost:9000"
 export SONAR_TOKEN="sqa_714777f3b0fbf76f5b08d290a82c0431bbc36a5f"
