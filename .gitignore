@@ -8,6 +8,7 @@ herdr/**/plugins/github-installations/
 herdr/**/plugins/.locks/
 herdr/**/*.sock*
 herdr/**/release-notes.json
+herdr/.config/herdr/plugins.json
 .vscode/
 /gk/
 /oh-my-zsh/
@@ -26,3 +27,5 @@ superfile/.config/superfile/toggleFooter
 superfile/.config/superfile/pinned.json
 
 superfile/.config/superfile/lastdir
+
+yazi/.config/yazi/bookmark
