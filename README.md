@@ -51,7 +51,7 @@ If these packages were previously linked on Linux, remove their links:
 
 ```bash
 cd ~/dotfiles
-stow -v -D -t ~ iterm2 karabiner
+stow -v -D -t "$HOME" iterm2 karabiner
 make stow
 ```
 
@@ -91,7 +91,7 @@ Preview Stow changes before applying them:
 
 ```bash
 cd ~/dotfiles
-stow -n -v -S -t ~ --ignore='themes$' act atuin bash bat btop gh ghostty git glow lazygit neofetch nvim powerline ranger starship tabtab thefuck vim worktrunk yazi zsh gtk-2.0
+stow -n -v -S -t "$HOME" act atuin bash bat btop gh ghostty git glow herdr lazygit neofetch nvim omp powerline ranger starship superfile tabtab thefuck vim worktrunk yazi zsh gtk-2.0
 ```
 
 ## Package selection
@@ -101,8 +101,6 @@ stow -n -v -S -t ~ --ignore='themes$' act atuin bash bat btop gh ghostty git glo
 - `COMMON_PACKAGES`: shared Linux/macOS packages.
 - `LINUX_PACKAGES`: Linux-only packages.
 - `MACOS_PACKAGES`: macOS-only packages.
-
-`lazygit/.config/lazygit/themes` is ignored during Stow because it is an absolute macOS symlink in this repo.
 
 ## Local machine overrides
 

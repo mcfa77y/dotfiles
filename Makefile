@@ -11,18 +11,17 @@ else
 PACKAGES = $(COMMON_PACKAGES) $(LINUX_PACKAGES)
 endif
 
-# lazygit/.config/lazygit/themes is an absolute macOS symlink in this repo.
-STOW_FLAGS = --ignore='themes$$'
+STOW_FLAGS ?=
 
 .PHONY: all stow unstow restow
 
 all: stow
 
 stow:
-	stow -v -S -t ~ $(STOW_FLAGS) $(PACKAGES)
+	stow -v -S -t $(HOME) $(STOW_FLAGS) $(PACKAGES)
 
 unstow:
-	stow -v -D -t ~ $(STOW_FLAGS) $(PACKAGES)
+	stow -v -D -t $(HOME) $(STOW_FLAGS) $(PACKAGES)
 
 restow:
-	stow -v -R -t ~ $(STOW_FLAGS) $(PACKAGES)
+	stow -v -R -t $(HOME) $(STOW_FLAGS) $(PACKAGES)
