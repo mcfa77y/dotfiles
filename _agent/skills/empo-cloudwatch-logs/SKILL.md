@@ -58,6 +58,20 @@ aws logs describe-log-streams \
   --output table
 ```
 
+### 2.5 Query Logs Insights Helper Script
+Use the TypeScript helper to query and await CloudWatch Insights logs:
+```bash
+bun run scripts/query_cw.ts \
+  --log-group "/ecs/backend/" \
+  --query "fields @timestamp, req.method, req.url, res.statusCode, msg | filter res.statusCode >= 400 | sort @timestamp desc | limit 25" \
+  --start "2026-10-06T22:35:00Z" \
+  --end "2026-10-06T22:45:00Z"
+```
+Preview without executing:
+```bash
+bun run scripts/query_cw.ts --dry-run
+```
+
 ### 3. Run Fast CloudWatch Logs Insights Queries
 
 CloudWatch Logs Insights provides fast indexed querying across all streams in a log group.
