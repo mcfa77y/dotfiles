@@ -1,8 +1,8 @@
-import type { Command } from 'commander'
-import type { CreateTabOptions } from '../types'
 import path from 'node:path'
 import process from 'node:process'
+import type { Command } from 'commander'
 import { cmux } from '../client'
+import type { CreateTabOptions } from '../types'
 
 export async function createTab(options: CreateTabOptions): Promise<string> {
   if (!options.name || !options.command) {
@@ -49,25 +49,31 @@ export function registerTabCommand(program: Command): void {
     .option('-f, --focus [boolean]', 'Switch focus to the new tab (default: false)')
     .option('--cwd <path>', 'Working directory for the tab (default: current directory)')
     .option('-w, --workspace <id>', 'Target workspace ID/ref')
-    .action(async (opts: {
-      name: string
-      command: string
-      focus?: boolean | string
-      cwd?: string
-      workspace?: string
-    }) => {
-      try {
-        await createTab({
-          name: opts.name,
-          command: opts.command,
-          focus: opts.focus === undefined ? false : (typeof opts.focus === 'boolean' ? opts.focus : String(opts.focus).toLowerCase() !== 'false'),
-          cwd: opts.cwd,
-          workspace: opts.workspace,
-        })
-      }
-      catch (error) {
-        console.error(`Error: ${error instanceof Error ? error.message : String(error)}`)
-        process.exit(1)
-      }
-    })
+    .action(
+      async (opts: {
+        name: string
+        command: string
+        focus?: boolean | string
+        cwd?: string
+        workspace?: string
+      }) => {
+        try {
+          await createTab({
+            name: opts.name,
+            command: opts.command,
+            focus:
+              opts.focus === undefined
+                ? false
+                : typeof opts.focus === 'boolean'
+                  ? opts.focus
+                  : String(opts.focus).toLowerCase() !== 'false',
+            cwd: opts.cwd,
+            workspace: opts.workspace,
+          })
+        } catch (error) {
+          console.error(`Error: ${error instanceof Error ? error.message : String(error)}`)
+          process.exit(1)
+        }
+      },
+    )
 }

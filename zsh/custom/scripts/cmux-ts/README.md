@@ -51,10 +51,13 @@ await createTab({
 })
 ```
 
-### Linting & Type Checking
+### Linting, Formatting & Checks
 
 ```bash
-bun run lint
-bun run lint:fix
-bun run typecheck
+bun run lint          # Runs Oxlint & Biome
+bun run lint:fix      # Biome automated check fixes
+bun run format        # Biome code formatting
+bun run knip          # Dead code & unused dependency analysis
+bun run typecheck     # TypeScript check
+bun test              # Bun test suite
 ```

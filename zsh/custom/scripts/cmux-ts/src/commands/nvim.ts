@@ -1,12 +1,13 @@
-import type { Command } from 'commander'
-import type { NvimRenameOptions } from '../types'
 import path from 'node:path'
 import process from 'node:process'
+import type { Command } from 'commander'
 import { cmux } from '../client'
+import type { NvimRenameOptions } from '../types'
 
 export async function nvimWithCmuxRename(options: NvimRenameOptions = {}): Promise<number> {
   const cwd = path.resolve(options.cwd || process.cwd())
-  const surfaceId = options.surface || process.env.CMUX_SURFACE_ID || await cmux.getCurrentSurfaceId()
+  const surfaceId =
+    options.surface || process.env.CMUX_SURFACE_ID || (await cmux.getCurrentSurfaceId())
 
   let originalTitle: string | undefined
 
@@ -18,8 +19,7 @@ export async function nvimWithCmuxRename(options: NvimRenameOptions = {}): Promi
         surface: surfaceId,
         title: `neovim ${folderName}`,
       })
-    }
-    catch {
+    } catch {
       // Non-fatal if rename fails before launching
     }
   }
@@ -32,8 +32,7 @@ export async function nvimWithCmuxRename(options: NvimRenameOptions = {}): Promi
       stdio: ['inherit', 'inherit', 'inherit'],
     })
     exitCode = await proc.exited
-  }
-  finally {
+  } finally {
     if (surfaceId) {
       try {
         if (originalTitle) {
@@ -41,14 +40,12 @@ export async function nvimWithCmuxRename(options: NvimRenameOptions = {}): Promi
             surface: surfaceId,
             title: originalTitle,
           })
-        }
-        else {
+        } else {
           await cmux.tabActionClearName({
             surface: surfaceId,
           })
         }
-      }
-      catch {
+      } catch {
         // Non-fatal if restore fails
       }
     }
@@ -71,8 +68,7 @@ export function registerNvimCommand(program: Command): void {
           args: rawArgs,
         })
         process.exit(exitCode)
-      }
-      catch (error) {
+      } catch (error) {
         console.error(`Error: ${error instanceof Error ? error.message : String(error)}`)
         process.exit(1)
       }

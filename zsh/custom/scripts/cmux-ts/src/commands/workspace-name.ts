@@ -1,15 +1,15 @@
-import type { Command } from 'commander'
-import type { WorkspaceNameOptions } from '../types'
 import path from 'node:path'
 import process from 'node:process'
+import type { Command } from 'commander'
 import { cmux } from '../client'
+import type { WorkspaceNameOptions } from '../types'
 
 export async function setWorkspaceName(options: WorkspaceNameOptions = {}): Promise<void> {
   const targetDir = path.resolve(options.targetDir || process.cwd())
   const dirName = path.basename(targetDir)
   const trimmedName = dirName.slice(0, 32)
 
-  const workspace = options.workspace || await cmux.getCurrentWorkspace()
+  const workspace = options.workspace || (await cmux.getCurrentWorkspace())
   if (!workspace) {
     throw new Error('Could not resolve current cmux workspace.')
   }
@@ -23,7 +23,9 @@ export function registerWorkspaceNameCommand(program: Command): void {
     .alias('set-workspace-name')
     .alias('cwrn')
     .alias('wsn')
-    .description('Sets workspace name to directory name (defaults to $PWD), trimmed to max 32 characters')
+    .description(
+      'Sets workspace name to directory name (defaults to $PWD), trimmed to max 32 characters',
+    )
     .option('-w, --workspace <id>', 'Target workspace ID/ref')
     .action(async (targetPath?: string, opts?: { workspace?: string }) => {
       try {
@@ -31,8 +33,7 @@ export function registerWorkspaceNameCommand(program: Command): void {
           targetDir: targetPath,
           workspace: opts?.workspace,
         })
-      }
-      catch (error) {
+      } catch (error) {
         console.error(`Error: ${error instanceof Error ? error.message : String(error)}`)
         process.exit(1)
       }

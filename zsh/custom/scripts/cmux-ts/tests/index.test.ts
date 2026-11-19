@@ -1,5 +1,5 @@
-import process from 'node:process'
 import { describe, expect, test } from 'bun:test'
+import process from 'node:process'
 import { launchDevWorkspace } from '../src/commands/dev'
 import { createTab } from '../src/commands/tab'
 import { getGitBranch, isGitRepo } from '../src/git'
@@ -8,8 +8,8 @@ import { createProgram } from '../src/index'
 describe('cmux-ts commander CLI program', () => {
   test('creates program with all required subcommands and aliases', () => {
     const program = createProgram()
-    const commandNames = program.commands.map(cmd => cmd.name())
-    const commandAliases = program.commands.flatMap(cmd => cmd.aliases())
+    const commandNames = program.commands.map((cmd) => cmd.name())
+    const commandAliases = program.commands.flatMap((cmd) => cmd.aliases())
 
     expect(commandNames).toContain('workspace-name')
     expect(commandNames).toContain('tab')
@@ -25,9 +25,9 @@ describe('cmux-ts commander CLI program', () => {
 
   test('dev command has options for omp, nvim, and terminal', () => {
     const program = createProgram()
-    const devCmd = program.commands.find(cmd => cmd.name() === 'dev')
+    const devCmd = program.commands.find((cmd) => cmd.name() === 'dev')
     expect(devCmd).toBeDefined()
-    const optionNames = devCmd?.options.map(opt => opt.long)
+    const optionNames = devCmd?.options.map((opt) => opt.long)
     expect(optionNames).toContain('--omp')
     expect(optionNames).toContain('--nvim')
     expect(optionNames).toContain('--terminal')
@@ -35,7 +35,14 @@ describe('cmux-ts commander CLI program', () => {
 
   test('dev command accepts positional path with --focus true', () => {
     const program = createProgram()
-    const parsed = program.parseOptions(['dev', '/some/path', '--omp', 'custom-omp', '--focus', 'true'])
+    const parsed = program.parseOptions([
+      'dev',
+      '/some/path',
+      '--omp',
+      'custom-omp',
+      '--focus',
+      'true',
+    ])
     expect(parsed.operands).toEqual(['dev', '/some/path'])
   })
 
@@ -74,6 +81,8 @@ describe('command validation', () => {
   })
 
   test('launchDevWorkspace throws if directory does not exist', async () => {
-    expect(launchDevWorkspace({ cwd: '/non-existent-path-12345' })).rejects.toThrow('Directory \'/non-existent-path-12345\' does not exist.')
+    expect(launchDevWorkspace({ cwd: '/non-existent-path-12345' })).rejects.toThrow(
+      "Directory '/non-existent-path-12345' does not exist.",
+    )
   })
 })

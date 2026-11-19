@@ -4,15 +4,14 @@ export async function isGitRepo(cwd: string): Promise<boolean> {
   try {
     const result = await $`git -C ${cwd} rev-parse --is-inside-work-tree`.quiet().nothrow()
     return result.exitCode === 0 && result.text().trim() === 'true'
-  }
-  catch {
+  } catch {
     return false
   }
 }
 
 export async function getGitBranch(cwd: string): Promise<string | undefined> {
   try {
-    if (!await isGitRepo(cwd)) {
+    if (!(await isGitRepo(cwd))) {
       return undefined
     }
 
@@ -28,8 +27,7 @@ export async function getGitBranch(cwd: string): Promise<string | undefined> {
     }
 
     return branch.length > 0 ? branch : undefined
-  }
-  catch {
+  } catch {
     return undefined
   }
 }

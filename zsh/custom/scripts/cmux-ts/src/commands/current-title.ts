@@ -1,5 +1,5 @@
-import type { Command } from 'commander'
 import process from 'node:process'
+import type { Command } from 'commander'
 import { cmux } from '../client'
 
 export async function getCurrentSurfaceTitle(): Promise<string | undefined> {
@@ -18,8 +18,7 @@ export function registerCurrentTitleCommand(program: Command): void {
         if (title) {
           console.log(title)
         }
-      }
-      catch (error) {
+      } catch (error) {
         console.error(`Error: ${error instanceof Error ? error.message : String(error)}`)
         process.exit(1)
       }

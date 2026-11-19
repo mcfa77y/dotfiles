@@ -1,3 +1,5 @@
+import process from 'node:process'
+import { $ } from 'bun'
 import type {
   CmuxCurrentWorkspaceResult,
   CmuxListPanesResult,
@@ -6,8 +8,6 @@ import type {
   CmuxTreeResult,
   CmuxWorkspaceCreateResult,
 } from './types'
-import process from 'node:process'
-import { $ } from 'bun'
 
 export class CmuxClient {
   async raw(args: string[]): Promise<string> {
@@ -23,8 +23,7 @@ export class CmuxClient {
     const output = await this.raw(['--json', ...args])
     try {
       return JSON.parse(output) as T
-    }
-    catch {
+    } catch {
       throw new Error(`Failed to parse cmux JSON response: ${output}`)
     }
   }
@@ -35,14 +34,16 @@ export class CmuxClient {
     }
     try {
       const res = await this.json<CmuxCurrentWorkspaceResult>(['current-workspace'])
-      return res.workspace_ref || res.workspace_id || (res.workspace && (res.workspace.ref || res.workspace.id))
-    }
-    catch {
+      return (
+        res.workspace_ref ||
+        res.workspace_id ||
+        (res.workspace && (res.workspace.ref || res.workspace.id))
+      )
+    } catch {
       try {
         const raw = await this.raw(['current-workspace'])
         return raw.length > 0 ? raw : undefined
-      }
-      catch {
+      } catch {
         return undefined
       }
     }
@@ -60,8 +61,7 @@ export class CmuxClient {
       if (tree.active?.surface_ref) {
         return tree.active.surface_ref as string
       }
-    }
-    catch {
+    } catch {
       // ignore
     }
     return undefined
@@ -85,22 +85,20 @@ export class CmuxClient {
           }
         }
       }
-    }
-    catch {
+    } catch {
       // fallback to text parse
     }
 
     try {
       const treeText = await this.raw(['tree'])
-      const match = treeText.split('\n').find(line => line.includes('◀ here'))
+      const match = treeText.split('\n').find((line) => line.includes('◀ here'))
       if (match) {
         const titleMatch = match.match(/"([^"]+)"/)
-        if (titleMatch && titleMatch[1]) {
+        if (titleMatch?.[1]) {
           return titleMatch[1]
         }
       }
-    }
-    catch {
+    } catch {
       // ignore
     }
 
@@ -111,8 +109,19 @@ export class CmuxClient {
     await this.raw(['workspace', 'rename', workspace, '--title', title])
   }
 
-  async createSurface(options: { cwd?: string, focus?: boolean, workspace?: string, pane?: string }): Promise<CmuxNewSurfaceResult> {
-    const args = ['new-surface', '--working-directory', options.cwd || process.cwd(), '--focus', options.focus ? 'true' : 'false']
+  async createSurface(options: {
+    cwd?: string
+    focus?: boolean
+    workspace?: string
+    pane?: string
+  }): Promise<CmuxNewSurfaceResult> {
+    const args = [
+      'new-surface',
+      '--working-directory',
+      options.cwd || process.cwd(),
+      '--focus',
+      options.focus ? 'true' : 'false',
+    ]
     if (options.workspace) {
       args.push('--workspace', options.workspace)
     }
@@ -122,7 +131,7 @@ export class CmuxClient {
     return await this.json<CmuxNewSurfaceResult>(args)
   }
 
-  async focusPane(options: { pane: string, workspace?: string }): Promise<void> {
+  async focusPane(options: { pane: string; workspace?: string }): Promise<void> {
     const args = ['focus-pane', '--pane', options.pane]
     if (options.workspace) {
       args.push('--workspace', options.workspace)
@@ -138,7 +147,7 @@ export class CmuxClient {
     return await this.json<CmuxListPanesResult>(args)
   }
 
-  async renameTab(options: { surface?: string, workspace?: string, title: string }): Promise<void> {
+  async renameTab(options: { surface?: string; workspace?: string; title: string }): Promise<void> {
     const args = ['rename-tab']
     if (options.workspace) {
       args.push('--workspace', options.workspace)
@@ -150,7 +159,7 @@ export class CmuxClient {
     await this.raw(args)
   }
 
-  async tabActionClearName(options: { surface?: string, workspace?: string }): Promise<void> {
+  async tabActionClearName(options: { surface?: string; workspace?: string }): Promise<void> {
     const args = ['tab-action', '--action', 'clear-name']
     if (options.workspace) {
       args.push('--workspace', options.workspace)
@@ -161,7 +170,7 @@ export class CmuxClient {
     await this.raw(args)
   }
 
-  async send(options: { surface?: string, workspace?: string, text: string }): Promise<void> {
+  async send(options: { surface?: string; workspace?: string; text: string }): Promise<void> {
     const args = ['send']
     if (options.workspace) {
       args.push('--workspace', options.workspace)
@@ -174,7 +183,11 @@ export class CmuxClient {
     await this.raw(args)
   }
 
-  async createWorkspace(options: { name: string, cwd: string, focus?: boolean }): Promise<CmuxWorkspaceCreateResult> {
+  async createWorkspace(options: {
+    name: string
+    cwd: string
+    focus?: boolean
+  }): Promise<CmuxWorkspaceCreateResult> {
     const args = [
       'workspace',
       'create',
@@ -188,7 +201,12 @@ export class CmuxClient {
     return await this.json<CmuxWorkspaceCreateResult>(args)
   }
 
-  async newPane(options: { workspace: string, type?: string, direction?: string, focus?: boolean }): Promise<CmuxNewPaneResult> {
+  async newPane(options: {
+    workspace: string
+    type?: string
+    direction?: string
+    focus?: boolean
+  }): Promise<CmuxNewPaneResult> {
     const args = [
       'new-pane',
       '--workspace',

@@ -1,10 +1,10 @@
-import type { Command } from 'commander'
-import type { LaunchDevOptions } from '../types'
 import { existsSync, statSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
+import type { Command } from 'commander'
 import { cmux } from '../client'
 import { getGitBranch } from '../git'
+import type { LaunchDevOptions } from '../types'
 
 export interface LaunchDevResult {
   workspaceRef: string
@@ -24,20 +24,13 @@ export async function launchDevWorkspace(options: LaunchDevOptions = {}): Promis
 
   let wsTitle: string
   let ompTitle: string
-  let nvimTitle: string
-  let terminalTitle: string
 
   if (branch) {
     wsTitle = branch
     ompTitle = `omp ${branch}`
-    nvimTitle = `nvim ${branch}`
-    terminalTitle = `terminal ${branch}`
-  }
-  else {
+  } else {
     wsTitle = folderName
     ompTitle = 'omp'
-    nvimTitle = 'nvim'
-    terminalTitle = `terminal ${folderName}`
   }
 
   const focus = options.focus ?? true
@@ -70,8 +63,7 @@ export async function launchDevWorkspace(options: LaunchDevOptions = {}): Promis
       surface: leftSurface,
       text: ompCmd,
     })
-  }
-  catch {
+  } catch {
     // Non-fatal if rename/send fails
   }
 
@@ -140,8 +132,7 @@ export async function launchDevWorkspace(options: LaunchDevOptions = {}): Promis
     if (leftPane) {
       await cmux.focusPane({ pane: leftPane, workspace: wsRef })
     }
-  }
-  catch {
+  } catch {
     // Non-fatal fallback
   }
 
@@ -166,27 +157,32 @@ export function registerDevCommand(program: Command): void {
     .option('--omp <command>', 'Command to run in left pane (default: omp-empo)', 'omp-empo')
     .option('--nvim <command>', 'Command to run in right pane tab 1 (default: nvim .)', 'nvim .')
     .option('--terminal <command>', 'Optional command to run in right pane tab 2 (terminal)')
-    .action(async (targetPath?: string, opts?: {
-      dir?: string
-      cwd?: string
-      focus?: boolean | string
-      omp?: string
-      nvim?: string
-      terminal?: string
-    }) => {
-      try {
-        const resolvedCwd = targetPath || opts?.dir || opts?.cwd || process.cwd()
-        await launchDevWorkspace({
-          cwd: resolvedCwd,
-          focus: opts?.focus === undefined ? undefined : String(opts.focus).toLowerCase() !== 'false',
-          ompCommand: opts?.omp,
-          nvimCommand: opts?.nvim,
-          terminalCommand: opts?.terminal,
-        })
-      }
-      catch (error) {
-        console.error(`Error: ${error instanceof Error ? error.message : String(error)}`)
-        process.exit(1)
-      }
-    })
+    .action(
+      async (
+        targetPath?: string,
+        opts?: {
+          dir?: string
+          cwd?: string
+          focus?: boolean | string
+          omp?: string
+          nvim?: string
+          terminal?: string
+        },
+      ) => {
+        try {
+          const resolvedCwd = targetPath || opts?.dir || opts?.cwd || process.cwd()
+          await launchDevWorkspace({
+            cwd: resolvedCwd,
+            focus:
+              opts?.focus === undefined ? undefined : String(opts.focus).toLowerCase() !== 'false',
+            ompCommand: opts?.omp,
+            nvimCommand: opts?.nvim,
+            terminalCommand: opts?.terminal,
+          })
+        } catch (error) {
+          console.error(`Error: ${error instanceof Error ? error.message : String(error)}`)
+          process.exit(1)
+        }
+      },
+    )
 }
