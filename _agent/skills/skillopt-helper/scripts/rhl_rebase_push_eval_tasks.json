@@ -1,0 +1,126 @@
+{
+  "format": "skillopt_sleep.tasks.v1",
+  "project": "/Users/joe/Projects/empo_health/remote-health-link",
+  "transcript_source": "guided_mining",
+  "n_sessions": 4,
+  "target_skill_path": "/Users/joe/dotfiles/_agent/skills/rhl-rebase-push/SKILL.md",
+  "reviewed": true,
+  "tasks": [
+    {
+      "id": "rhl_rebase_push_task_01",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "some of the mocks are used in many place lets find a common place to put these mocks so we can use it in our testing\n@workspaces/mock-services/sources/modules/twilio/twilio-proxy.service.spec.ts:22-66",
+      "context_excerpt": "Context for rhl-rebase-push: Rebases current branch onto origin/main and force-pushes with lease to the remote repository....",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "git status --porcelain"
+          },
+          {
+            "op": "contains",
+            "arg": "git rebase --abort"
+          }
+        ]
+      },
+      "tags": ["rhl-rebase-push", "harvested"],
+      "source_sessions": [],
+      "split": "train",
+      "origin": "harvested",
+      "derived_from": "rhl-rebase-push",
+      "skill_hint": "rhl-rebase-push"
+    },
+    {
+      "id": "rhl_rebase_push_task_02",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets run the worktrunk hook that creates a graphify for us @.config/wt.toml",
+      "context_excerpt": "Context for rhl-rebase-push: Rebases current branch onto origin/main and force-pushes with lease to the remote repository....",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "git status --porcelain"
+          },
+          {
+            "op": "contains",
+            "arg": "git rebase --abort"
+          }
+        ]
+      },
+      "tags": ["rhl-rebase-push", "harvested"],
+      "source_sessions": [],
+      "split": "val",
+      "origin": "harvested",
+      "derived_from": "rhl-rebase-push",
+      "skill_hint": "rhl-rebase-push"
+    },
+    {
+      "id": "rhl_rebase_push_task_03",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "@workspaces/mock-services/sources/testing/ses-mailbox.ts:4 seems to be only used in one place",
+      "context_excerpt": "Context for rhl-rebase-push: Rebases current branch onto origin/main and force-pushes with lease to the remote repository....",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "git status --porcelain"
+          },
+          {
+            "op": "contains",
+            "arg": "git rebase --abort"
+          }
+        ]
+      },
+      "tags": ["rhl-rebase-push", "harvested"],
+      "source_sessions": [],
+      "split": "train",
+      "origin": "harvested",
+      "derived_from": "rhl-rebase-push",
+      "skill_hint": "rhl-rebase-push"
+    },
+    {
+      "id": "rhl_rebase_push_task_04",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets commit and push our staged changes",
+      "context_excerpt": "Context for rhl-rebase-push: Rebases current branch onto origin/main and force-pushes with lease to the remote repository....",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "git status --porcelain"
+          },
+          {
+            "op": "contains",
+            "arg": "git rebase --abort"
+          }
+        ]
+      },
+      "tags": ["rhl-rebase-push", "harvested"],
+      "source_sessions": [],
+      "split": "val",
+      "origin": "harvested",
+      "derived_from": "rhl-rebase-push",
+      "skill_hint": "rhl-rebase-push"
+    }
+  ]
+}

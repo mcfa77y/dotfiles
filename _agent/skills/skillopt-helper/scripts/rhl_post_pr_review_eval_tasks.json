@@ -1,0 +1,110 @@
+{
+  "format": "skillopt_sleep.tasks.v1",
+  "project": "/Users/joe/Projects/empo_health/remote-health-link",
+  "transcript_source": "guided_mining",
+  "n_sessions": 4,
+  "target_skill_path": "/Users/joe/dotfiles/_agent/skills/rhl-post-pr-review/SKILL.md",
+  "reviewed": true,
+  "tasks": [
+    {
+      "id": "rhl_post_pr_review_task_01",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets commit and push, create a pr, then run review",
+      "context_excerpt": "Context for rhl-post-pr-review: Post structured inline review comments and top-level review summaries to GitHub Pull Requests in RHL repositories....",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "gh auth status"
+          }
+        ]
+      },
+      "tags": ["rhl-post-pr-review", "harvested"],
+      "source_sessions": [],
+      "split": "train",
+      "origin": "harvested",
+      "derived_from": "rhl-post-pr-review",
+      "skill_hint": "rhl-post-pr-review"
+    },
+    {
+      "id": "rhl_post_pr_review_task_02",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "why does this command immediately exit with an error\n monitor-cicd --pr https://github.com/EmpoHealth/core/pull/3535",
+      "context_excerpt": "Context for rhl-post-pr-review: Post structured inline review comments and top-level review summaries to GitHub Pull Requests in RHL repositories....",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "gh auth status"
+          }
+        ]
+      },
+      "tags": ["rhl-post-pr-review", "harvested"],
+      "source_sessions": [],
+      "split": "val",
+      "origin": "harvested",
+      "derived_from": "rhl-post-pr-review",
+      "skill_hint": "rhl-post-pr-review"
+    },
+    {
+      "id": "rhl_post_pr_review_task_03",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets add an exit message when this happens.",
+      "context_excerpt": "Context for rhl-post-pr-review: Post structured inline review comments and top-level review summaries to GitHub Pull Requests in RHL repositories....",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "gh auth status"
+          }
+        ]
+      },
+      "tags": ["rhl-post-pr-review", "harvested"],
+      "source_sessions": [],
+      "split": "train",
+      "origin": "harvested",
+      "derived_from": "rhl-post-pr-review",
+      "skill_hint": "rhl-post-pr-review"
+    },
+    {
+      "id": "rhl_post_pr_review_task_04",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "## Code Review Request\n\n### Mode\n\nPR EmpoHealth/core#2804\n\n### Changed Files (4 files, +108/-99 lines)\n\n|File|+/-|Type|\n|---|---|---|\n|workspaces/qa/sources/pages/DashboardPage.ts|+10/-27|ts|\n|workspaces/qa/sources/pages/HelpPage.ts|+13/-30|ts|\n|workspaces/qa/sources/pages/PatientDashboardPage.ts|+10/-27|ts|\n|workspaces/qa/sources/utils/LinearHelper.ts|+75/-15|ts|\n### Distribution Guidelines\n\nUse the `task` tool with `agent: \"reviewer\"` and a `tasks` array.\nSpawn **2 reviewer agents** in parallel.\nGroup files by locality, e.g.:\n- Same directory/module → same agent\n- Related functionality → same agent\n- Tests with their implementation files → same agent\n\n### Reviewer Instructions\n\nReviewer MUST:\n1. Focus ONLY on assigned files\n2. MUST use diff hunks below (NEVER re-run git diff)\n3. MUST NOT read local workspace files for PR file context; use the fetched PR diff and `pr://EmpoHealth/core/2804/diff/all` or per-file `pr://EmpoHealth/core/2804/diff/<index>` only\n4. Use incremental `yield` sections for findings and verdict fields; do NOT call a separate finding tool\n### Diff\n\n<diff>\ndiff --git a/workspaces/qa/sources/pages/DashboardPage.ts b/workspaces/qa/sources/pages/DashboardPage.ts\nindex ec1dd7b69c..fa59b618f0 100644\n--- a/workspaces/qa/sources/pages/DashboardPage.ts\n+++ b/workspaces/qa/sources/pages/DashboardPage.ts\n@@ -16,13 +16,6 @@ const linear = new LinearHelper()\n let pageHelp: PageUtils\n\n const madhurimaAssigneeId = process.env.LINEAR_SUPPORT_ASSIGNEE_ID\n-const statusPool: Record<string, string | undefined> = {\n-\ttodo: process.env.LINEAR_TODO_STATUS_ID,\n-\t\"in progress\": process.env.LINEAR_IN_PROGRESS_STATUS_ID,\n-\tdone: process.env.LINEAR_DONE_STATUS_ID,\n-\t\"waiting on external party\":\n-\t\tprocess.env.LINEAR_WAITING_ON_EXTERNAL_PARTY_STATUS_ID,\n-}\n const agentName = \"Madhurima Singh\"\n const senderName = \"TestProvider\"\n export class DashboardPage {\n@@ -2409,19 +2402,14 @@ export class DashboardPage {\n \t\texpect(ticket.id).toBeDefined()\n \t\tcreatedIssueId = ticket.id\n \t\tconst dynamicTicketKey = ticket.identifier\n-\t\t// 3. Resolve the exact status UUID target state\n-\t\tconst cleanInput = statusNameOrId.toLowerCase().trim()\n-\t\tconst resolvedStatusId = statusPool[cleanInput] || statusNameOrId\n+\t\t// 3. Resolve the exact status UUID target state and assignee\n+\t\tconst resolvedStatusId = await linear.resolveStateId(statusNameOrId)\n+\t\tconst targetAssigneeId = await linear.resolveAssigneeId(madhurimaAssigneeId)\n\n-\t\tif (!resolvedStatusId || !madhurimaAssigneeId) {\n-\t\t\tthrow new Error(\n-\t\t\t\t`Configuration Error: Unable to resolve status mapping for \"${statusNameOrId}\" or Assignee ID is missing in Infisical context.`,\n-\t\t\t)\n-\t\t}\n \t\tawait linear.updateTicketStatusAssignee(\n \t\t\tticket.id,\n \t\t\tresolvedStatusId,\n-\t\t\tmadhurimaAssigneeId,\n+\t\t\ttargetAssigneeId,\n \t\t)\n \t\tconsole.log(\n \t\t\t`Ticket ${dynamicTicketKey} successfully assigned to Madhurima Singh.`,\n@@ -2483,7 +2471,7 @@ export class DashboardPage {\n\n \t\tconst currentAssignee = await freshTicketData.assignee\n \t\tconst currentState = await freshTicketData.state\n-\t\texpect(currentAssignee?.id).toBe(madhurimaAssigneeId)\n+\t\texpect(currentAssignee?.id).toBe(targetAssigneeId)\n \t\texpect(currentAssignee?.name).toBe(\"Madhurima Singh\")\n \t\texpect(currentState?.id).toBe(resolvedStatusId)\n\n@@ -2509,19 +2497,14 @@ export class DashboardPage {\n \t\tcreatedIssueId = ticket.id\n \t\tconst dynamicTicketKey = ticket.identifier\n\n-\t\t// 3. Resolve the exact status UUID target state\n-\t\tconst cleanInput = statusNameOrId.toLowerCase().trim()\n-\t\tconst resolvedStatusId = statusPool[cleanInput] || statusNameOrId\n+\t\t// 3. Resolve the exact status UUID target state and assignee\n+\t\tconst resolvedStatusId = await linear.resolveStateId(statusNameOrId)\n+\t\tconst targetAssigneeId = await linear.resolveAssigneeId(madhurimaAssigneeId)\n\n-\t\tif (!resolvedStatusId || !madhurimaAssigneeId) {\n-\t\t\tthrow new Error(\n-\t\t\t\t`Configuration Error: Unable to resolve status mapping for \"${statusNameOrId}\" or Assignee ID is missing in Infisical context.`,\n-\t\t\t)\n-\t\t}\n \t\tawait linear.updateTicketStatusAssignee(\n \t\t\tticket.id,\n \t\t\tresolvedStatusId,\n-\t\t\tmadhurimaAssigneeId,\n+\t\t\ttargetAssigneeId,\n \t\t)\n \t\tconsole.log(\n \t\t\t`Ticket ${dynamicTicketKey} successfully assigned to Madhurima Singh.`,\n@@ -2566,7 +2549,7 @@ export class DashboardPage {\n \t\t// 5. ASSIGNMENT ASSERTIONS: Verify the workflow state and the correct team owner\n \t\tconst currentAssignee = await freshTicketData.assignee\n \t\tconst currentState = await freshTicketData.state\n-\t\texpect(currentAssignee?.id).toBe(madhurimaAssigneeId)\n+\t\texpect(currentAssignee?.id).toBe(targetAssigneeId)\n \t\texpect(currentAssignee?.name).toBe(\"Madhurima Singh\")\n \t\texpect(currentState?.id).toBe(resolvedStatusId)\n\ndiff --git a/workspaces/qa/sources/pages/HelpPage.ts b/workspaces/qa/sources/pages/HelpPage.ts\nindex 827ce08e87..1c2772b064 100644\n--- a/workspaces/qa/sources/pages/HelpPage.ts\n+++ b/workspaces/qa/sources/pages/HelpPage.ts\n@@ -4,13 +4,6 @@ import { PageUtils } from \"../utils/PageUtils\"\n const linear = new LinearHelper()\n let pageHelp: PageUtils\n const madhurimaAssigneeId = process.env.LINEAR_SUPPORT_ASSIGNEE_ID //\"f7a9d7d3-63a3-45a2-b89c-3a87b735b84c\"\n-const statusPool: Record<string, string | undefined> = {\n-\ttodo: process.env.LINEAR_TODO_STATUS_ID,\n-\t\"in progress\": process.env.LINEAR_IN_PROGRESS_STATUS_ID,\n-\tdone: process.env.LINEAR_DONE_STATUS_ID,\n-\t\"waiting on external party\":\n-\t\tprocess.env.LINEAR_WAITING_ON_EXTERNAL_PARTY_STATUS_ID,\n-}\n const agentName = \"Madhurima Singh\"\n const TIMEOUT_MS = 3000\n\n@@ -556,19 +549,14 @@ export class HelpPage {\n \t\tcreatedIssueId = ticket.id\n \t\tconst dynamicTicketKey = ticket.identifier\n\n-\t\t// 3. Resolve the exact status UUID target state\n-\t\tconst cleanInput = statusNameOrId.toLowerCase().trim()\n-\t\tconst resolvedStatusId = statusPool[cleanInput] || statusNameOrId\n+\t\t// 3. Resolve the exact status UUID target state and assignee\n+\t\tconst resolvedStatusId = await linear.resolveStateId(statusNameOrId)\n+\t\tconst targetAssigneeId = await linear.resolveAssigneeId(madhurimaAssigneeId)\n\n-\t\tif (!resolvedStatusId || !madhurimaAssigneeId) {\n-\t\t\tthrow new Error(\n-\t\t\t\t`Configuration Error: Unable to resolve status mapping for \"${statusNameOrId}\" or Assignee ID is missing in Infisical context.`,\n-\t\t\t)\n-\t\t}\n \t\tawait linear.updateTicketStatusAssignee(\n \t\t\tticket.id,\n \t\t\tresolvedStatusId,\n-\t\t\tmadhurimaAssigneeId,\n+\t\t\ttargetAssigneeId,\n \t\t)\n \t\tconsole.log(\n \t\t\t`Ticket ${dynamicTicketKey} successfully assigned to Madhurima Singh.`,\n@@ -613,7 +601,7 @@ export class HelpPage {\n \t\t// 5. ASSIGNMENT ASSERTIONS: Verify the workflow state and the correct team owner\n \t\tconst currentAssignee = await freshTicketData.assignee\n \t\tconst currentState = await freshTicketData.state\n-\t\texpect(currentAssignee?.id).toBe(madhurimaAssigneeId)\n+\t\texpect(currentAssignee?.id).toBe(targetAssigneeId)\n \t\texpect(currentAssignee?.name).toBe(\"Madhurima Singh\")\n \t\texpect(currentState?.id).toBe(resolvedStatusId)\n\n@@ -640,19 +628,14 @@ export class HelpPage {\n \t\tcreatedIssueId = ticket.id\n \t\tconst dynamicTicketKey = ticket.identifier\n\n-\t\t// 3. Resolve the exact status UUID target state\n-\t\tconst cleanInput = statusNameOrId.toLowerCase().trim()\n-\t\tconst resolvedStatusId = statusPool[cleanInput] || statusNameOrId\n+\t\t// 3. Resolve the exact status UUID target state and assignee\n+\t\tconst resolvedStatusId = await linear.resolveStateId(statusNameOrId)\n+\t\tconst targetAssigneeId = await linear.resolveAssigneeId(madhurimaAssigneeId)\n\n-\t\tif (!resolvedStatusId || !madhurimaAssigneeId) {\n-\t\t\tthrow new Error(\n-\t\t\t\t`Configuration Error: Unable to resolve status mapping for \"${statusNameOrId}\" or Assignee ID is missing in Infisical context.`,\n-\t\t\t)\n-\t\t}\n \t\tawait linear.updateTicketStatusAssignee(\n \t\t\tticket.id,\n \t\t\tresolvedStatusId,\n-\t\t\tmadhurimaAssigneeId,\n+\t\t\ttargetAssigneeId,\n \t\t)\n \t\tconsole.log(\n \t\t\t`Ticket ${dynamicTicketKey} successfully assigned to Madhurima Singh.`,\n@@ -697,7 +680,7 @@ export class HelpPage {\n \t\t// 5. ASSIGNMENT ASSERTIONS: Verify the workflow state and the correct team owner\n \t\tconst currentAssignee = await freshTicketData.assignee\n \t\tconst currentState = await freshTicketData.state\n-\t\texpect(currentAssignee?.id).toBe(madhurimaAssigneeId)\n+\t\texpect(currentAssignee?.id).toBe(targetAssigneeId)\n \t\texpect(currentAssignee?.name).toBe(\"Madhurima Singh\")\n \t\texpect(currentState?.id).toBe(resolvedStatusId)\n\n@@ -886,12 +869,12 @@ export class HelpPage {\n \tasync addCommenttoTicket(\n \t\tcommentText: string,\n \t\tfullExpectedTitle: string,\n-\t\tcreatedIssueId: string | undefined,\n+\t\t_createdIssueId: string | undefined,\n \t) {\n \t\tconst ticket = await linear.waitForIssueCreation(fullExpectedTitle)\n \t\texpect(ticket.id).toBeDefined()\n-\t\tcreatedIssueId = ticket.id\n-\t\tconst dynamicTicketKey = ticket.identifier\n+\t\t_createdIssueId = ticket.id\n+\t\tconsole.log(`Adding comment to ticket ${ticket.identifier}...`)\n \t\tconst freshTicketData = await linear.getIssueDetails(ticket.id)\n \t\tconst commentsConnection = await freshTicketData.comments()\n\ndiff --git a/workspaces/qa/sources/pages/PatientDashboardPage.ts b/workspaces/qa/sources/pages/PatientDashboardPage.ts\nindex 50cf8873e7..38905a057c 100644\n--- a/workspaces/qa/sources/pages/PatientDashboardPage.ts\n+++ b/workspaces/qa/sources/pages/PatientDashboardPage.ts\n@@ -4,13 +4,6 @@ import { PageUtils } from \"../utils/PageUtils\"\n const linear = new LinearHelper()\n let pageHelp: PageUtils\n const madhurimaAssigneeId = process.env.LINEAR_SUPPORT_ASSIGNEE_ID //\"f7a9d7d3-63a3-45a2-b89c-3a87b735b84c\"\n-const statusPool: Record<string, string | undefined> = {\n-\ttodo: process.env.LINEAR_TODO_STATUS_ID,\n-\t\"in progress\": process.env.LINEAR_IN_PROGRESS_STATUS_ID,\n-\tdone: process.env.LINEAR_DONE_STATUS_ID,\n-\t\"waiting on external party\":\n-\t\tprocess.env.LINEAR_WAITING_ON_EXTERNAL_PARTY_STATUS_ID,\n-}\n const agentName = \"Madhurima Singh\"\n export class PatientDashboardPage {\n \tprivate page: Page\n@@ -547,19 +540,14 @@ export class PatientDashboardPage {\n \t\tcreatedIssueId = ticket.id\n \t\tconst dynamicTicketKey = ticket.identifier\n\n-\t\t// 3. Resolve the exact status UUID target state\n-\t\tconst cleanInput = statusNameOrId.toLowerCase().trim()\n-\t\tconst resolvedStatusId = statusPool[cleanInput] || statusNameOrId\n+\t\t// 3. Resolve the exact status UUID target state and assignee\n+\t\tconst resolvedStatusId = await linear.resolveStateId(statusNameOrId)\n+\t\tconst targetAssigneeId = await linear.resolveAssigneeId(madhurimaAssigneeId)\n\n-\t\tif (!resolvedStatusId || !madhurimaAssigneeId) {\n-\t\t\tthrow new Error(\n-\t\t\t\t`Configuration Error: Unable to resolve status mapping for \"${statusNameOrId}\" or Assignee ID is missing in Infisical context.`,\n-\t\t\t)\n-\t\t}\n \t\tawait linear.updateTicketStatusAssignee(\n \t\t\tticket.id,\n \t\t\tresolvedStatusId,\n-\t\t\tmadhurimaAssigneeId,\n+\t\t\ttargetAssigneeId,\n \t\t)\n \t\tconsole.log(\n \t\t\t`Ticket ${dynamicTicketKey} successfully assigned to Madhurima Singh.`,\n@@ -609,7 +597,7 @@ export class PatientDashboardPage {\n \t\t// 5. ASSIGNMENT ASSERTIONS: Verify the workflow state and the correct team owner\n \t\tconst currentAssignee = await freshTicketData.assignee\n \t\tconst currentState = await freshTicketData.state\n-\t\texpect(currentAssignee?.id).toBe(madhurimaAssigneeId)\n+\t\texpect(currentAssignee?.id).toBe(targetAssigneeId)\n \t\texpect(currentAssignee?.name).toBe(\"Madhurima Singh\")\n \t\texpect(currentState?.id).toBe(resolvedStatusId)\n\n@@ -635,19 +623,14 @@ export class PatientDashboardPage {\n \t\tcreatedIssueId = ticket.id\n \t\tconst dynamicTicketKey = ticket.identifier\n\n-\t\t// 3. Resolve the exact status UUID target state\n-\t\tconst cleanInput = statusNameOrId.toLowerCase().trim()\n-\t\tconst resolvedStatusId = statusPool[cleanInput] || statusNameOrId\n+\t\t// 3. Resolve the exact status UUID target state and assignee\n+\t\tconst resolvedStatusId = await linear.resolveStateId(statusNameOrId)\n+\t\tconst targetAssigneeId = await linear.resolveAssigneeId(madhurimaAssigneeId)\n\n-\t\tif (!resolvedStatusId || !madhurimaAssigneeId) {\n-\t\t\tthrow new Error(\n-\t\t\t\t`Configuration Error: Unable to resolve status mapping for \"${statusNameOrId}\" or Assignee ID is missing in Infisical context.`,\n-\t\t\t)\n-\t\t}\n \t\tawait linear.updateTicketStatusAssignee(\n \t\t\tticket.id,\n \t\t\tresolvedStatusId,\n-\t\t\tmadhurimaAssigneeId,\n+\t\t\ttargetAssigneeId,\n \t\t)\n \t\tconsole.log(\n \t\t\t`Ticket ${dynamicTicketKey} successfully assigned to Madhurima Singh.`,\n@@ -692,7 +675,7 @@ export class PatientDashboardPage {\n \t\t// 5. ASSIGNMENT ASSERTIONS: Verify the workflow state and the correct team owner\n \t\tconst currentAssignee = await freshTicketData.assignee\n \t\tconst currentState = await freshTicketData.state\n-\t\texpect(currentAssignee?.id).toBe(madhurimaAssigneeId)\n+\t\texpect(currentAssignee?.id).toBe(targetAssigneeId)\n \t\texpect(currentAssignee?.name).toBe(\"Madhurima Singh\")\n \t\texpect(currentState?.id).toBe(resolvedStatusId)\n\ndiff --git a/workspaces/qa/sources/utils/LinearHelper.ts b/workspaces/qa/sources/utils/LinearHelper.ts\nindex 4b3fcafd32..1826471020 100644\n--- a/workspaces/qa/sources/utils/LinearHelper.ts\n+++ b/workspaces/qa/sources/utils/LinearHelper.ts\n@@ -82,30 +82,90 @@ export class LinearHelper {\n \t\t})\n \t}\n\n-\tasync updateTicketStatusAssignee(\n-\t\tissueId: string,\n-\t\tstateNameOrId?: \"todo\" | \"in progress\" | \"done\" | string,\n-\t\tassigneeId?: string,\n-\t): Promise<void> {\n-\t\tconst updatePayload: any = {}\n+\t/**\n+\t * Sanitizes status or user ID string from accidental quotes or whitespace\n+\t */\n+\tstatic sanitizeId(id?: string): string | undefined {\n+\t\treturn id?.replace(/['’\"]/g, \"\").trim()\n+\t}\n\n-\t\t// 1. Dynamic Workspace Mapping reading straight from Infisical environment keys\n+\t/**\n+\t * Resolves a workflow state ID by name or UUID, with fallback to Infisical env vars and dynamic Linear lookup\n+\t */\n+\tasync resolveStateId(stateNameOrId: string): Promise<string> {\n+\t\tconst cleanInput = stateNameOrId.toLowerCase().trim()\n \t\tconst workflowStates: Record<string, string | undefined> = {\n \t\t\ttodo: process.env.LINEAR_TODO_STATUS_ID,\n \t\t\t\"in progress\": process.env.LINEAR_IN_PROGRESS_STATUS_ID,\n \t\t\tdone: process.env.LINEAR_DONE_STATUS_ID,\n+\t\t\t\"waiting on external party\":\n+\t\t\t\tprocess.env.LINEAR_WAITING_ON_EXTERNAL_PARTY_STATUS_ID,\n+\t\t}\n+\n+\t\tconst resolved = LinearHelper.sanitizeId(\n+\t\t\tworkflowStates[cleanInput] || stateNameOrId,\n+\t\t)\n+\t\tconst isUuid =\n+\t\t\t/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(\n+\t\t\t\tresolved || \"\",\n+\t\t\t)\n+\t\tif (isUuid && resolved) {\n+\t\t\treturn resolved\n+\t\t}\n+\n+\t\ttry {\n+\t\t\tconst states = await this.client.workflowStates()\n+\t\t\tconst match = states.nodes.find(\n+\t\t\t\t(s) => s.name.toLowerCase() === cleanInput,\n+\t\t\t)\n+\t\t\tif (match) {\n+\t\t\t\treturn match.id\n+\t\t\t}\n+\t\t} catch (err) {\n+\t\t\tconsole.warn(`[LinearHelper] Failed to query workflowStates: ${err}`)\n \t\t}\n\n-\t\t// 2. Resolve the stateId dynamically\n+\t\treturn resolved || stateNameOrId\n+\t}\n+\n+\t/**\n+\t * Resolves an assignee ID by user name, email, or UUID, with fallback to Infisical env vars and dynamic Linear lookup\n+\t */\n+\tasync resolveAssigneeId(assigneeNameOrId?: string): Promise<string> {\n+\t\tconst raw =\n+\t\t\tassigneeNameOrId ||\n+\t\t\tprocess.env.LINEAR_SUPPORT_ASSIGNEE_ID ||\n+\t\t\t\"Madhurima Singh\"\n+\t\tconst sanitized = LinearHelper.sanitizeId(raw) || \"\"\n+\t\tconst isUuid =\n+\t\t\t/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(\n+\t\t\t\tsanitized,\n+\t\t\t)\n+\t\tif (isUuid) {\n+\t\t\treturn sanitized\n+\t\t}\n+\n+\t\ttry {\n+\t\t\treturn await this.getUserIdByEmailOrName(sanitized)\n+\t\t} catch (err) {\n+\t\t\tconsole.warn(`[LinearHelper] Failed to resolve assignee: ${err}`)\n+\t\t\treturn sanitized\n+\t\t}\n+\t}\n+\n+\tasync updateTicketStatusAssignee(\n+\t\tissueId: string,\n+\t\tstateNameOrId?: \"todo\" | \"in progress\" | \"done\" | string,\n+\t\tassigneeId?: string,\n+\t): Promise<void> {\n+\t\tconst updatePayload: any = {}\n+\n \t\tif (\n \t\t\tstateNameOrId &&\n \t\t\ttypeof stateNameOrId === \"string\" &&\n \t\t\tstateNameOrId.trim() !== \"\"\n \t\t) {\n-\t\t\tconst cleanInput = stateNameOrId.toLowerCase().trim()\n-\n-\t\t\t// Match with Infisical variable if using a friendly string key; fall back to raw input value\n-\t\t\tupdatePayload.stateId = workflowStates[cleanInput] || cleanInput\n+\t\t\tupdatePayload.stateId = await this.resolveStateId(stateNameOrId)\n \t\t}\n\n \t\tif (\n@@ -113,13 +173,13 @@ export class LinearHelper {\n \t\t\ttypeof assigneeId === \"string\" &&\n \t\t\tassigneeId.trim() !== \"\"\n \t\t) {\n-\t\t\tupdatePayload.assigneeId = assigneeId.trim()\n+\t\t\tupdatePayload.assigneeId = await this.resolveAssigneeId(assigneeId)\n \t\t}\n\n-\t\t// 3. Execute the native SDK update method safely\n+\t\t// Execute the native SDK update method safely\n \t\tawait this.client.updateIssue(issueId, updatePayload)\n \t\tconsole.log(\n-\t\t\t`[Linear Sync] Updated ticket ${issueId} successfully. Status mapped to: ${updatePayload.stateId}`,\n+\t\t\t`[Linear Sync] Updated ticket ${issueId} successfully. Status mapped to: ${updatePayload.stateId}, Assignee: ${updatePayload.assigneeId}`,\n \t\t)\n \t}\n \tasync cleanupTicket(issueId: string): Promise<void> {\n</diff>",
+      "context_excerpt": "Context for rhl-post-pr-review: Post structured inline review comments and top-level review summaries to GitHub Pull Requests in RHL repositories....",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "gh auth status"
+          }
+        ]
+      },
+      "tags": ["rhl-post-pr-review", "harvested"],
+      "source_sessions": [],
+      "split": "val",
+      "origin": "harvested",
+      "derived_from": "rhl-post-pr-review",
+      "skill_hint": "rhl-post-pr-review"
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "format": "skillopt_sleep.tasks.v1",
+  "project": "/Users/joe/Projects/empo_health/remote-health-link",
+  "transcript_source": "guided_mining",
+  "n_sessions": 4,
+  "target_skill_path": "/Users/joe/dotfiles/_agent/skills/rhl-review-pr/SKILL.md",
+  "reviewed": true,
+  "tasks": [
+    {
+      "id": "rhl_review_pr_task_01",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "## Code Review Request\n\n### Mode\n\nPR EmpoHealth/core#2629\n\n### Changed Files (22 files, +2240/-95 lines)\n\n|File|+/-|Type|\n|---|---|---|\n|workspaces/mock-services/sources/modules/twilio/dto/twilio-inspection.dto.ts|+10/-0|ts|\n|workspaces/mock-services/sources/modules/twilio/dto/twilio-trigger.dto.ts|+51/-0|ts|\n|workspaces/mock-services/sources/modules/twilio/index.ts|+10/-0|ts|\n|workspaces/mock-services/sources/modules/twilio/twilio-admin.controller.spec.ts|+85/-0|ts|\n|workspaces/mock-services/sources/modules/twilio/twilio-admin.controller.ts|+70/-0|ts|\n|workspaces/mock-services/sources/modules/twilio/twilio-proxy.service.spec.ts|+128/-88|ts|\n|workspaces/mock-services/sources/modules/twilio/twilio-proxy.service.ts|+266/-3|ts|\n|workspaces/mock-services/sources/modules/twilio/twilio-registry.service.spec.ts|+176/-0|ts|\n|workspaces/mock-services/sources/modules/twilio/twilio-registry.service.ts|+157/-0|ts|\n|workspaces/mock-services/sources/modules/twilio/twilio-signature.util.spec.ts|+35/-0|ts|\n|workspaces/mock-services/sources/modules/twilio/twilio-signature.util.ts|+23/-0|ts|\n|workspaces/mock-services/sources/modules/twilio/twilio-templates.util.spec.ts|+86/-0|ts|\n|workspaces/mock-services/sources/modules/twilio/twilio-templates.util.ts|+172/-0|ts|\n|workspaces/mock-services/sources/modules/twilio/twilio-trigger.controller.spec.ts|+58/-0|ts|\n|workspaces/mock-services/sources/modules/twilio/twilio-trigger.controller.ts|+50/-0|ts|\n|workspaces/mock-services/sources/modules/twilio/twilio-trigger.service.spec.ts|+204/-0|ts|\n|workspaces/mock-services/sources/modules/twilio/twilio-trigger.service.ts|+198/-0|ts|\n|workspaces/mock-services/sources/modules/twilio/twilio.integration.spec.ts|+291/-0|ts|\n|workspaces/mock-services/sources/modules/twilio/twilio.interface.ts|+59/-0|ts|\n|workspaces/mock-services/sources/modules/twilio/twilio.module.ts|+19/-4|ts|\n|workspaces/mock-services/sources/modules/twilio/twiml-parser.util.spec.ts|+42/-0|ts|\n|workspaces/mock-services/sources/modules/twilio/twiml-parser.util.ts|+50/-0|ts|\n### Distribution Guidelines\n\nUse the `task` tool with `agent: \"reviewer\"` and a `tasks` array.\nSpawn **8 reviewer agents** in parallel.\nGroup files by locality, e.g.:\n- Same directory/module → same agent\n- Related functionality → same agent\n- Tests with their implementation files → same agent\n\n### Reviewer Instructions\n\nReviewer MUST:\n1. Focus ONLY on assigned files\n2. MUST read assigned PR file diffs from `pr://EmpoHealth/core/2629/diff/all` or per-file `pr://EmpoHealth/core/2629/diff/<index>`; NEVER use local `git diff`/`git show` for PR diff content\n3. MUST NOT read local workspace files for PR file context; use the fetched PR diff and `pr://EmpoHealth/core/2629/diff/all` or per-file `pr://EmpoHealth/core/2629/diff/<index>` only\n4. Use incremental `yield` sections for findings and verdict fields; do NOT call a separate finding tool\n\n### Diff Previews\n\n_Full diff too large (22 files). Showing first ~5 lines per file._\n\n#### workspaces/mock-services/sources/modules/twilio/dto/twilio-inspection.dto.ts\n\n```diff\nnew file mode 100644\n+import { createZodDto } from \"nestjs-zod\"\n+import { z } from \"zod\"\n+\n+export const twilioInspectionQuerySchema = z.object({\n```\n\n#### workspaces/mock-services/sources/modules/twilio/dto/twilio-trigger.dto.ts\n\n```diff\nnew file mode 100644\n+import { createZodDto } from \"nestjs-zod\"\n+import { z } from \"zod\"\n+import { twilioSmsStatusEnum, twilioVoiceStatusEnum } from \"../twilio.interface\"\n+\n```\n\n#### workspaces/mock-services/sources/modules/twilio/index.ts\n\n```diff\n+export * from \"./twilio.interface\"\n export * from \"./twilio-proxy.controller\"\n export * from \"./twilio-proxy.service\"\n+export * from \"./twilio-registry.service\"\n+export * from \"./twilio-trigger.controller\"\n```\n\n#### workspaces/mock-services/sources/modules/twilio/twilio-admin.controller.spec.ts\n\n```diff\nnew file mode 100644\n+import { NotFoundException } from \"@nestjs/common\"\n+import { beforeEach, describe, expect, it, vi } from \"vitest\"\n+import { TwilioAdminController } from \"./twilio-admin.controller\"\n+import { TwilioRegistryService } from \"./twilio-registry.service\"\n```\n\n#### workspaces/mock-services/sources/modules/twilio/twilio-admin.controller.ts\n\n```diff\nnew file mode 100644\n+import {\n+\tController,\n+\tGet,\n+\tHttpCode,\n```\n\n#### workspaces/mock-services/sources/modules/twilio/twilio-proxy.service.spec.ts\n\n```diff\nimport { RestMatcherService } from \"@matcher\"\n import { HttpForwarderService } from \"@http-forwarder\"\n import { TwilioProxyService } from \"./twilio-proxy.service\"\n+import { TwilioRegistryService } from \"./twilio-registry.service\"\n+import { TwilioRecordedCall } from \"./twilio.interface\"\n```\n\n#### workspaces/mock-services/sources/modules/twilio/twilio-proxy.service.ts\n\n```diff\nimport { Injectable, Inject } from \"@nestjs/common\"\n-import type { Request } from \"express\"\n+import type { Request, Response } from \"express\"\n import { PinoLogger } from \"nestjs-pino\"\n import { ConfigService } from \"@config\"\n```\n\n#### workspaces/mock-services/sources/modules/twilio/twilio-registry.service.spec.ts\n\n```diff\nnew file mode 100644\n+import { beforeEach, describe, expect, it, vi } from \"vitest\"\n+import { PinoLogger } from \"nestjs-pino\"\n+import { StorageService } from \"@storage\"\n+import { TwilioRegistryService } from \"./twilio-registry.service\"\n```\n\n#### workspaces/mock-services/sources/modules/twilio/twilio-registry.service.ts\n\n```diff\nnew file mode 100644\n+import { Inject, Injectable } from \"@nestjs/common\"\n+import { PinoLogger } from \"nestjs-pino\"\n+import { STORAGE_SERVICE, StorageService } from \"@storage\"\n+import {\n```\n\n#### workspaces/mock-services/sources/modules/twilio/twilio-signature.util.spec.ts\n\n```diff\nnew file mode 100644\n+import { describe, expect, it } from \"vitest\"\n+import { calculateTwilioSignature } from \"./twilio-signature.util\"\n+\n+describe(\"calculateTwilioSignature\", () => {\n```\n\n#### workspaces/mock-services/sources/modules/twilio/twilio-signature.util.ts\n\n```diff\nnew file mode 100644\n+import { createHmac } from \"crypto\"\n+\n+/**\n+ * Calculates the X-Twilio-Signature header matching Twilio's official algorithm:\n```\n\n#### workspaces/mock-services/sources/modules/twilio/twilio-templates.util.spec.ts\n\n```diff\nnew file mode 100644\n+import { describe, expect, it } from \"vitest\"\n+import {\n+\tbuildCallCreatedTemplate,\n+\tbuildMessageCreatedTemplate,\n```\n\n#### workspaces/mock-services/sources/modules/twilio/twilio-templates.util.ts\n\n```diff\nnew file mode 100644\n+import { randomBytes } from \"crypto\"\n+\n+export function generateTwilioSid(\n+\tprefix: \"CA\" | \"SM\" | \"RE\" | \"AP\" | \"AC\",\n```\n\n#### workspaces/mock-services/sources/modules/twilio/twilio-trigger.controller.spec.ts\n\n```diff\nnew file mode 100644\n+import { HttpStatus } from \"@nestjs/common\"\n+import { beforeEach, describe, expect, it, vi } from \"vitest\"\n+import { TwilioTriggerController } from \"./twilio-trigger.controller\"\n+import { TwilioTriggerService } from \"./twilio-trigger.service\"\n```\n\n#### workspaces/mock-services/sources/modules/twilio/twilio-trigger.controller.ts\n\n```diff\nnew file mode 100644\n+import {\n+\tBody,\n+\tController,\n+\tHttpCode,\n```\n\n#### workspaces/mock-services/sources/modules/twilio/twilio-trigger.service.spec.ts\n\n```diff\nnew file mode 100644\n+import {\n+\tInternalServerErrorException,\n+\tBadRequestException,\n+} from \"@nestjs/common\"\n```\n\n#### workspaces/mock-services/sources/modules/twilio/twilio-trigger.service.ts\n\n```diff\nnew file mode 100644\n+import {\n+\tBadRequestException,\n+\tInjectable,\n+\tInternalServerErrorException,\n```\n\n#### workspaces/mock-services/sources/modules/twilio/twilio.integration.spec.ts\n\n```diff\nnew file mode 100644\n+import type { Request, Response } from \"express\"\n+import {\n+\tafterEach,\n+\tbeforeEach,\n```\n\n#### workspaces/mock-services/sources/modules/twilio/twilio.interface.ts\n\n```diff\nnew file mode 100644\n+import { z } from \"zod\"\n+\n+export const twilioVoiceStatusEnum = z.enum([\n+\t\"initiated\",\n```\n\n#### workspaces/mock-services/sources/modules/twilio/twilio.module.ts\n\n```diff\nimport { ScenarioModule } from \"@scenario\"\n import { MatcherModule } from \"@matcher\"\n import { HttpForwarderModule } from \"@http-forwarder\"\n+import { StorageModule } from \"@storage\"\n import { TwilioProxyController } from \"./twilio-proxy.controller\"\n```\n\n#### workspaces/mock-services/sources/modules/twilio/twiml-parser.util.spec.ts\n\n```diff\nnew file mode 100644\n+import { describe, expect, it } from \"vitest\"\n+import { parseTwimlCallbacks } from \"./twiml-parser.util\"\n+\n+describe(\"parseTwimlCallbacks\", () => {\n```\n\n#### workspaces/mock-services/sources/modules/twilio/twiml-parser.util.ts\n\n```diff\nnew file mode 100644\n+/**\n+ * Parses TwiML attributes and elements for statusCallback and recordingStatusCallback.\n+ */\n+export interface ParsedTwimlCallbacks {\n```",
+      "context_excerpt": "Context for rhl-review-pr: Perform a local PR review for RHL repositories and output feedback to docs/...",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "git log"
+          }
+        ]
+      },
+      "tags": ["rhl-review-pr", "harvested"],
+      "source_sessions": [],
+      "split": "train",
+      "origin": "harvested",
+      "derived_from": "rhl-review-pr",
+      "skill_hint": "rhl-review-pr"
+    },
+    {
+      "id": "rhl_review_pr_task_02",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets apply those fixes. and for the \n- Decode XML Entities and Match Quote Delimiters in TwiML Callback Parser\n  - lets find an npm package that helps to parse xml to manage this instead of using regex",
+      "context_excerpt": "Context for rhl-review-pr: Perform a local PR review for RHL repositories and output feedback to docs/...",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "git log"
+          }
+        ]
+      },
+      "tags": ["rhl-review-pr", "harvested"],
+      "source_sessions": [],
+      "split": "val",
+      "origin": "harvested",
+      "derived_from": "rhl-review-pr",
+      "skill_hint": "rhl-review-pr"
+    },
+    {
+      "id": "rhl_review_pr_task_03",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets see how we can address https://github.com/EmpoHealth/core/pull/2629#discussion_r3962109871",
+      "context_excerpt": "Context for rhl-review-pr: Perform a local PR review for RHL repositories and output feedback to docs/...",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "git log"
+          }
+        ]
+      },
+      "tags": ["rhl-review-pr", "harvested"],
+      "source_sessions": [],
+      "split": "train",
+      "origin": "harvested",
+      "derived_from": "rhl-review-pr",
+      "skill_hint": "rhl-review-pr"
+    },
+    {
+      "id": "rhl_review_pr_task_04",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets write on the comment that it is a false positive.",
+      "context_excerpt": "Context for rhl-review-pr: Perform a local PR review for RHL repositories and output feedback to docs/...",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "git log"
+          }
+        ]
+      },
+      "tags": ["rhl-review-pr", "harvested"],
+      "source_sessions": [],
+      "split": "val",
+      "origin": "harvested",
+      "derived_from": "rhl-review-pr",
+      "skill_hint": "rhl-review-pr"
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "format": "skillopt_sleep.tasks.v1",
+  "project": "/Users/joe/Projects/empo_health/remote-health-link",
+  "transcript_source": "guided_mining",
+  "n_sessions": 4,
+  "target_skill_path": "/Users/joe/dotfiles/_agent/skills/wt-switch-create/SKILL.md",
+  "reviewed": true,
+  "tasks": [
+    {
+      "id": "wt_switch_create_task_01",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets reply to eric's comment https://github.com/EmpoHealth/core/pull/3514 and update the pr description",
+      "context_excerpt": "Context for wt-switch-create: Create a new worktrunk worktree (optionally in another repo) and switch this session's working directory into it. Use wh...",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "wt switch --create"
+          },
+          {
+            "op": "contains",
+            "arg": "wt list"
+          },
+          {
+            "op": "contains",
+            "arg": "wt merge"
+          }
+        ]
+      },
+      "tags": ["wt-switch-create", "harvested"],
+      "source_sessions": [],
+      "split": "train",
+      "origin": "harvested",
+      "derived_from": "wt-switch-create",
+      "skill_hint": "wt-switch-create"
+    },
+    {
+      "id": "wt_switch_create_task_02",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets implement the reccomended next steps from investigation markdown",
+      "context_excerpt": "Context for wt-switch-create: Create a new worktrunk worktree (optionally in another repo) and switch this session's working directory into it. Use wh...",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "wt switch --create"
+          },
+          {
+            "op": "contains",
+            "arg": "wt list"
+          },
+          {
+            "op": "contains",
+            "arg": "wt merge"
+          }
+        ]
+      },
+      "tags": ["wt-switch-create", "harvested"],
+      "source_sessions": [],
+      "split": "val",
+      "origin": "harvested",
+      "derived_from": "wt-switch-create",
+      "skill_hint": "wt-switch-create"
+    },
+    {
+      "id": "wt_switch_create_task_03",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets create a ticket to finish the migration. in the meantime lets go with option B update mock test expectations. then another ticket to finish the mockservice with the newly migrated email service. \nPlease ask me any follow up questions that may be useful to help refine this prompt. Make the questions as an interactive prompt.",
+      "context_excerpt": "Context for wt-switch-create: Create a new worktrunk worktree (optionally in another repo) and switch this session's working directory into it. Use wh...",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "wt switch --create"
+          },
+          {
+            "op": "contains",
+            "arg": "wt list"
+          },
+          {
+            "op": "contains",
+            "arg": "wt merge"
+          }
+        ]
+      },
+      "tags": ["wt-switch-create", "harvested"],
+      "source_sessions": [],
+      "split": "train",
+      "origin": "harvested",
+      "derived_from": "wt-switch-create",
+      "skill_hint": "wt-switch-create"
+    },
+    {
+      "id": "wt_switch_create_task_04",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets finish implementing plan B",
+      "context_excerpt": "Context for wt-switch-create: Create a new worktrunk worktree (optionally in another repo) and switch this session's working directory into it. Use wh...",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "contains",
+            "arg": "wt switch --create"
+          },
+          {
+            "op": "contains",
+            "arg": "wt list"
+          },
+          {
+            "op": "contains",
+            "arg": "wt merge"
+          }
+        ]
+      },
+      "tags": ["wt-switch-create", "harvested"],
+      "source_sessions": [],
+      "split": "val",
+      "origin": "harvested",
+      "derived_from": "wt-switch-create",
+      "skill_hint": "wt-switch-create"
+    }
+  ]
+}
