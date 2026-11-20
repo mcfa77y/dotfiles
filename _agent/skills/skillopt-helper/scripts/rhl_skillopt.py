@@ -49,7 +49,7 @@ except ImportError:
 class OmpBackend(CliBackend):
     name = "omp"
 
-    def __init__(self, model: str = "", timeout: int = 180):
+    def __init__(self, model: str = "", timeout: int = 300):
         super().__init__(model=model, timeout=timeout)
         self.omp_path = shutil.which("omp") or "/opt/homebrew/bin/omp"
 
@@ -71,7 +71,7 @@ class OmpBackend(CliBackend):
 class AgyBackend(CliBackend):
     name = "agy"
 
-    def __init__(self, model: str = "", timeout: int = 180):
+    def __init__(self, model: str = "", timeout: int = 300):
         super().__init__(model=model, timeout=timeout)
         self.agy_path = shutil.which("agy") or "/Users/joe/.local/bin/agy"
 
