@@ -1,0 +1,110 @@
+{
+  "format": "skillopt_sleep.tasks.v1",
+  "project": "/Users/joe/Projects/empo_health/remote-health-link",
+  "transcript_source": "guided_mining",
+  "n_sessions": 4,
+  "target_skill_path": "/Users/joe/dotfiles/_agent/skills/rhl-create-ticket/SKILL.md",
+  "reviewed": true,
+  "tasks": [
+    {
+      "id": "rhl_create_ticket_task_01",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets write a ticket that refactors /Users/joe/Projects/empo_health/remote-health-link.rhl-4129-configure-backend-api-test-environment-service-routing/workspaces/backend-api/server.config.ts\n\nsimilar to /Users/joe/Projects/empo_health/remote-health-link.rhl-4129-configure-backend-api-test-environment-service-routing/workspaces/mock-services/sources/modules/config/config.service.ts",
+      "context_excerpt": "Context for rhl-create-ticket: Create a Linear ticket describing the currently staged changes, and switch to a new worktree....",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "regex",
+            "arg": ".+"
+          }
+        ]
+      },
+      "tags": ["rhl-create-ticket", "harvested"],
+      "source_sessions": [],
+      "split": "train",
+      "origin": "harvested",
+      "derived_from": "rhl-create-ticket",
+      "skill_hint": "rhl-create-ticket"
+    },
+    {
+      "id": "rhl_create_ticket_task_02",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "https://github.com/EmpoHealth/core/actions/runs/34876495501/job/104088823628?pr=2560",
+      "context_excerpt": "Context for rhl-create-ticket: Create a Linear ticket describing the currently staged changes, and switch to a new worktree....",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "regex",
+            "arg": ".+"
+          }
+        ]
+      },
+      "tags": ["rhl-create-ticket", "harvested"],
+      "source_sessions": [],
+      "split": "val",
+      "origin": "harvested",
+      "derived_from": "rhl-create-ticket",
+      "skill_hint": "rhl-create-ticket"
+    },
+    {
+      "id": "rhl_create_ticket_task_03",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets create a ticket that will implement option 3 @docs/investigation-34876495501.md",
+      "context_excerpt": "Context for rhl-create-ticket: Create a Linear ticket describing the currently staged changes, and switch to a new worktree....",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "regex",
+            "arg": ".+"
+          }
+        ]
+      },
+      "tags": ["rhl-create-ticket", "harvested"],
+      "source_sessions": [],
+      "split": "train",
+      "origin": "harvested",
+      "derived_from": "rhl-create-ticket",
+      "skill_hint": "rhl-create-ticket"
+    },
+    {
+      "id": "rhl_create_ticket_task_04",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "why does /Users/joe/Projects/empo_health/remote-health-link.rhl-4126-memfault-provider-devices-cohorts-rest-api-stubs/workspaces/mock-services/sources/modules/memfault/memfault-registry.service.ts\nhave a registry while the other mock services dont",
+      "context_excerpt": "Context for rhl-create-ticket: Create a Linear ticket describing the currently staged changes, and switch to a new worktree....",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "regex",
+            "arg": ".+"
+          }
+        ]
+      },
+      "tags": ["rhl-create-ticket", "harvested"],
+      "source_sessions": [],
+      "split": "val",
+      "origin": "harvested",
+      "derived_from": "rhl-create-ticket",
+      "skill_hint": "rhl-create-ticket"
+    }
+  ]
+}

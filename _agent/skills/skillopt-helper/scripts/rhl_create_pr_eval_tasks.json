@@ -1,0 +1,110 @@
+{
+  "format": "skillopt_sleep.tasks.v1",
+  "project": "/Users/joe/Projects/empo_health/remote-health-link",
+  "transcript_source": "guided_mining",
+  "n_sessions": 4,
+  "target_skill_path": "/Users/joe/dotfiles/_agent/skills/rhl-create-pr/SKILL.md",
+  "reviewed": true,
+  "tasks": [
+    {
+      "id": "rhl_create_pr_task_01",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets run a sonar scan",
+      "context_excerpt": "Context for rhl-create-pr: Creates a GitHub Pull Request describing changes on the current branch with specified reviewers....",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "regex",
+            "arg": ".+"
+          }
+        ]
+      },
+      "tags": ["rhl-create-pr", "harvested"],
+      "source_sessions": [],
+      "split": "train",
+      "origin": "harvested",
+      "derived_from": "rhl-create-pr",
+      "skill_hint": "rhl-create-pr"
+    },
+    {
+      "id": "rhl_create_pr_task_02",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets create a pr",
+      "context_excerpt": "Context for rhl-create-pr: Creates a GitHub Pull Request describing changes on the current branch with specified reviewers....",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "regex",
+            "arg": ".+"
+          }
+        ]
+      },
+      "tags": ["rhl-create-pr", "harvested"],
+      "source_sessions": [],
+      "split": "val",
+      "origin": "harvested",
+      "derived_from": "rhl-create-pr",
+      "skill_hint": "rhl-create-pr"
+    },
+    {
+      "id": "rhl_create_pr_task_03",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets commit and push, create a pr, then run review",
+      "context_excerpt": "Context for rhl-create-pr: Creates a GitHub Pull Request describing changes on the current branch with specified reviewers....",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "regex",
+            "arg": ".+"
+          }
+        ]
+      },
+      "tags": ["rhl-create-pr", "harvested"],
+      "source_sessions": [],
+      "split": "train",
+      "origin": "harvested",
+      "derived_from": "rhl-create-pr",
+      "skill_hint": "rhl-create-pr"
+    },
+    {
+      "id": "rhl_create_pr_task_04",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "how couls dwe bet mitigate the mock drift? would it make sense to spin up an ephemeral mock service similar to how we do it for backend and frontend or are there other ideas that would align with best practices",
+      "context_excerpt": "Context for rhl-create-pr: Creates a GitHub Pull Request describing changes on the current branch with specified reviewers....",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "regex",
+            "arg": ".+"
+          }
+        ]
+      },
+      "tags": ["rhl-create-pr", "harvested"],
+      "source_sessions": [],
+      "split": "val",
+      "origin": "harvested",
+      "derived_from": "rhl-create-pr",
+      "skill_hint": "rhl-create-pr"
+    }
+  ]
+}

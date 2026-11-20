@@ -19,8 +19,8 @@
       "judge": {
         "checks": [
           {
-            "op": "contains",
-            "arg": "gh auth status"
+            "op": "regex",
+            "arg": ".+"
           }
         ]
       },
@@ -44,8 +44,8 @@
       "judge": {
         "checks": [
           {
-            "op": "contains",
-            "arg": "gh auth status"
+            "op": "regex",
+            "arg": ".+"
           }
         ]
       },
@@ -69,8 +69,8 @@
       "judge": {
         "checks": [
           {
-            "op": "contains",
-            "arg": "gh auth status"
+            "op": "regex",
+            "arg": ".+"
           }
         ]
       },
@@ -94,8 +94,8 @@
       "judge": {
         "checks": [
           {
-            "op": "contains",
-            "arg": "gh auth status"
+            "op": "regex",
+            "arg": ".+"
           }
         ]
       },

@@ -9,7 +9,7 @@
     {
       "id": "rhl_commit_push_task_01",
       "project": "/Users/joe/Projects/empo_health/remote-health-link",
-      "intent": "for [Image #1, 1325x370] lets provide hover over value for the y axis\nPlease ask me any follow up questions that may be useful to help refine this prompt. Make the questions as an interactive prompt.",
+      "intent": "lets start implementing",
       "context_excerpt": "Context for rhl-commit-push: Commits and pushes changed files while excluding local dev/test files and adhering to commitlint....",
       "system": "",
       "attempted_solution": "",
@@ -36,7 +36,7 @@
           },
           {
             "op": "contains",
-            "arg": "git push --no-verify"
+            "arg": "git push"
           }
         ]
       },
@@ -50,7 +50,7 @@
     {
       "id": "rhl_commit_push_task_02",
       "project": "/Users/joe/Projects/empo_health/remote-health-link",
-      "intent": "lets commit our changes",
+      "intent": "let commit and push",
       "context_excerpt": "Context for rhl-commit-push: Commits and pushes changed files while excluding local dev/test files and adhering to commitlint....",
       "system": "",
       "attempted_solution": "",
@@ -77,7 +77,7 @@
           },
           {
             "op": "contains",
-            "arg": "git push --no-verify"
+            "arg": "git push"
           }
         ]
       },
@@ -91,7 +91,7 @@
     {
       "id": "rhl_commit_push_task_03",
       "project": "/Users/joe/Projects/empo_health/remote-health-link",
-      "intent": "let setup https://github.com/usetrmnl/trmnl-display\nbased on the guide https://docs.trmnl.com/go/diy/byod-s\nPlease ask me any follow up questions that may be useful to help refine this prompt. Make the questions as an interactive prompt.",
+      "intent": "lets address the comments from simon ( he left more comments on this pr this is just one of them)\nhttps://github.com/EmpoHealth/core/pull/2629/changes#r3965923575\nplease provide recommendations and prompt me if there are follow up questions",
       "context_excerpt": "Context for rhl-commit-push: Commits and pushes changed files while excluding local dev/test files and adhering to commitlint....",
       "system": "",
       "attempted_solution": "",
@@ -118,7 +118,7 @@
           },
           {
             "op": "contains",
-            "arg": "git push --no-verify"
+            "arg": "git push"
           }
         ]
       },
@@ -132,7 +132,7 @@
     {
       "id": "rhl_commit_push_task_04",
       "project": "/Users/joe/Projects/empo_health/remote-health-link",
-      "intent": "\uf47c \ue5fe  ~/Projects/python_for_fun/inky-frame/apps/trmnl/  3 \n   \u2514\u2574\udb80\udf20  trmnl_app.py  3 \n     \u251c\u2574\uf071  Refactor this function to reduce its Cognitive Complexity from 36 to the 15 allowed. [+18 locations] sonarqube (python:S3776) [137, 9]\n     \u251c\u2574\uf071  Refactor this function to reduce its Cognitive Complexity from 31 to the 15 allowed. [+20 locations] sonarqube (python:S3776) [237, 9]\n     \u2514\u2574\uf071  Merge this if statement with the enclosing one. [+1 location] sonarqube (python:S1066) [247, 21]",
+      "intent": "lets add those replies to simons comments",
       "context_excerpt": "Context for rhl-commit-push: Commits and pushes changed files while excluding local dev/test files and adhering to commitlint....",
       "system": "",
       "attempted_solution": "",
@@ -159,7 +159,7 @@
           },
           {
             "op": "contains",
-            "arg": "git push --no-verify"
+            "arg": "git push"
           }
         ]
       },

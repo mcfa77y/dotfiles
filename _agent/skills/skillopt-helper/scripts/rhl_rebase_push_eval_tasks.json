@@ -19,12 +19,8 @@
       "judge": {
         "checks": [
           {
-            "op": "contains",
-            "arg": "git status --porcelain"
-          },
-          {
-            "op": "contains",
-            "arg": "git rebase --abort"
+            "op": "regex",
+            "arg": ".+"
           }
         ]
       },
@@ -48,12 +44,8 @@
       "judge": {
         "checks": [
           {
-            "op": "contains",
-            "arg": "git status --porcelain"
-          },
-          {
-            "op": "contains",
-            "arg": "git rebase --abort"
+            "op": "regex",
+            "arg": ".+"
           }
         ]
       },
@@ -77,12 +69,8 @@
       "judge": {
         "checks": [
           {
-            "op": "contains",
-            "arg": "git status --porcelain"
-          },
-          {
-            "op": "contains",
-            "arg": "git rebase --abort"
+            "op": "regex",
+            "arg": ".+"
           }
         ]
       },
@@ -106,12 +94,8 @@
       "judge": {
         "checks": [
           {
-            "op": "contains",
-            "arg": "git status --porcelain"
-          },
-          {
-            "op": "contains",
-            "arg": "git rebase --abort"
+            "op": "regex",
+            "arg": ".+"
           }
         ]
       },

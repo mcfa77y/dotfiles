@@ -1,0 +1,110 @@
+{
+  "format": "skillopt_sleep.tasks.v1",
+  "project": "/Users/joe/Projects/empo_health/remote-health-link",
+  "transcript_source": "guided_mining",
+  "n_sessions": 4,
+  "target_skill_path": "/Users/joe/dotfiles/_agent/skills/rhl-backend-e2e/SKILL.md",
+  "reviewed": true,
+  "tasks": [
+    {
+      "id": "rhl_backend_e2e_task_01",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets rebase and push",
+      "context_excerpt": "Context for rhl-backend-e2e: >-...",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "regex",
+            "arg": ".+"
+          }
+        ]
+      },
+      "tags": ["rhl-backend-e2e", "harvested"],
+      "source_sessions": [],
+      "split": "train",
+      "origin": "harvested",
+      "derived_from": "rhl-backend-e2e",
+      "skill_hint": "rhl-backend-e2e"
+    },
+    {
+      "id": "rhl_backend_e2e_task_02",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "lets mark the pr as ready to review and add reviewers",
+      "context_excerpt": "Context for rhl-backend-e2e: >-...",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "regex",
+            "arg": ".+"
+          }
+        ]
+      },
+      "tags": ["rhl-backend-e2e", "harvested"],
+      "source_sessions": [],
+      "split": "val",
+      "origin": "harvested",
+      "derived_from": "rhl-backend-e2e",
+      "skill_hint": "rhl-backend-e2e"
+    },
+    {
+      "id": "rhl_backend_e2e_task_03",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "## Code Review Request\n\n### Mode\n\nReviewing changes between `remotes/origin/rhl-3915-admin-enrollments-list-endpoint` and `rhl-3916-patch-enrollment-endpoint-modification` (PR-style)\n\n### Changed Files (18 files, +936/-114 lines)\n\n|File|+/-|Type|\n|---|---|---|\n|workspaces/backend-api/sources/apps/data-api/src/modules/empo-app/user.controller.ts|+10/-0|ts|\n|workspaces/backend-api/sources/apps/data-api/src/modules/enrollments/dto/enrollments.dto.ts|+180/-13|ts|\n|workspaces/backend-api/sources/apps/data-api/src/modules/enrollments/enrollments.constant.ts|+18/-0|ts|\n|workspaces/backend-api/sources/apps/data-api/src/modules/enrollments/enrollments.controller.spec.ts|+21/-0|ts|\n|workspaces/backend-api/sources/apps/data-api/src/modules/enrollments/enrollments.controller.ts|+36/-4|ts|\n|workspaces/backend-api/sources/apps/data-api/src/modules/enrollments/enrollments.service.spec.ts|+166/-4|ts|\n|workspaces/backend-api/sources/apps/data-api/src/modules/enrollments/enrollments.service.ts|+187/-16|ts|\n|workspaces/backend-api/sources/apps/data-api/src/modules/user/user.service.ts|+8/-3|ts|\n|workspaces/backend-api/sources/e2e/tests/enrollments.e2e.spec.ts|+91/-0|ts|\n|workspaces/frontend-app/sources/interface/enrollment.ts|+16/-12|ts|\n|workspaces/frontend-app/sources/mocks/msw-handlers.ts|+79/-50|ts|\n|workspaces/frontend-app/sources/modules/admin/AdminEnrollments.spec.tsx|+83/-2|tsx|\n|workspaces/frontend-app/sources/modules/admin/AdminEnrollments.stories.tsx|+1/-1|tsx|\n|workspaces/frontend-app/sources/modules/admin/AdminEnrollments.tsx|+5/-2|tsx|\n|workspaces/frontend-app/sources/modules/enrollments/EnrollForm.tsx|+15/-2|tsx|\n|workspaces/frontend-app/sources/modules/patient/AlternateContactsFormItem.tsx|+6/-1|tsx|\n|workspaces/frontend-app/sources/modules/patient/contact-info.ts|+12/-2|ts|\n|workspaces/frontend-app/sources/services/users.ts|+2/-2|ts|\n### Distribution Guidelines\n\nUse the `task` tool with `agent: \"reviewer\"` and a `tasks` array.\nSpawn **4 reviewer agents** in parallel.\nGroup files by locality, e.g.:\n- Same directory/module → same agent\n- Related functionality → same agent\n- Tests with their implementation files → same agent\n\n### Reviewer Instructions\n\nReviewer MUST:\n1. Focus ONLY on assigned files\n2. MUST run `git diff`/`git show` for assigned files\n3. MAY read full file context as needed via `read`\n4. Use incremental `yield` sections for findings and verdict fields; do NOT call a separate finding tool\n\n### Diff Previews\n\n_Full diff too large (18 files). Showing first ~5 lines per file._\n\n#### workspaces/backend-api/sources/apps/data-api/src/modules/empo-app/user.controller.ts\n\n```diff\ntype: String,\n \t\trequired: false,\n \t})\n+\t@ApiQuery({\n+\t\tname: \"enrollmentId\",\n```\n\n#### workspaces/backend-api/sources/apps/data-api/src/modules/enrollments/dto/enrollments.dto.ts\n\n```diff\nimport {\n \tAnswerInfo,\n \tAnswerSelectOption,\n-\tInsurance,\n+\tInsuranceName,\n```\n\n#### workspaces/backend-api/sources/apps/data-api/src/modules/enrollments/enrollments.constant.ts\n\n```diff\nexport const MAX_UPLOAD_PATIENT_BROCHURE_SIZE_BYTES = 5 * 1024 * 1024\n export const MAX_UPLOAD_PATIENT_BROCHURE_SIZE_BYTES_MESSAGE =\n \t\"The uploaded patient brochure file too large. Maximum size is 5MB\"\n+\n+/**\n```\n\n#### workspaces/backend-api/sources/apps/data-api/src/modules/enrollments/enrollments.controller.spec.ts\n\n```diff\nexpect(mockEnrollmentsService.updateEnrollment).toHaveBeenCalledWith(\n \t\t\t\tmockId,\n \t\t\t\tmockUpdateEnrollmentDTO,\n+\t\t\t\tundefined,\n+\t\t\t)\n```\n\n#### workspaces/backend-api/sources/apps/data-api/src/modules/enrollments/enrollments.controller.ts\n\n```diff\nPost,\n \tQuery,\n \tUploadedFile,\n+\tUploadedFiles,\n \tUseGuards,\n```\n\n#### workspaces/backend-api/sources/apps/data-api/src/modules/enrollments/enrollments.service.spec.ts\n\n```diff\nfindUsersByIds: jest.fn().mockResolvedValue([]),\n \t\t\tfindUserIdsBySearchQuery: jest.fn().mockResolvedValue([]),\n \t\t\tfindByUserId: jest.fn().mockResolvedValue(null),\n+\t\t\tsyncAlternateContacts: jest.fn().mockResolvedValue([]),\n \t\t}\n```\n\n#### workspaces/backend-api/sources/apps/data-api/src/modules/enrollments/enrollments.service.ts\n\n```diff\nasync updateEnrollment(\n \t\tid: Types.ObjectId,\n \t\tupdateEnrollmentDto: UpdateEnrollmentDto,\n+\t\tconsentForm?: Express.Multer.File,\n \t) {\n```\n\n#### workspaces/backend-api/sources/apps/data-api/src/modules/user/user.service.ts\n\n```diff\nawait this.handleDeviceChanges(deviceChangeParams, session)\n\n \t\t\t\tif (updateUserDto.alternateContacts !== undefined) {\n-\t\t\t\t\tawait this.handleAlternateContactsChanges(\n+\t\t\t\t\tawait this.syncAlternateContacts(\n```\n\n#### workspaces/backend-api/sources/e2e/tests/enrollments.e2e.spec.ts\n\n```diff\n// Expect either 200 (success), 404 (not found), or validation error\n       expect([200, 404, 400]).toContain(response.status)\n     })\n+\n+    // The admin enrollment form posts multipart/form-data so it can carry a\n```\n\n#### workspaces/frontend-app/sources/interface/enrollment.ts\n\n```diff\nfileUrl: string\n }>\n\n-export type EnrollmentPayload = Pick<\n-\tEnrollment,\n```\n\n#### workspaces/frontend-app/sources/mocks/msw-handlers.ts\n\n```diff\n})\n \t})\n\n-export const PATCHAdminEnrollmentUpdate = (\n-\tstatus: HttpStatusCode = HttpStatusCode.Ok,\n```\n\n#### workspaces/frontend-app/sources/modules/admin/AdminEnrollments.spec.tsx\n\n```diff\n}\n })\n\n+test(\"saving the edit form updates the row\", async () => {\n+\tawait Default.run()\n```\n\n#### workspaces/frontend-app/sources/modules/admin/AdminEnrollments.stories.tsx\n\n```diff\nother: [\n \t\t\t\t\t...commonHandlers,\n \t\t\t\t\tGETAdminEnrollments({ enrollments: defaultEnrollments }),\n-\t\t\t\t\tPATCHAdminEnrollmentUpdate(),\n+\t\t\t\t\tPATCHAdminEnrollmentUpdate({ enrollments: defaultEnrollments }),\n```\n\n#### workspaces/frontend-app/sources/modules/admin/AdminEnrollments.tsx\n\n```diff\nreturn\n \t\t}\n \t\tmutate(\n-\t\t\t{ ...enrollment, completionDate: completionDate.toISOString() },\n+\t\t\t{\n```\n\n#### workspaces/frontend-app/sources/modules/enrollments/EnrollForm.tsx\n\n```diff\n\"patient-brochure\",\n \t\tpatientBrochure.enabled,\n \t)\n-\tconst { ruleCheckPhoneNumberAsync } = useCheckPhoneNumberAsync()\n+\t// When editing, the enrollment's own numbers must not count as duplicates.\n```\n\n#### workspaces/frontend-app/sources/modules/patient/AlternateContactsFormItem.tsx\n\n```diff\nname = \"alternateContacts\",\n \tpatientPhoneNumberPath,\n \tpatientId,\n+\tenrollmentId,\n \t...props\n```\n\n#### workspaces/frontend-app/sources/modules/patient/contact-info.ts\n\n```diff\nimport { useCheckPhoneNumber } from \"services/users\"\n import { DEFAULT_COUNTRY } from \"utils/constants\"\n\n-export function useCheckPhoneNumberAsync(userId?: string) {\n-\tconst { mutateAsync: checkPhoneNumber } = useCheckPhoneNumber(userId)\n```\n\n#### workspaces/frontend-app/sources/services/users.ts\n\n```diff\n})\n }\n\n-export const useCheckPhoneNumber = (userId?: string) => {\n+export const useCheckPhoneNumber = (userId?: string, enrollmentId?: string) => {\n```",
+      "context_excerpt": "Context for rhl-backend-e2e: >-...",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "regex",
+            "arg": ".+"
+          }
+        ]
+      },
+      "tags": ["rhl-backend-e2e", "harvested"],
+      "source_sessions": [],
+      "split": "train",
+      "origin": "harvested",
+      "derived_from": "rhl-backend-e2e",
+      "skill_hint": "rhl-backend-e2e"
+    },
+    {
+      "id": "rhl_backend_e2e_task_04",
+      "project": "/Users/joe/Projects/empo_health/remote-health-link",
+      "intent": "Complete assignment thoroughly:\n\n# Target\nReview the following backend files:\n- `workspaces/backend-api/sources/apps/data-api/src/modules/enrollments/dto/enrollments.dto.ts`\n- `workspaces/backend-api/sources/apps/data-api/src/modules/enrollments/enrollments.constant.ts`\n- `workspaces/backend-api/sources/apps/data-api/src/modules/enrollments/enrollments.controller.ts`\n- `workspaces/backend-api/sources/apps/data-api/src/modules/enrollments/enrollments.controller.spec.ts`\n- `workspaces/backend-api/sources/e2e/tests/enrollments.e2e.spec.ts`\n\n# Review Steps\n1. Run `git diff remotes/origin/rhl-3915-admin-enrollments-list-endpoint...HEAD -- <file>` or `git diff remotes/origin/rhl-3915-admin-enrollments-list-endpoint HEAD -- <file>` for your assigned files.\n2. Read full file context with `read` where needed.\n3. Check DTO validation decorators (class-validator / class-transformer), multipart/form-data handling for consent forms / patient brochures, file size limits, OpenAPI decorators (@ApiProperty, @ApiBody), controller routing, and e2e tests.\n4. Output detailed findings grouped by file and category (Security, Correctness, Performance, Style, Tests) with severity (Blocker, Major, Minor, Note) and concrete code suggestions.",
+      "context_excerpt": "Context for rhl-backend-e2e: >-...",
+      "system": "",
+      "attempted_solution": "",
+      "outcome": "",
+      "reference_kind": "rules",
+      "reference": "",
+      "judge": {
+        "checks": [
+          {
+            "op": "regex",
+            "arg": ".+"
+          }
+        ]
+      },
+      "tags": ["rhl-backend-e2e", "harvested"],
+      "source_sessions": [],
+      "split": "val",
+      "origin": "harvested",
+      "derived_from": "rhl-backend-e2e",
+      "skill_hint": "rhl-backend-e2e"
+    }
+  ]
+}
