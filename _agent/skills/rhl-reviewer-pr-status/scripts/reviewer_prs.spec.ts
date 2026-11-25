@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 import {
+  evaluateMergifyReviewerRequirement,
   evaluateReviewerStatus,
   formatMarkdownReport,
   formatSlackDigest,
@@ -272,6 +273,27 @@ describe('reviewer_prs', () => {
       });
       expect(singleReviewer).toContain('## 1. `@simon57b`');
       expect(singleReviewer).not.toContain('`@pm-pp`');
+    });
+  });
+
+  describe('evaluateMergifyReviewerRequirement', () => {
+    it('flags root and workflow files as requiring Eric', () => {
+      const files = [{ path: '.github/workflows/backend-api--pr.yml' }];
+      const res = evaluateMergifyReviewerRequirement(files, 'edahlseng');
+      expect(res.required).toBe(true);
+      expect(res.reason).toContain("Require Eric's review on core repository configuration");
+    });
+
+    it('flags SAAS account files as requiring Eric or Anuj', () => {
+      const files = [{ path: 'workspaces/_saas-accounts/terraform.tf' }];
+      expect(evaluateMergifyReviewerRequirement(files, 'edahlseng').required).toBe(true);
+      expect(evaluateMergifyReviewerRequirement(files, 'anuj-khandelwal').required).toBe(true);
+      expect(evaluateMergifyReviewerRequirement(files, 'simon57b').required).toBe(false);
+    });
+
+    it('does not require Eric for standard workspace files', () => {
+      const files = [{ path: 'workspaces/backend-api/sources/apps/data-api/src/service.ts' }];
+      expect(evaluateMergifyReviewerRequirement(files, 'edahlseng').required).toBe(false);
     });
   });
 });

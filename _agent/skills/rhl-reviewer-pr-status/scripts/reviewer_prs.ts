@@ -23,17 +23,23 @@ export interface ReviewRequest {
   name?: string;
 }
 
+export interface PRFile {
+  path: string;
+}
+
 export interface PullRequest {
   number: number;
   title: string;
   url: string;
   headRefName?: string;
+  isDraft?: boolean;
   reviewDecision?: string;
   reviewRequests?: ReviewRequest[];
   latestReviews?: Array<{
     author?: { login: string };
     state?: string;
   }>;
+  files?: PRFile[];
   updatedAt?: string;
 }
 
@@ -53,6 +59,9 @@ export interface ReviewerPRItem {
   latestReviewDate?: string;
   latestReviewBody?: string;
   reviewRequested: boolean;
+  mergifyRequired?: boolean;
+  mergifyReason?: string;
+  isDraft?: boolean;
 }
 
 export interface ReviewerSummary {
@@ -89,6 +98,68 @@ export function getLatestReviewsByUser(reviews: Review[]): Map<string, Review> {
 
   return latestMap;
 }
+/**
+ * Checks whether a reviewer's approval is strictly required by repository Mergify rules.
+ */
+export function evaluateMergifyReviewerRequirement(
+  files: PRFile[] | undefined,
+  reviewer: string,
+): { required: boolean; reason?: string } {
+  if (!files || files.length === 0) {
+    return { required: false };
+  }
+  const filePaths = files.map((f) => f.path);
+  const rev = reviewer.toLowerCase();
+
+  if (rev === 'edahlseng') {
+    // 1. Root / core repo config
+    const touchesCore = filePaths.some(
+      (p) =>
+        (!p.startsWith('workspaces/') && !p.startsWith('.github/workflows/qa--')) ||
+        p.startsWith('workspaces/_repository-configuration'),
+    );
+    if (touchesCore) {
+      return { required: true, reason: "Require Eric's review on core repository configuration" };
+    }
+    // 2. SAAS accounts
+    if (filePaths.some((p) => p.startsWith('workspaces/_saas-accounts'))) {
+      return {
+        required: true,
+        reason: "Require Eric or Anuj's review on SAAS configuration changes",
+      };
+    }
+    // 3. Repository sync
+    if (filePaths.some((p) => p.startsWith('workspaces/repository-sync'))) {
+      return { required: true, reason: "Require Eric's review on Repository Syncing changes" };
+    }
+  }
+
+  if (rev === 'anuj-khandelwal') {
+    if (filePaths.some((p) => p.startsWith('workspaces/_saas-accounts'))) {
+      return {
+        required: true,
+        reason: "Require Eric or Anuj's review on SAAS configuration changes",
+      };
+    }
+  }
+
+  if (rev === 'cynthia642' || rev === 'singhmadhurima123') {
+    const touchesAppOrBackend = filePaths.some(
+      (p) =>
+        p === 'package.json' ||
+        p.startsWith('tsconfig') ||
+        p === 'yarn.lock' ||
+        p.startsWith('workspaces/frontend-app/') ||
+        p.startsWith('workspaces/backend-api/') ||
+        p.startsWith('workspaces/common/'),
+    );
+    if (touchesAppOrBackend) {
+      return { required: true, reason: "Require QA's approval on frontend and backend changes" };
+    }
+  }
+
+  return { required: false };
+}
 
 /**
  * Determines the status of a specific reviewer on a single PR.
@@ -100,6 +171,7 @@ export function evaluateReviewerStatus(
 ): ReviewerPRItem {
   const normReviewer = reviewer.toLowerCase();
   const requested = (pr.reviewRequests || []).some((r) => r.login.toLowerCase() === normReviewer);
+  const mergify = evaluateMergifyReviewerRequirement(pr.files, reviewer);
 
   const reviewerReviews = reviews
     .filter((r) => r.user?.login.toLowerCase() === normReviewer)
@@ -114,14 +186,12 @@ export function evaluateReviewerStatus(
 
   if (state === 'CHANGES_REQUESTED') {
     relationship = 'CHANGES_REQUESTED';
-  } else if (requested && state !== 'APPROVED') {
-    relationship = 'REVIEW_REQUESTED';
   } else if (state === 'APPROVED') {
     relationship = 'APPROVED';
+  } else if (requested || mergify.required) {
+    relationship = 'REVIEW_REQUESTED';
   } else if (state === 'COMMENTED') {
     relationship = requested ? 'REVIEW_REQUESTED' : 'COMMENTED';
-  } else if (requested) {
-    relationship = 'REVIEW_REQUESTED';
   }
 
   return {
@@ -133,12 +203,12 @@ export function evaluateReviewerStatus(
     latestReviewDate: latestReview?.submitted_at,
     latestReviewBody: latestReview?.body?.trim(),
     reviewRequested: requested,
+    mergifyRequired: mergify.required,
+    mergifyReason: mergify.reason,
+    isDraft: pr.isDraft,
   };
 }
 
-/**
- * Groups PRs by reviewer, analyzing review requests and submitted reviews.
- */
 export function groupPrsByReviewers(
   prs: PullRequest[],
   reviewsByPr: Map<number, Review[]>,
@@ -158,6 +228,8 @@ export function groupPrsByReviewers(
     return summaryMap.get(reviewer)!;
   }
 
+  const candidateReviewers = ['edahlseng', 'cynthia642', 'singhmadhurima123', 'anuj-khandelwal'];
+
   for (const pr of prs) {
     const reviews = reviewsByPr.get(pr.number) || [];
     const involvedReviewers = new Set<string>();
@@ -168,6 +240,13 @@ export function groupPrsByReviewers(
 
     for (const r of reviews) {
       if (r.user?.login) involvedReviewers.add(r.user.login);
+    }
+
+    for (const cand of candidateReviewers) {
+      const mergify = evaluateMergifyReviewerRequirement(pr.files, cand);
+      if (mergify.required) {
+        involvedReviewers.add(cand);
+      }
     }
 
     for (const reviewer of involvedReviewers) {
@@ -193,6 +272,8 @@ export function groupPrsByReviewers(
 
   return summaryMap;
 }
+
+/**
 
 /**
  * Formats a Markdown report for a specific reviewer or overall reviewers.
@@ -381,13 +462,19 @@ export function formatSlackDmMessages(
 
     if (summary.changesRequested.length > 0) {
       for (const item of summary.changesRequested) {
-        lines.push(`• [#${item.prNumber}](${item.url}): ${item.title} *(Feedback addressed)*`);
+        const ruleNote = item.mergifyRequired
+          ? ` *(Required by Mergify: ${item.mergifyReason})*`
+          : ' *(Feedback addressed)*';
+        lines.push(`• [#${item.prNumber}](${item.url}): ${item.title}${ruleNote}`);
       }
     }
 
     if (summary.reviewRequested.length > 0) {
       for (const item of summary.reviewRequested) {
-        lines.push(`• [#${item.prNumber}](${item.url}): ${item.title} *(Initial review)*`);
+        const ruleNote = item.mergifyRequired
+          ? ` *(Required by Mergify: ${item.mergifyReason})*`
+          : ' *(Initial review)*';
+        lines.push(`• [#${item.prNumber}](${item.url}): ${item.title}${ruleNote}`);
       }
     }
 
@@ -404,7 +491,7 @@ export function formatSlackDmMessages(
     lines.splice(lines.length - 2, 2);
   }
 
-  return lines.join('\n').trim() + '\n';
+  return `${lines.join('\n').trim()}\n`;
 }
 
 /**
@@ -443,7 +530,13 @@ export async function run(): Promise<void> {
       '--unfreeze-pr <number>',
       'Highlight a specific PR number as deployment unfreeze critical path',
       parseInt,
-    );
+    )
+    .option(
+      '--mergify-required-only',
+      'Filter to only PRs where the reviewer is strictly required by Mergify rules (Group 1)',
+      false,
+    )
+    .option('--include-drafts', 'Include draft pull requests', false);
 
   program.parse(process.argv);
   const opts = program.opts();
@@ -455,9 +548,8 @@ export async function run(): Promise<void> {
 
   // 1. Fetch open PRs
   const prsJson =
-    await $`gh pr list --repo ${repo} --author ${author} --state open --limit 50 --json number,title,url,reviewRequests,reviewDecision,headRefName,updatedAt`.text();
+    await $`gh pr list --repo ${repo} --author ${author} --state open --limit 50 --json number,title,url,reviewRequests,reviewDecision,headRefName,updatedAt,isDraft,files`.text();
   const prs: PullRequest[] = JSON.parse(prsJson || '[]');
-
   if (prs.length === 0) {
     console.log(`No open pull requests found for @${author} in ${repo}.`);
     return;
@@ -478,8 +570,11 @@ export async function run(): Promise<void> {
   // 3. Group and analyze
   // 3. Filter PRs if unapproved-only or slack-dm format
   let activePrs = prs;
-  if (opts.unapprovedOnly || format === 'slack-dm') {
-    activePrs = prs.filter(
+  if (!opts.includeDrafts) {
+    activePrs = activePrs.filter((pr) => !pr.isDraft);
+  }
+  if (opts.unapprovedOnly) {
+    activePrs = activePrs.filter(
       (pr) =>
         pr.reviewDecision === 'REVIEW_REQUIRED' ||
         pr.reviewDecision === 'CHANGES_REQUESTED' ||
@@ -489,6 +584,14 @@ export async function run(): Promise<void> {
 
   // 4. Group and analyze
   const summaries = groupPrsByReviewers(activePrs, reviewsByPr);
+  if (opts.mergifyRequiredOnly) {
+    for (const [_reviewer, summary] of summaries.entries()) {
+      summary.changesRequested = summary.changesRequested.filter((item) => item.mergifyRequired);
+      summary.reviewRequested = summary.reviewRequested.filter((item) => item.mergifyRequired);
+      summary.approved = summary.approved.filter((item) => item.mergifyRequired);
+      summary.commentedOnly = summary.commentedOnly.filter((item) => item.mergifyRequired);
+    }
+  }
 
   // 5. Generate output according to requested format
   let output = '';

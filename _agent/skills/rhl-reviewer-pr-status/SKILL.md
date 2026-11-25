@@ -26,6 +26,9 @@ bun run ~/.omp/agent/skills/rhl-reviewer-pr-status/scripts/reviewer_prs.ts --for
 # Generate individual copy-friendly Slack DM messages per reviewer (clean markdown without blockquote `>`)
 bun run ~/.omp/agent/skills/rhl-reviewer-pr-status/scripts/reviewer_prs.ts --format slack-dm
 
+# Generate Slack DM messages specifically for PRs strictly blocked by Mergify protection rules (Group 1)
+bun run ~/.omp/agent/skills/rhl-reviewer-pr-status/scripts/reviewer_prs.ts --reviewer edahlseng --mergify-required-only --format slack-dm -o docs/slack-review-request-eric.md
+
 # Generate Slack DM messages and write directly to markdown file
 bun run ~/.omp/agent/skills/rhl-reviewer-pr-status/scripts/reviewer_prs.ts --format slack-dm -o docs/slack-review-requests.md
 

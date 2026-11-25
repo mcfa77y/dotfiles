@@ -36,9 +36,10 @@ export HEADROOM_PORT=8765
 export EMPO_AI_BASE_URL='http://127.0.0.1:8765/v1'
 # Beta output shaper: trims model output ceremony (preambles, restated code)
 export HEADROOM_ROLLOUT_CHANNEL='beta'
-export HEADROOM_OUTPUT_SHAPER=1
+export HEADROOM_OUTPUT_SHAPER=0
 export HEADROOM_OUTPUT_HOLDOUT=0.1
 export HEADROOM_MODE=token
+export HEADROOM_READ_MATURATION=1
 
 # --- llmfit ---
 export LLMFIT_DASHBOARD_PORT=8790

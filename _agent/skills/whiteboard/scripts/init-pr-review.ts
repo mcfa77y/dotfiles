@@ -476,68 +476,109 @@ export async function runWhiteboardReview(
 
   await apiExecutor('session_capabilities', {});
 
-  const regRes = await apiExecutor('session_register_repository', { path: repoPath });
-  const repositoryId = String(regRes?.id || regRes?.repositoryId || '');
-  if (!repositoryId) {
-    throw new Error(
-      `Failed to register repository: missing id in response (${JSON.stringify(regRes)})`,
+  let repositoryId = '';
+  let baseSha = base;
+  let headSha = head;
+  let sessionId = '';
+
+  try {
+    const regRes = await apiExecutor('session_register_repository', { path: repoPath });
+    repositoryId = String(regRes?.id || regRes?.repositoryId || '');
+  } catch {
+    // Real Whiteboard CLI does not support session_register_repository
+  }
+
+  if (repositoryId) {
+    try {
+      const pinsRes = await apiExecutor('session_resolve_pins', {
+        repositoryId,
+        base,
+        head,
+      });
+      baseSha = String(pinsRes?.base || base);
+      headSha = String(pinsRes?.head || head);
+    } catch {
+      // Ignore if resolve_pins unsupported
+    }
+
+    const realCreatePayload: Record<string, unknown> = {
+      title,
+      pins: {
+        repositoryId,
+        base: baseSha,
+        head: headSha,
+      },
+      target: {
+        kind: 'commits',
+        repositoryId,
+        base: baseSha,
+        head: headSha,
+      },
+      open: false,
+    };
+    if (pullRequestUrl) {
+      realCreatePayload.pullRequestUrl = pullRequestUrl;
+    }
+
+    const createRes = await apiExecutor('session_create', realCreatePayload);
+    sessionId = String(
+      createRes?.sessionId ||
+        createRes?.reviewId ||
+        createRes?.id ||
+        (createRes?.session as Record<string, unknown> | undefined)?.sessionId ||
+        (createRes?.review as Record<string, unknown> | undefined)?.reviewId ||
+        (createRes?.review as Record<string, unknown> | undefined)?.id ||
+        '',
     );
+
+    try {
+      const realRepinPayload: Record<string, unknown> = {
+        sessionId,
+        pins: {
+          repositoryId,
+          base: baseSha,
+          head: headSha,
+        },
+      };
+      if (pullRequestUrl) {
+        realRepinPayload.pullRequestUrl = pullRequestUrl;
+      }
+      await apiExecutor('session_repin', realRepinPayload);
+    } catch {
+      // Ignore if repin unsupported
+    }
+  } else {
+    const realCreatePayload: Record<string, unknown> = {
+      title,
+      target: {
+        kind: 'worktree',
+        repositoryPath: repoPath,
+        base,
+      },
+    };
+
+    const createRes = await apiExecutor('session_create', realCreatePayload);
+    const sessionObj = createRes?.session as Record<string, unknown> | undefined;
+    sessionId = String(
+      createRes?.sessionId || sessionObj?.sessionId || createRes?.reviewId || createRes?.id || '',
+    );
+
+    const pinsObj = (createRes?.pins || sessionObj?.pins) as Record<string, unknown> | undefined;
+    if (pinsObj) {
+      baseSha = String(pinsObj.base || baseSha);
+      headSha = String(pinsObj.head || headSha);
+    }
+    const projectObj = (createRes?.project || sessionObj?.project) as
+      | Record<string, unknown>
+      | undefined;
+    if (projectObj) {
+      repositoryId = String(projectObj.id || repositoryId);
+    }
   }
 
-  const pinsRes = await apiExecutor('session_resolve_pins', {
-    repositoryId,
-    base,
-    head,
-  });
-  const baseSha = String(pinsRes?.base || base);
-  const headSha = String(pinsRes?.head || head);
-
-  const realCreatePayload: Record<string, unknown> = {
-    title,
-    pins: {
-      repositoryId,
-      base: baseSha,
-      head: headSha,
-    },
-    target: {
-      kind: 'commits',
-      repositoryId,
-      base: baseSha,
-      head: headSha,
-    },
-    open: false,
-  };
-  if (pullRequestUrl) {
-    realCreatePayload.pullRequestUrl = pullRequestUrl;
-  }
-
-  const createRes = await apiExecutor('session_create', realCreatePayload);
-  const sessionId = String(
-    createRes?.sessionId ||
-      createRes?.reviewId ||
-      createRes?.id ||
-      (createRes?.review as Record<string, unknown> | undefined)?.reviewId ||
-      (createRes?.review as Record<string, unknown> | undefined)?.id ||
-      '',
-  );
   if (!sessionId) {
-    throw new Error(
-      `Failed to create review session: missing sessionId in response (${JSON.stringify(createRes)})`,
-    );
+    throw new Error(`Failed to create review session: missing sessionId in response`);
   }
-
-  const realRepinPayload: Record<string, unknown> = {
-    sessionId,
-    pins: {
-      repositoryId,
-      base: baseSha,
-      head: headSha,
-    },
-  };
-  if (pullRequestUrl) {
-    realRepinPayload.pullRequestUrl = pullRequestUrl;
-  }
-  await apiExecutor('session_repin', realRepinPayload);
 
   for (const [lensTitle, files] of Object.entries(lenses)) {
     await apiExecutor('session_lens_edit', {

@@ -150,10 +150,40 @@ aws_set_profile() {
 # --- CI/CD ---
 RERUN_DIR="$JS_DIR/rerun-github-qa-tests"
 
-alias rerun-cicd-url='bun run --cwd $RERUN_DIR monitor --url $(clippaste)'
+rerun-cicd-url() {
+  local clip url
+  clip="${1:-$(clippaste 2>/dev/null)}"
+  if [[ "$clip" =~ https?://[^\"\'[:space:]]+ ]]; then
+    url="$MATCH"
+  else
+    url="$clip"
+  fi
+  if [[ "$url" =~ /pull/ ]]; then
+    bun run --cwd "$RERUN_DIR" monitor:pr --pr "$url"
+  elif [[ -n "$url" ]]; then
+    bun run --cwd "$RERUN_DIR" monitor --url "$url"
+  else
+    bun run --cwd "$RERUN_DIR" monitor
+  fi
+}
 alias rerun-cicd='bun run --cwd $RERUN_DIR monitor'
 alias monitor-cicd='bun run --cwd $RERUN_DIR monitor:pr'
-alias monitor-cicd-url='bun run --cwd $RERUN_DIR monitor:pr --pr $(clippaste)'
+monitor-cicd-url() {
+  local clip url
+  clip="${1:-$(clippaste 2>/dev/null)}"
+  if [[ "$clip" =~ https?://[^\"\'[:space:]]+ ]]; then
+    url="$MATCH"
+  else
+    url="$clip"
+  fi
+  if [[ "$url" =~ /actions/runs/ ]]; then
+    bun run --cwd "$RERUN_DIR" monitor --url "$url"
+  elif [[ -n "$url" ]]; then
+    bun run --cwd "$RERUN_DIR" monitor:pr --pr "$url"
+  else
+    bun run --cwd "$RERUN_DIR" monitor:pr
+  fi
+}
 alias monitor-cicd-here='bun run --cwd $RERUN_DIR monitor:pr --pr $(gh pr view --json url --jq .url)'
 
 # --- Terraform ---
@@ -447,6 +477,12 @@ local_start_app_and_server() {
   cmux-tab --name "BE Server" --command "backend_start"
   cmux-tab --name "MS Server" --command "mock_service_start "
   cmux-tab --name "ngrok 3000" --command "ngrok_start"
+  echo ""
+  echo "Started servers:"
+  echo "  Frontend:      http://localhost:3002"
+  echo "  Backend:       http://localhost:3000"
+  echo "  Mock Service:  http://localhost:3001"
+  echo "  ngrok Tunnel:  https://${NGROK_URL:-dextrogyrate-unreceiving-georgiana.ngrok-free.dev} (web UI: http://127.0.0.1:4040)"
 }
 
 # 2026-06-10
